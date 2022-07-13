@@ -117,7 +117,7 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
 
     def qCalc(u, v, ksi):
         return (ksi ** 3 * frCalc(u, v, ksi) - ksiShock ** 3 * frCalc(u, v, ksi)) * config.R_ns / (
-                    s * config.G * config.M_ns)
+                s * config.G * config.M_ns)
 
     # получаем эффективную температуру из закона Стефана-Больцмана
     Teff = (fTheta() / config.sigmStfBolc) ** (1 / 4)
