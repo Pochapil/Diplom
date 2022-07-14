@@ -88,14 +88,14 @@ R_phi = R_ns * np.sin(theta_accretion_begin)
 
 l0 = A_normal(theta_accretion_begin) / (2 * delta_distance(theta_accretion_begin))
 print("l0 = %.5f" % l0)
-phi_accretion = 360 * grad_to_rad * 1.01 * a_portion  # полный круг для наложения. на карте были пробелы
+lim_phi_accretion = 360 * grad_to_rad * 1.01 * a_portion  # полный круг для наложения. на карте были пробелы
 
-print("phi = %f" % (phi_accretion / grad_to_rad))
+print("phi = %f" % (lim_phi_accretion / grad_to_rad))
 print("theta_accretion_begin = %f" % (theta_accretion_begin / grad_to_rad))
 print("theta_accretion_end = %f" % (theta_accretion_end / grad_to_rad))
 
 # шаги по углам для интегрирования
-step_phi_accretion = phi_accretion / N_phi_accretion
+step_phi_accretion = lim_phi_accretion / N_phi_accretion
 step_theta_accretion = (theta_accretion_end - theta_accretion_begin) / N_theta_accretion
 print("step theta = %f " % step_theta_accretion)
 
@@ -206,7 +206,7 @@ def calculate_total_luminosity(phi_range, theta_range):
     return total_luminosity
 
 
-def check_if_intersect(origin_phi, origin_theta, direction_vector):
+def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accretion):
     # все отнормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
 
@@ -233,6 +233,8 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector):
     t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
 
     # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
+    if t_sphere[0] > 0 or t_sphere[1] > 0:
+        return True
 
     # cone x**2 + y**2 == z**2
     a_cone = x_direction ** 2 + y_direction ** 2 - z_direction ** 2
@@ -243,17 +245,19 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector):
     t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
     # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
 
-    if t_sphere[0] > 0 or t_sphere[1] > 0:
-        return True
-
+    # для верхнего конуса:
     if t_cone[0] > 0:
-        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array([x_direction, y_direction, z_direction])
-        if (intersect_vector[2] > 0):
+        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array(
+            [x_direction, y_direction, z_direction])
+        phi_intersect, theta_intersect = get_angles_from_vector(intersect_vector)
+        if (intersect_vector[2] > 0 and phi_intersect < lim_phi_accretion):
             return True
 
     if t_cone[1] > 0:
-        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array([x_direction, y_direction, z_direction])
-        if (intersect_vector[2] > 0):
+        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array(
+            [x_direction, y_direction, z_direction])
+        phi_intersect, theta_intersect = get_angles_from_vector(intersect_vector)
+        if (intersect_vector[2] > 0 and phi_intersect < lim_phi_accretion):
             return True
 
     return False
@@ -294,7 +298,7 @@ def calculate_integral_distribution(t_max, N_phi_accretion, N_theta_accretion):
                 # cos_psi_range[i][j] = np.dot(e_obs_mu, matrix.newE_n(phi_range[i], theta_range[j])) # неэффективно
                 cos_psi_range[i, j] = np.dot(e_obs_mu, array_normal[i * N_theta_accretion + j])
 
-                if check_if_intersect(phi_range[i], theta_range[j], e_obs_mu):
+                if check_if_intersect(phi_range[i], theta_range[j], e_obs_mu, lim_phi_accretion):
                     simps_cos[j] = 0
 
                 elif cos_psi_range[i, j] > 0:
