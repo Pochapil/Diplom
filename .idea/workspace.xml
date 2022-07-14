@@ -5,6 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e4169d14-b72c-4590-b988-e001dae1939f" name="Changes" comment="intersect">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/save29.txt" beforeDir="false" afterPath="$PROJECT_DIR$/save29.txt" afterDir="false" />
     </list>
@@ -78,7 +79,7 @@
       <workItem from="1657534970595" duration="3000" />
       <workItem from="1657534992610" duration="301000" />
       <workItem from="1657740229650" duration="2245000" />
-      <workItem from="1657824455315" duration="2209000" />
+      <workItem from="1657824455315" duration="3083000" />
     </task>
     <task id="LOCAL-00001" summary="Initial">
       <created>1657535244882</created>
@@ -101,7 +102,14 @@
       <option name="project" value="LOCAL" />
       <updated>1657826105586</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="intersect">
+      <created>1657826866705</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1657826866705</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -125,6 +133,6 @@
     <option name="LAST_COMMIT_MESSAGE" value="intersect" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Diplom$main.coverage" NAME="main Coverage Results" MODIFIED="1657826679910" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$main.coverage" NAME="main Coverage Results" MODIFIED="1657827559200" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
