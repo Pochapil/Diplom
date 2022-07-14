@@ -47,10 +47,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
+betta_rotate = 40 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
+betta_mu = 0 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -102,7 +104,6 @@ phi_range = np.array([step_phi_accretion * i for i in range(N_phi_accretion)])
 theta_range = np.array([theta_accretion_begin + step_theta_accretion * j for j in range(N_theta_accretion)])
 cos_psi_range = np.empty([N_phi_accretion, N_theta_accretion])
 
-
 # тут беру значения из Teff в промежутках так как нахожу по отрезку кси а нужно по тета!!
 
 ksiStop1 = 1.
@@ -112,7 +113,7 @@ ksi_bs = ksi1[::-1]
 i = 0  # left_border
 true_T_eff = []
 for theta in theta_range:
-    while ksi_bs[i + 1] < R_e / R_ns * np.sin(theta)**2 and (i < len(theta_range) - 2):
+    while ksi_bs[i + 1] < R_e / R_ns * np.sin(theta) ** 2 and (i < len(theta_range) - 2):
         i += 1
     true_T_eff.append(Teff[i])
 
@@ -231,7 +232,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector):
     # solution for sphere
     t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
 
-    print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
+    # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
 
     # cone x**2 + y**2 == z**2
     a_cone = x_direction ** 2 + y_direction ** 2 - z_direction ** 2
@@ -240,7 +241,22 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector):
 
     # solution for cone
     t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
-    print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
+    # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
+
+    if t_sphere[0] > 0 or t_sphere[1] > 0:
+        return True
+
+    if t_cone[0] > 0:
+        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array([x_direction, y_direction, z_direction])
+        if (intersect_vector[2] > 0):
+            return True
+
+    if t_cone[1] > 0:
+        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array([x_direction, y_direction, z_direction])
+        if (intersect_vector[2] > 0):
+            return True
+
+    return False
 
 
 def calculate_integral_distribution(t_max, N_phi_accretion, N_theta_accretion):
@@ -270,7 +286,7 @@ def calculate_integral_distribution(t_max, N_phi_accretion, N_theta_accretion):
         # print("e_obs_mu%d: (%f, %f, %f)" % (i1, np.take(e_obs_mu, 0), np.take(e_obs_mu, 1), np.take(e_obs_mu, 2)))
 
         phi, theta = get_angles_from_vector(e_obs_mu)
-        #print("thetaObs%d = %f" % (i1, (theta / grad_to_rad)))
+        # print("thetaObs%d = %f" % (i1, (theta / grad_to_rad)))
 
         # sum_intense изотропная светимость ( * 4 pi еще надо)
         for i in range(N_phi_accretion):
@@ -278,9 +294,10 @@ def calculate_integral_distribution(t_max, N_phi_accretion, N_theta_accretion):
                 # cos_psi_range[i][j] = np.dot(e_obs_mu, matrix.newE_n(phi_range[i], theta_range[j])) # неэффективно
                 cos_psi_range[i, j] = np.dot(e_obs_mu, array_normal[i * N_theta_accretion + j])
 
-                # check_if_intersect(phi_range[i], theta_range[j], e_obs_mu)
+                if check_if_intersect(phi_range[i], theta_range[j], e_obs_mu):
+                    simps_cos[j] = 0
 
-                if cos_psi_range[i, j] > 0:
+                elif cos_psi_range[i, j] > 0:
                     sum_intense[i1] += sigmStfBolc * Teff[j] ** 4 * cos_psi_range[i, j] * dS[j]
                     simps_cos[j] = cos_psi_range[i, j]
                     # * S=R**2 * step_phi_accretion * step_theta_accretion
@@ -467,7 +484,7 @@ def plot_map_delta_phi(position_of_max, t_max_for_cos, N_phi_accretion, N_theta_
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
         phi_obs, theta_obs = get_angles_from_vector(e_obs_mu)
-        #print("theta_obs%d = %f" % (i1, theta_obs))
+        # print("theta_obs%d = %f" % (i1, theta_obs))
         for j in range(N_theta_accretion):
             delta_phi_lim = get_lim_for_analytic_integral_phi(theta_range[j], e_obs_mu)
             for i in range(N_phi_accretion):
