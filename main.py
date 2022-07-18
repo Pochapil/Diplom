@@ -47,7 +47,7 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 40 * grad_to_rad
+betta_rotate = 80 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
@@ -124,19 +124,22 @@ ax1.plot(ksi_bs, true_T_eff, 'r')
 Teff = np.array(true_T_eff)
 
 
-def create_array_normal(phi_range, theta_range):
+def create_array_normal(phi_range, theta_range, outer_flag):
     N_phi_accretion = len(phi_range)
     N_theta_accretion = len(theta_range)
     array_normal = []  # матрица нормалей чтобы не пересчитывать в циклах
+    coefficient = -1
+    if outer_flag:
+        coefficient = 1
     # matrix_normal = np.empty([N_phi_accretion, N_theta_accretion])
     for i in range(N_phi_accretion):
         for j in range(N_theta_accretion):
             # matrix_normal[i, j] = matrix.newE_n(phi_range[i], theta_range[j])
-            array_normal.append(matrix.newE_n(phi_range[i], theta_range[j]))
+            array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
     return array_normal
 
 
-array_normal = create_array_normal(phi_range, theta_range)
+array_normal = create_array_normal(phi_range, theta_range, False)
 
 dS = []  # массив единичных площадок при интегрировании так как зависит только от theta посчитаю 1 раз
 dS_simps = []
@@ -278,7 +281,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     return False
 
 
-def calculate_integral_distribution(t_max, N_phi_accretion, N_theta_accretion):
+def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max):
     integral_max = 0
     # sum_intense изотропная светимость ( * 4 pi еще надо)
     sum_intense = [0] * t_max
@@ -347,57 +350,10 @@ def calculate_integral_distribution(t_max, N_phi_accretion, N_theta_accretion):
     return sum_intense, sum_simps_integrate, analytic_integral_phi, position_of_max
 
 
-sum_intense, sum_simps_integrate, analytic_integral_phi, position_of_max = calculate_integral_distribution(t_max,
-                                                                                                           N_phi_accretion,
-                                                                                                           N_theta_accretion)
+sum_intense, sum_simps_integrate, analytic_integral_phi, position_of_max = \
+    calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max)
 
 print("max: %d" % position_of_max)
-
-
-def plot_map_cos(n_pos, position_of_max, t_max, N_phi_accretion, N_theta_accretion, row_number, column_number):
-    number_of_plots = row_number * column_number
-
-    crf = [0] * number_of_plots
-    cr = [0] * number_of_plots
-
-    fig, axes = plt.subplots(nrows=row_number, ncols=column_number, figsize=(8, 8), subplot_kw={'projection': 'polar'})
-    # сдвигаем графики относительно позиции максимума. чтобы макс был на (0,0)
-    row_figure = 0
-    column_figure = 0
-    # phi_mu = phi_mu_0
-    for i1 in range(number_of_plots):
-        phi_mu = phi_mu_0 + omega_ns * (n_pos + i1 + position_of_max)
-        # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
-        A_matrix_analytic = matrix.newMatrixAnalytic(phi_rotate, betta_rotate, phi_mu, betta_mu)
-
-        # A_matrix_analytic = matrix.newRy(betta_mu) @ matrix.newRz(phi_mu) @ matrix.newRy(betta_rotate) \
-        #                 @ matrix.newRz(phi_rotate)
-
-        # print("analytic matrix:")
-        # print(A_matrix_analytic)
-        count_0 = 0
-        e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
-        for i in range(N_phi_accretion):
-            for j in range(N_theta_accretion):
-                cos_psi_range[i][j] = np.dot(e_obs_mu, array_normal[i * N_phi_accretion + j])
-                if cos_psi_range[i][j] < 0:
-                    count_0 += 1
-
-        crf[i1] = axes[row_figure, column_figure].contourf(phi_range, theta_range / grad_to_rad,
-                                                           cos_psi_range.transpose(), vmin=-1, vmax=1)
-
-        if count_0 > 0:
-            cr[i1] = axes[row_figure, column_figure].contour(phi_range, theta_range / grad_to_rad,
-                                                             cos_psi_range.transpose(),
-                                                             [0.], colors='w')
-        column_figure += 1
-        if column_figure == column_number:
-            column_figure = 0
-            row_figure += 1
-
-    cbar = fig.colorbar(crf[i1], ax=axes[:], shrink=0.8, location='right')
-
-    plt.show()
 
 
 def plot_map_cos_in_range(position_of_max, t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number,
@@ -476,59 +432,6 @@ def plot_map_t_eff(T_eff, N_phi_accretion, N_theta_accretion):
         for j in range(N_theta_accretion):
             result[i, j] = T_eff[j]
     ax.contourf(phi_range, theta_range / grad_to_rad, result.transpose())
-    plt.show()
-
-
-def plot_map_delta_phi(position_of_max, t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number, column_number):
-    number_of_plots = row_number * column_number
-
-    crf = [0] * number_of_plots
-
-    fig, axes = plt.subplots(nrows=row_number, ncols=column_number, figsize=(8, 8), subplot_kw={'projection': 'polar'})
-
-    row_figure = 0
-    column_figure = 0
-
-    # для единого колорбара - взял из инета
-    cmap = cm.get_cmap('viridis')
-    normalizer = Normalize(-1, 1)
-    im = cm.ScalarMappable(norm=normalizer)
-
-    phi_mu_max = phi_mu_0 + omega_ns * position_of_max
-    for i1 in range(number_of_plots):
-        # сдвигаем графики относительно позиции максимума. чтобы макс был на (0,0)
-        phi_mu = phi_mu_max + omega_ns * (t_max_for_cos / (number_of_plots - 1)) * i1
-        # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
-        A_matrix_analytic = matrix.newMatrixAnalytic(phi_rotate, betta_rotate, phi_mu, betta_mu)
-        e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
-
-        phi_obs, theta_obs = get_angles_from_vector(e_obs_mu)
-        # print("theta_obs%d = %f" % (i1, theta_obs))
-        for j in range(N_theta_accretion):
-            delta_phi_lim = get_lim_for_analytic_integral_phi(theta_range[j], e_obs_mu)
-            for i in range(N_phi_accretion):
-                if (phi_range[i] >= delta_phi_lim) and (phi_range[i] <= 2 * np.pi - delta_phi_lim):
-                    cos_psi_range[j][i] = 1
-                else:
-                    cos_psi_range[j][i] = -1
-        crf[i1] = axes[row_figure, column_figure].contourf(phi_range, theta_range / grad_to_rad,
-                                                           cos_psi_range, vmin=-1, vmax=1, cmap=cmap,
-                                                           norm=normalizer)
-        axes[row_figure, column_figure].set_title(
-            "phase = %.2f" % (omega_ns * (t_max_for_cos / (number_of_plots - 1)) * i1 / (2 * np.pi)))
-
-        # axes[row_figure, column_figure].set_theta_zero_location('E', offset=phi_obs/grad_to_rad)
-        axes[row_figure, column_figure].set_theta_offset(phi_obs)
-
-        axes[row_figure, column_figure].set_rorigin(-theta_accretion_begin)
-
-        column_figure += 1
-        if column_figure == column_number:
-            column_figure = 0
-            row_figure += 1
-
-    plt.subplots_adjust(hspace=0.5, wspace=0.5)
-    cbar = fig.colorbar(im, ax=axes[:, :], shrink=0.7, location='right')
     plt.show()
 
 
