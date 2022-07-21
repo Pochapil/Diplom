@@ -47,12 +47,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 190 * grad_to_rad
+betta_rotate = 90 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 130 * grad_to_rad
+betta_mu = 10 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -263,20 +263,29 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
     # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
 
-    # # для верхнего конуса:
-    # if t_cone[0] > 0:
-    #     intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array(
-    #         [x_direction, y_direction, z_direction])
-    #     phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_vector)
-    #     if (intersect_vector[2] > 0 and theta_intersect > lim_theta and phi_intersect < lim_phi_accretion):
-    #         return True
-    #
-    # if t_cone[1] > 0:
-    #     intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array(
-    #         [x_direction, y_direction, z_direction])
-    #     phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_vector)
-    #     if (intersect_vector[2] > 0 and theta_intersect > lim_theta and phi_intersect < lim_phi_accretion):
-    #         return True
+    if t_cone[0] > 0:
+        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array(
+            [x_direction, y_direction, z_direction])
+        phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_vector)
+        # для верхнего конуса:
+        if (intersect_vector[2] > 0 and theta_intersect > lim_theta and phi_intersect < lim_phi_accretion):
+            return True
+        # для нижнего конуса:
+        if (intersect_vector[2] < 0 and np.pi / 2 < theta_intersect <
+                (np.pi - lim_theta) and np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
+            return True
+
+    if t_cone[1] > 0:
+        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array(
+            [x_direction, y_direction, z_direction])
+        phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_vector)
+        # для верхнего конуса:
+        if (intersect_vector[2] > 0 and theta_intersect > lim_theta and phi_intersect < lim_phi_accretion):
+            return True
+        # для нижнего конуса:
+        if (intersect_vector[2] < 0 and np.pi / 2 < theta_intersect <
+                (np.pi - lim_theta) and np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
+            return True
 
     return False
 
@@ -478,9 +487,8 @@ for i in range(4):
     plot_luminosity(arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], 0, omega_ns, t_max)
 
 sum_simps_integrate = np.array(arr_sum_simps_integrate[0])
-for i in range(1,4):
+for i in range(1, 4):
     sum_simps_integrate += np.array(arr_sum_simps_integrate[i])
-
 
 plot_luminosity(sum_simps_integrate, [0], 0, omega_ns, t_max)
 
