@@ -10,6 +10,8 @@ from matplotlib.colors import Normalize
 import BS_distribution_T_eff as get_T_eff
 import config  # const
 
+import plot_3d_configuration
+
 # смотри RotationSingleColorBar.py
 # const
 file_count = 29
@@ -47,12 +49,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 90 * grad_to_rad
+betta_rotate = 20 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 10 * grad_to_rad
+betta_mu = 90 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -483,14 +485,31 @@ array_normal = create_array_normal(phi_range_1, theta_range_1, False)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
     calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max)
 
-for i in range(4):
-    plot_luminosity(arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], 0, omega_ns, t_max)
+# for i in range(4):
+#     plot_luminosity(arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], 0, omega_ns, t_max)
 
 sum_simps_integrate = np.array(arr_sum_simps_integrate[0])
 for i in range(1, 4):
     sum_simps_integrate += np.array(arr_sum_simps_integrate[i])
 
-plot_luminosity(sum_simps_integrate, [0], 0, omega_ns, t_max)
+# plot_luminosity(sum_simps_integrate, [0], 0, omega_ns, t_max)
+
+fig = plt.figure(figsize=(8, 8))
+phi_for_plot = list(omega_ns * i / (2 * np.pi) for i in range(t_max))
+ax3 = fig.add_subplot(111)
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[0],
+         label='top outer')
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[1],
+         label='top inner')
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[2],
+         label='bot outer', marker='*')
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[3],
+         label='bot inner')
+ax3.plot(phi_for_plot, sum_simps_integrate,
+         label='sum')
+ax3.legend()
+#plt.yscale('log')
+plt.show()
 
 row_number = 2
 column_number = 3
@@ -578,3 +597,10 @@ if (plot_3D_flag):
     ax.set_ylim([-1, 1])
     ax.set_zlim([-1, 1])
     plt.show()
+
+plot_3d_configuration.plot_3d_configuration(phi_range, theta_range)
+
+file_name = "save_phi_range.txt"
+np.savetxt(file_name, phi_range)
+file_name = "save_theta_range.txt"
+np.savetxt(file_name, theta_range)
