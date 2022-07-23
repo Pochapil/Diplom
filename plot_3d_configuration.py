@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_3d_configuration(phi_range_column, theta_range_column):
+def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
     lim_value = 0.2
 
     fig = plt.figure(figsize=(8, 8))
@@ -45,7 +45,7 @@ def plot_3d_configuration(phi_range_column, theta_range_column):
 
     def add_vector(ax, origin, vector):
         vector = np.array(vector) * lim_value / np.linalg.norm(vector)
-        ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2])
+        ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2], color='green')
 
     omega_vector = [1, 2, 1]
     mu_vector = [0, 0, 1]
@@ -56,6 +56,9 @@ def plot_3d_configuration(phi_range_column, theta_range_column):
     ax.set_xlim([-lim_value, lim_value])
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
+
+    ax.view_init(90 - betta_rotate - betta_mu, 0)  # поворот в градусах
+
     plt.show()
 
 
@@ -66,4 +69,4 @@ if __name__ == "__main__":
     file_name = "save_theta_range.txt"
     theta_range_column = np.loadtxt(file_name)
 
-    plot_3d_configuration(phi_range_column, theta_range_column)
+    plot_3d_configuration(phi_range_column, theta_range_column, 20, 10)
