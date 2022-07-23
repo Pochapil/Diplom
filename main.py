@@ -106,6 +106,13 @@ phi_range = np.array([step_phi_accretion * i for i in range(N_phi_accretion)])
 theta_range = np.array([theta_accretion_begin + step_theta_accretion * j for j in range(N_theta_accretion)])
 cos_psi_range = np.empty([N_phi_accretion, N_theta_accretion])
 
+# сохраняю для показа в 3д
+print('phi_theta_range saved')
+file_name = "save_phi_range.txt"
+np.savetxt(file_name, phi_range)
+file_name = "save_theta_range.txt"
+np.savetxt(file_name, theta_range)
+
 # тут беру значения из Teff в промежутках так как нахожу по отрезку кси а нужно по тета!!
 
 ksiStop1 = 1.
@@ -508,7 +515,7 @@ ax3.plot(phi_for_plot, arr_sum_simps_integrate[3],
 ax3.plot(phi_for_plot, sum_simps_integrate,
          label='sum')
 ax3.legend()
-#plt.yscale('log')
+# plt.yscale('log')
 plt.show()
 
 row_number = 2
@@ -599,8 +606,3 @@ if (plot_3D_flag):
     plt.show()
 
 plot_3d_configuration.plot_3d_configuration(phi_range, theta_range)
-
-file_name = "save_phi_range.txt"
-np.savetxt(file_name, phi_range)
-file_name = "save_theta_range.txt"
-np.savetxt(file_name, theta_range)

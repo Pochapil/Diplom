@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 
 
 def plot_3d_configuration(phi_range_column, theta_range_column):
+    lim_value = 0.2
+
     fig = plt.figure(figsize=(8, 8))
     ax = plt.axes(projection='3d')
 
@@ -39,7 +41,18 @@ def plot_3d_configuration(phi_range_column, theta_range_column):
     # низ
     ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="r", alpha=0.2)
 
-    lim_value = 0.2
+    origin = [0, 0, 0]
+
+    def add_vector(ax, origin, vector):
+        vector = np.array(vector) * lim_value / np.linalg.norm(vector)
+        ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2])
+
+    omega_vector = [1, 2, 1]
+    mu_vector = [0, 0, 1]
+
+    add_vector(ax, origin, omega_vector)
+    add_vector(ax, origin, mu_vector)
+
     ax.set_xlim([-lim_value, lim_value])
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
