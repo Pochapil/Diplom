@@ -3,8 +3,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
+def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu, phase):
     lim_value = 0.2
+    grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
     ax = plt.axes(projection='3d')
@@ -43,22 +44,29 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
 
     origin = [0, 0, 0]
 
-    def add_vector(ax, origin, vector):
+    def add_vector(ax, origin, vector, color):
         vector = np.array(vector) * lim_value / np.linalg.norm(vector)
-        ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2], color='green')
+        ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2], color=color)
 
-    omega_vector = [1, 2, 1]
+    # откладываем от магнитного вектора
+    omega_vector = [np.sin(betta_mu * grad_to_rad) * np.cos(phase * grad_to_rad),
+                    np.sin(betta_mu * grad_to_rad) * np.sin(phase * grad_to_rad),
+                    np.cos(betta_mu * grad_to_rad)]
     mu_vector = [0, 0, 1]
+    observer_vector = [np.sin((betta_rotate + betta_mu) * grad_to_rad) * np.cos(phase * grad_to_rad),
+                       np.sin((betta_rotate + betta_mu) * grad_to_rad) * np.sin(phase * grad_to_rad),
+                       np.cos((betta_rotate + betta_mu) * grad_to_rad)]
 
-    add_vector(ax, origin, omega_vector)
-    add_vector(ax, origin, mu_vector)
+    add_vector(ax, origin, observer_vector, 'black')
+    add_vector(ax, origin, omega_vector, 'green')
+    add_vector(ax, origin, mu_vector, 'red')
 
     ax.set_xlim([-lim_value, lim_value])
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
 
-    ax.view_init(90 - betta_rotate - betta_mu, 0)  # поворот в градусах
-
+    # ax.view_init(90 - betta_rotate - betta_mu, 0)  # поворот в градусах
+    ax.view_init(90 - betta_rotate - betta_mu, phase)
     plt.show()
 
 
@@ -69,4 +77,4 @@ if __name__ == "__main__":
     file_name = "save_theta_range.txt"
     theta_range_column = np.loadtxt(file_name)
 
-    plot_3d_configuration(phi_range_column, theta_range_column, 20, 10)
+    plot_3d_configuration(phi_range_column, theta_range_column, 10, 30, 16)
