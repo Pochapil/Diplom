@@ -3,9 +3,30 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
+def get_angles_from_vector(vector):
+    x = vector[0, 0]
+    y = vector[0, 1]
+    z = vector[0, 2]
+    theta = np.arccos(z)  # np.arccos(z/r)
+    if x > 0:
+        if y >= 0:
+            phi = np.arctan(y / x)
+        else:
+            phi = np.arctan(y / x) + 2 * np.pi
+    else:
+        phi = np.arctan(y / x) + np.pi
+    return phi, theta
+
+
 def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu, phase):
     lim_value = 0.2
     grad_to_rad = np.pi / 180
+    i_angle = 0 * grad_to_rad
+    e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate* grad_to_rad, phase * grad_to_rad, betta_mu* grad_to_rad)
+    e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+    azimuth, elevation = get_angles_from_vector(e_obs_mu)
 
     fig = plt.figure(figsize=(8, 8))
     ax = plt.axes(projection='3d')
@@ -57,8 +78,12 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
                        np.sin((betta_rotate + betta_mu) * grad_to_rad) * np.sin(phase * grad_to_rad),
                        np.cos((betta_rotate + betta_mu) * grad_to_rad)]
 
-    add_vector(ax, origin, observer_vector, 'black')
-    add_vector(ax, origin, omega_vector, 'green')
+    observer_mu_vector = [np.sin(elevation * grad_to_rad) * np.cos(azimuth * grad_to_rad),
+                          np.sin(elevation * grad_to_rad) * np.sin(azimuth * grad_to_rad),
+                          np.cos(elevation * grad_to_rad)]
+
+    #add_vector(ax, origin, observer_mu_vector, 'black')
+    #add_vector(ax, origin, omega_vector, 'green')
     add_vector(ax, origin, mu_vector, 'red')
 
     ax.set_xlim([-lim_value, lim_value])
@@ -66,7 +91,12 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
     ax.set_zlim([-lim_value, lim_value])
 
     # ax.view_init(90 - betta_rotate - betta_mu, 0)  # поворот в градусах
-    ax.view_init(90 - betta_rotate - betta_mu, phase)
+    # ax.view_init(90 - betta_rotate - betta_mu, phase)
+    ax.view_init(90- elevation / grad_to_rad, azimuth / grad_to_rad)
+
+    print('elevation = %f' % elevation)
+    print('azimuth = %f' % azimuth)
+
     plt.show()
 
 
@@ -77,4 +107,4 @@ if __name__ == "__main__":
     file_name = "save_theta_range.txt"
     theta_range_column = np.loadtxt(file_name)
 
-    plot_3d_configuration(phi_range_column, theta_range_column, 10, 30, 16)
+    plot_3d_configuration(phi_range_column, theta_range_column, 40, 10, 0)

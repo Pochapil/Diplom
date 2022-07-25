@@ -49,12 +49,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 20 * grad_to_rad
+betta_rotate = 40 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 90 * grad_to_rad
+betta_mu = 30 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -605,4 +605,5 @@ if (plot_3D_flag):
     ax.set_zlim([-1, 1])
     plt.show()
 
-plot_3d_configuration.plot_3d_configuration(phi_range, theta_range)
+plot_3d_configuration.plot_3d_configuration(phi_range, theta_range, betta_rotate / grad_to_rad, betta_mu / grad_to_rad,
+                                            0)
