@@ -16,7 +16,7 @@ import plot_3d_configuration
 # const
 file_count = 29
 grad_to_rad = np.pi / 180
-
+file_count = 0
 # Parameters
 MSun = config.MSun  # масса молнца г
 G = config.G  # гравитационная постоянная см3·с−2·г−1
@@ -49,12 +49,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 40 * grad_to_rad
+betta_rotate = 50 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 30 * grad_to_rad
+betta_mu = 120 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -233,8 +233,8 @@ def calculate_total_luminosity(phi_range, theta_range):
     return total_luminosity
 
 
-def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accretion, lim_theta_top, lim_theta_bot
-                       ):
+def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accretion, lim_theta_top, lim_theta_bot,
+                       flag):
     # все отнормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
 
@@ -243,9 +243,9 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     z_origin = np.cos(origin_theta)
     # origin_point = [x, y, z]
 
-    x_direction = direction_vector[0, 0]
-    y_direction = direction_vector[0, 1]
-    z_direction = direction_vector[0, 2]
+    x_direction = direction_vector[0, 0] + x_origin
+    y_direction = direction_vector[0, 1] + y_origin
+    z_direction = direction_vector[0, 2] + z_origin
 
     def find_intersect_solution(a, b, c):
         if b ** 2 - 4 * a * c >= 0:
@@ -264,11 +264,13 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
 
     # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
-    if t_sphere[0] > 0.001 or t_sphere[1] > 0:
+    if t_sphere[0] > 0 or t_sphere[1] > 0:
         return True
 
     # cone x**2 + y**2 == z**2
     lim_theta = lim_theta_top
+    if flag:
+        lim_theta = lim_theta_bot
     a_cone = (x_direction ** 2 + y_direction ** 2) / (np.tan(lim_theta) ** 2) - z_direction ** 2
     b_cone = 2 * ((x_origin * x_direction + y_origin * y_direction) / (np.tan(lim_theta) ** 2) - z_origin * z_direction)
     c_cone = (x_origin ** 2 + y_origin ** 2) / (np.tan(lim_theta) ** 2) - z_origin ** 2
@@ -304,7 +306,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     return False
 
 
-def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max):
+def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max, flag):
     integral_max = -1
     # sum_intense изотропная светимость ( * 4 pi еще надо)
     sum_intense = [0] * t_max
@@ -341,7 +343,7 @@ def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_t
 
                 if cos_psi_range[i, j] > 0:
                     if check_if_intersect(phi_range[i], theta_range[j], e_obs_mu, lim_phi_accretion,
-                                          theta_accretion_begin, theta_accretion_end):
+                                          theta_accretion_begin, theta_accretion_end, flag):
                         simps_cos[j] = 0
                     else:
                         sum_intense[i1] += sigmStfBolc * Teff[j] ** 4 * cos_psi_range[i, j] * dS[j]
@@ -469,14 +471,16 @@ arr_position_of_max = [0] * 4
 
 # верхняя колонка внешняя поверхность
 i = 0
+file_count = i
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
-    calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max)
+    calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max, True)
 
 # верхняя колонка внутрення поверхность
 i += 1
+file_count = i
 array_normal = create_array_normal(phi_range, theta_range, False)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
-    calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max)
+    calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max, False)
 
 # нижняя колонка углы
 theta_accretion_begin_1 = np.pi - theta_accretion_begin
@@ -488,15 +492,17 @@ phi_range_1 = np.array([np.pi + step_phi_accretion * i for i in range(N_phi_accr
 
 # нижняя колонка внешняя поверхность
 i += 1
+file_count = i
 array_normal = create_array_normal(phi_range_1, theta_range_1, True)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
-    calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max)
+    calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max, True)
 
 # нижняя колонка внутрення поверхность
 i += 1
+file_count = i
 array_normal = create_array_normal(phi_range_1, theta_range_1, False)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
-    calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max)
+    calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max, False)
 
 # for i in range(4):
 #     plot_luminosity(arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], 0, omega_ns, t_max)

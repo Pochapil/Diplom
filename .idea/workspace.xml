@@ -4,8 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e4169d14-b72c-4590-b988-e001dae1939f" name="Changes" comment="grad instead rad!!!!">
-      <change afterPath="$PROJECT_DIR$/try.py" afterDir="false" />
+    <list default="true" id="e4169d14-b72c-4590-b988-e001dae1939f" name="Changes" comment="cone fixed + maps">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/plot_3d_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_3d_configuration.py" afterDir="false" />
@@ -148,7 +147,7 @@
       <workItem from="1658478525675" duration="4600000" />
       <workItem from="1658584765840" duration="3947000" />
       <workItem from="1658739476967" duration="8870000" />
-      <workItem from="1658831399073" duration="7167000" />
+      <workItem from="1658831399073" duration="9995000" />
     </task>
     <task id="LOCAL-00001" summary="Initial">
       <created>1657535244882</created>
@@ -262,7 +261,14 @@
       <option name="project" value="LOCAL" />
       <updated>1658751928416</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="cone fixed + maps">
+      <created>1658838687801</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1658838687801</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -294,11 +300,12 @@
     <MESSAGE value="view init" />
     <MESSAGE value="phase rotation 3d" />
     <MESSAGE value="grad instead rad!!!!" />
-    <option name="LAST_COMMIT_MESSAGE" value="grad instead rad!!!!" />
+    <MESSAGE value="cone fixed + maps" />
+    <option name="LAST_COMMIT_MESSAGE" value="cone fixed + maps" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Diplom$try.coverage" NAME="try Coverage Results" MODIFIED="1658832878476" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Diplom$main.coverage" NAME="main Coverage Results" MODIFIED="1658838499318" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Diplom$plot_3d_configuration.coverage" NAME="plot_3d_configuration Coverage Results" MODIFIED="1658838607385" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$main.coverage" NAME="main Coverage Results" MODIFIED="1658841741634" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$plot_3d_configuration.coverage" NAME="plot_3d_configuration Coverage Results" MODIFIED="1658841879995" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
