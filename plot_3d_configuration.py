@@ -23,7 +23,8 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
     grad_to_rad = np.pi / 180
     i_angle = 0 * grad_to_rad
     e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
-    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate* grad_to_rad, phase * grad_to_rad, betta_mu* grad_to_rad)
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
+                                                 betta_mu * grad_to_rad)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
     azimuth, elevation = get_angles_from_vector(e_obs_mu)
@@ -82,8 +83,8 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
                           np.sin(elevation * grad_to_rad) * np.sin(azimuth * grad_to_rad),
                           np.cos(elevation * grad_to_rad)]
 
-    #add_vector(ax, origin, observer_mu_vector, 'black')
-    #add_vector(ax, origin, omega_vector, 'green')
+    # add_vector(ax, origin, observer_mu_vector, 'black')
+    # add_vector(ax, origin, omega_vector, 'green')
     add_vector(ax, origin, mu_vector, 'red')
 
     ax.set_xlim([-lim_value, lim_value])
@@ -92,7 +93,7 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
 
     # ax.view_init(90 - betta_rotate - betta_mu, 0)  # поворот в градусах
     # ax.view_init(90 - betta_rotate - betta_mu, phase)
-    ax.view_init(90- elevation / grad_to_rad, azimuth / grad_to_rad)
+    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     print('elevation = %f' % elevation)
     print('azimuth = %f' % azimuth)
@@ -107,4 +108,4 @@ if __name__ == "__main__":
     file_name = "save_theta_range.txt"
     theta_range_column = np.loadtxt(file_name)
 
-    plot_3d_configuration(phi_range_column, theta_range_column, 40, 10, 0)
+    plot_3d_configuration(phi_range_column, theta_range_column, 40, 30, 130)

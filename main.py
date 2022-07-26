@@ -233,7 +233,8 @@ def calculate_total_luminosity(phi_range, theta_range):
     return total_luminosity
 
 
-def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accretion, lim_theta):
+def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accretion, lim_theta_top, lim_theta_bot
+                       ):
     # все отнормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
 
@@ -247,9 +248,12 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     z_direction = direction_vector[0, 2]
 
     def find_intersect_solution(a, b, c):
-        t_1 = (-b + (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
-        t_2 = (-b - (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
-        return t_1, t_2
+        if b ** 2 - 4 * a * c >= 0:
+            t_1 = (-b + (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
+            t_2 = (-b - (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
+            return t_1, t_2
+        else:
+            return 0, 0
 
     # sphere x**2 + y**2 + z**2 == 1
     a_sphere = x_direction ** 2 + y_direction ** 2 + z_direction ** 2
@@ -260,40 +264,41 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
 
     # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
-    if t_sphere[0] > 0 or t_sphere[1] > 0:
+    if t_sphere[0] > 0.001 or t_sphere[1] > 0:
         return True
 
     # cone x**2 + y**2 == z**2
-    a_cone = x_direction ** 2 + y_direction ** 2 - z_direction ** 2
-    b_cone = 2 * (x_origin * x_direction + y_origin * y_direction - z_origin * z_direction)
-    c_cone = x_origin ** 2 + y_origin ** 2 - z_origin ** 2
+    lim_theta = lim_theta_top
+    a_cone = (x_direction ** 2 + y_direction ** 2) / (np.tan(lim_theta) ** 2) - z_direction ** 2
+    b_cone = 2 * ((x_origin * x_direction + y_origin * y_direction) / (np.tan(lim_theta) ** 2) - z_origin * z_direction)
+    c_cone = (x_origin ** 2 + y_origin ** 2) / (np.tan(lim_theta) ** 2) - z_origin ** 2
 
     # solution for cone
     t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
     # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
 
     if t_cone[0] > 0:
-        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array(
+        intersect_point = np.array([x_origin, y_origin, z_origin]) + t_cone[0] * np.array(
             [x_direction, y_direction, z_direction])
-        phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_vector)
+        phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_point)
         # для верхнего конуса:
-        if (intersect_vector[2] > 0 and theta_intersect > lim_theta and phi_intersect < lim_phi_accretion):
+        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (intersect_vector[2] < 0 and np.pi / 2 < theta_intersect <
-                (np.pi - lim_theta) and np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
+        if (- ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
+                lim_phi_accretion + np.pi)):
             return True
 
     if t_cone[1] > 0:
-        intersect_vector = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array(
+        intersect_point = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array(
             [x_direction, y_direction, z_direction])
-        phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_vector)
+        phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_point)
         # для верхнего конуса:
-        if (intersect_vector[2] > 0 and theta_intersect > lim_theta and phi_intersect < lim_phi_accretion):
+        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (intersect_vector[2] < 0 and np.pi / 2 < theta_intersect <
-                (np.pi - lim_theta) and np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
+        if (- ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
+                lim_phi_accretion + np.pi)):
             return True
 
     return False
@@ -334,12 +339,13 @@ def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_t
                 # cos_psi_range[i][j] = np.dot(e_obs_mu, matrix.newE_n(phi_range[i], theta_range[j])) # неэффективно
                 cos_psi_range[i, j] = np.dot(e_obs_mu, array_normal[i * N_theta_accretion + j])  # умножать на N_theta
 
-                if check_if_intersect(phi_range[i], theta_range[j], e_obs_mu, lim_phi_accretion, theta_accretion_end):
-                    simps_cos[j] = 0
-
-                elif cos_psi_range[i, j] > 0:
-                    sum_intense[i1] += sigmStfBolc * Teff[j] ** 4 * cos_psi_range[i, j] * dS[j]
-                    simps_cos[j] = cos_psi_range[i, j]
+                if cos_psi_range[i, j] > 0:
+                    if check_if_intersect(phi_range[i], theta_range[j], e_obs_mu, lim_phi_accretion,
+                                          theta_accretion_begin, theta_accretion_end):
+                        simps_cos[j] = 0
+                    else:
+                        sum_intense[i1] += sigmStfBolc * Teff[j] ** 4 * cos_psi_range[i, j] * dS[j]
+                        simps_cos[j] = cos_psi_range[i, j]
                     # * S=R**2 * step_phi_accretion * step_theta_accretion
                 else:
                     simps_cos[j] = 0
@@ -521,8 +527,26 @@ plt.show()
 row_number = 2
 column_number = 3
 
-for i in range(4):
-    plot_map_cos_in_range(arr_position_of_max[i], t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number,
+map_flag = False
+if map_flag:
+    i = 0
+    array_normal = create_array_normal(phi_range, theta_range, True)
+    plot_map_cos_in_range(0, t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number,
+                          column_number)
+
+    i += 1
+    array_normal = create_array_normal(phi_range, theta_range, False)
+    plot_map_cos_in_range(0, t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number,
+                          column_number)
+
+    i += 1
+    array_normal = create_array_normal(phi_range_1, theta_range_1, True)
+    plot_map_cos_in_range(0, t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number,
+                          column_number)
+
+    i += 1
+    array_normal = create_array_normal(phi_range_1, theta_range_1, False)
+    plot_map_cos_in_range(0, t_max_for_cos, N_phi_accretion, N_theta_accretion, row_number,
                           column_number)
 
 
@@ -605,5 +629,5 @@ if (plot_3D_flag):
     ax.set_zlim([-1, 1])
     plt.show()
 
-plot_3d_configuration.plot_3d_configuration(phi_range, theta_range, betta_rotate / grad_to_rad, betta_mu / grad_to_rad,
-                                            0)
+# plot_3d_configuration.plot_3d_configuration(phi_range, theta_range, betta_rotate / grad_to_rad, betta_mu / grad_to_rad,
+#                                             0)
