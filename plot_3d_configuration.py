@@ -19,6 +19,8 @@ def get_angles_from_vector(vector):
 
 
 def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu, phase):
+    phase = phase * 360
+
     lim_value = 0.2
     grad_to_rad = np.pi / 180
     i_angle = 0 * grad_to_rad
@@ -79,11 +81,11 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
                        np.sin((betta_rotate + betta_mu) * grad_to_rad) * np.sin(phase * grad_to_rad),
                        np.cos((betta_rotate + betta_mu) * grad_to_rad)]
 
-    observer_mu_vector = [np.sin(elevation * grad_to_rad) * np.cos(azimuth * grad_to_rad),
-                          np.sin(elevation * grad_to_rad) * np.sin(azimuth * grad_to_rad),
-                          np.cos(elevation * grad_to_rad)]
+    observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
+                          np.sin(elevation) * np.sin(azimuth),
+                          np.cos(elevation)]
 
-    # add_vector(ax, origin, observer_mu_vector, 'black')
+    add_vector(ax, origin, observer_mu_vector, 'black')
     # add_vector(ax, origin, omega_vector, 'green')
     add_vector(ax, origin, mu_vector, 'red')
 
@@ -108,4 +110,4 @@ if __name__ == "__main__":
     file_name = "save_theta_range.txt"
     theta_range_column = np.loadtxt(file_name)
 
-    plot_3d_configuration(phi_range_column, theta_range_column, 50, 120, 180)
+    plot_3d_configuration(phi_range_column, theta_range_column, 30, 0, 0.375)

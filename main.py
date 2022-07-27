@@ -49,12 +49,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 50 * grad_to_rad
+betta_rotate = 30 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 120 * grad_to_rad
+betta_mu = 0 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -268,9 +268,11 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
         return True
 
     # cone x**2 + y**2 == z**2
+    # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
     lim_theta = lim_theta_top
     if flag:
         lim_theta = lim_theta_bot
+
     a_cone = (x_direction ** 2 + y_direction ** 2) / (np.tan(lim_theta) ** 2) - z_direction ** 2
     b_cone = 2 * ((x_origin * x_direction + y_origin * y_direction) / (np.tan(lim_theta) ** 2) - z_origin * z_direction)
     c_cone = (x_origin ** 2 + y_origin ** 2) / (np.tan(lim_theta) ** 2) - z_origin ** 2
@@ -284,10 +286,10 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             [x_direction, y_direction, z_direction])
         phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_point)
         # для верхнего конуса:
-        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
+        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect <= lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (- ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
+        if (-ksiShock * np.cos(lim_theta_top) <= intersect_point[2] < 0 and np.pi <= phi_intersect <= (
                 lim_phi_accretion + np.pi)):
             return True
 
@@ -296,10 +298,10 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             [x_direction, y_direction, z_direction])
         phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_point)
         # для верхнего конуса:
-        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
+        if (0 < intersect_point[2] <= ksiShock * np.cos(lim_theta_top) and phi_intersect <= lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (- ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
+        if (-ksiShock * np.cos(lim_theta_top) <= intersect_point[2] < 0 and np.pi <= phi_intersect <= (
                 lim_phi_accretion + np.pi)):
             return True
 
