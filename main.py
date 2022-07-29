@@ -49,12 +49,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 30 * grad_to_rad
+betta_rotate = 40 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 0 * grad_to_rad
+betta_mu = 120 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -237,15 +237,15 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
                        flag):
     # все отнормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
-
-    x_origin = np.sin(origin_theta) * np.cos(origin_phi)
-    y_origin = np.sin(origin_theta) * np.sin(origin_phi)
-    z_origin = np.cos(origin_theta)
+    r = R_e * np.sin(origin_theta) ** 2 / R_ns
+    x_origin = np.sin(origin_theta) * np.cos(origin_phi) * r
+    y_origin = np.sin(origin_theta) * np.sin(origin_phi) * r
+    z_origin = np.cos(origin_theta) * r
     # origin_point = [x, y, z]
 
-    x_direction = direction_vector[0, 0] + x_origin
-    y_direction = direction_vector[0, 1] + y_origin
-    z_direction = direction_vector[0, 2] + z_origin
+    x_direction = direction_vector[0, 0]
+    y_direction = direction_vector[0, 1]
+    z_direction = direction_vector[0, 2]
 
     def find_intersect_solution(a, b, c):
         if b ** 2 - 4 * a * c >= 0:
@@ -253,7 +253,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             t_2 = (-b - (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
             return t_1, t_2
         else:
-            return 0, 0
+            return -1, -1
 
     # sphere x**2 + y**2 + z**2 == 1
     a_sphere = x_direction ** 2 + y_direction ** 2 + z_direction ** 2

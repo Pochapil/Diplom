@@ -110,4 +110,4 @@ if __name__ == "__main__":
     file_name = "save_theta_range.txt"
     theta_range_column = np.loadtxt(file_name)
 
-    plot_3d_configuration(phi_range_column, theta_range_column, 30, 0, 0.375)
+    plot_3d_configuration(phi_range_column, theta_range_column, 40, 120, 0.27)
