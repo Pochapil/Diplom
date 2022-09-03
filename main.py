@@ -54,7 +54,7 @@ phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 120 * grad_to_rad
+betta_mu = 60 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -286,10 +286,10 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             [x_direction, y_direction, z_direction])
         phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_point)
         # для верхнего конуса:
-        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect <= lim_phi_accretion):
+        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (-ksiShock * np.cos(lim_theta_top) <= intersect_point[2] < 0 and np.pi <= phi_intersect <= (
+        if (-ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
                 lim_phi_accretion + np.pi)):
             return True
 
@@ -298,10 +298,10 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             [x_direction, y_direction, z_direction])
         phi_intersect, theta_intersect = get_angles_from_vector_one_dimension(intersect_point)
         # для верхнего конуса:
-        if (0 < intersect_point[2] <= ksiShock * np.cos(lim_theta_top) and phi_intersect <= lim_phi_accretion):
+        if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (-ksiShock * np.cos(lim_theta_top) <= intersect_point[2] < 0 and np.pi <= phi_intersect <= (
+        if (-ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
                 lim_phi_accretion + np.pi)):
             return True
 
