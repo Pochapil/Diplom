@@ -1,6 +1,7 @@
 import geometricTask.matrix as matrix
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.widgets import Slider
 
 
 def get_angles_from_vector(vector):
@@ -187,6 +188,75 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
         plt.pause(.001)
 
 
+def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
+    # fig, ax = plt.subplots()
+    lim_value = 0.2
+    grad_to_rad = np.pi / 180
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    N_phi_accretion = len(phi_range_column)
+    N_theta_accretion = len(theta_range_column)
+
+    # рисуем звезду
+    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
+    phi_range = np.arange(0, 2 * np.pi, 2 * np.pi / N_phi_accretion)
+
+    u, v = np.meshgrid(phi_range, theta_range)
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(v) * np.cos(u)
+    y = r1 * np.sin(v) * np.sin(u)
+    z = r1 * np.cos(v)
+
+    ax.plot_surface(x, y, z, color='b', alpha=1)
+
+    # рисуем силовые линии
+    # верх
+    theta_range = theta_range_column
+    phi_range = phi_range_column
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color="r", alpha=0.2)
+    # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
+
+    # низ
+    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="r", alpha=0.2)
+
+    # вектора
+    origin = [0, 0, 0]
+    mu_vector = [0, 0, 1]
+    add_vector(ax, origin, mu_vector, 'red', lim_value)
+
+    axSlider1 = fig.add_axes([0.25, 0.1, 0.65, 0.03])
+    slider1 = Slider(axSlider1, 'phase', valmin=0, valmax=2)
+
+    ax.set_xlim([-lim_value, lim_value])
+    ax.set_ylim([-lim_value, lim_value])
+    ax.set_zlim([-lim_value, lim_value])
+
+    def rotate(val):
+        phase = slider1.val
+        i_angle = 0 * grad_to_rad
+        phase = phase * 360
+        e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+        A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
+                                                     betta_mu * grad_to_rad)
+        e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+        azimuth, elevation = get_angles_from_vector(e_obs_mu)
+
+        ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+
+    slider1.on_changed(rotate)
+    plt.show()
+
+
 if __name__ == "__main__":
     file_name = "save_phi_range.txt"
     phi_range_column = np.loadtxt(file_name)
@@ -195,5 +265,5 @@ if __name__ == "__main__":
     theta_range_column = np.loadtxt(file_name)
 
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
-
-    animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
+    visualise_3d_configuration(phi_range_column, theta_range_column, 40, 30)
+    # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
