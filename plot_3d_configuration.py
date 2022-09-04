@@ -233,12 +233,23 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     mu_vector = [0, 0, 1]
     add_vector(ax, origin, mu_vector, 'red', lim_value)
 
-    axSlider1 = fig.add_axes([0.25, 0.1, 0.65, 0.03])
-    slider1 = Slider(axSlider1, 'phase', valmin=0, valmax=2)
+    axSlider1 = fig.add_axes([0.25, 0.1, 0.65, 0.05])
+    slider1 = Slider(axSlider1, 'phase', valmin=0, valmax=2, valinit=0)
 
     ax.set_xlim([-lim_value, lim_value])
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
+
+    i_angle = 0 * grad_to_rad
+    phase = 0
+    e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
+                                                 betta_mu * grad_to_rad)
+    e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+    azimuth, elevation = get_angles_from_vector(e_obs_mu)
+
+    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     def rotate(val):
         phase = slider1.val
