@@ -1,7 +1,7 @@
 import geometricTask.matrix as matrix
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
+from matplotlib.widgets import Slider, TextBox, Button
 
 
 def get_angles_from_vector(vector):
@@ -252,7 +252,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     def rotate(val):
-        phase = slider1.val
+        phase = slider1.val  # slider1.val
         i_angle = 0 * grad_to_rad
         phase = phase * 360
         e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
@@ -265,6 +265,16 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
         ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     slider1.on_changed(rotate)
+
+    ax_box = fig.add_axes([0.25, 0.03, 0.05, 0.05])
+    text_box = TextBox(ax_box, 'phase to set')
+
+    def func_for_text_box(text):
+        phase1 = float(text)
+        slider1.set_val(phase1)
+
+    text_box.on_submit(func_for_text_box)
+
     plt.show()
 
 
