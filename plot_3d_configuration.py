@@ -286,5 +286,5 @@ if __name__ == "__main__":
     theta_range_column = np.loadtxt(file_name)
 
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
-    visualise_3d_configuration(phi_range_column, theta_range_column, 40, 30)
+    visualise_3d_configuration(phi_range_column, theta_range_column, 40, 60)
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)

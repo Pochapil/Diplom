@@ -6,7 +6,7 @@ import scipy.integrate
 
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
-
+from scipy.optimize import fsolve
 import BS_distribution_T_eff as get_T_eff
 import config  # const
 
@@ -289,9 +289,10 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
         if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (-ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
-                lim_phi_accretion + np.pi)):
-            return True
+        if -ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0:
+            # if (np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
+            if (0 < phi_intersect < lim_phi_accretion):
+                return True
 
     if t_cone[1] > 0:
         intersect_point = np.array([x_origin, y_origin, z_origin]) + t_cone[1] * np.array(
@@ -301,9 +302,10 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
         if (0 < intersect_point[2] < ksiShock * np.cos(lim_theta_top) and phi_intersect < lim_phi_accretion):
             return True
         # для нижнего конуса:
-        if (-ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0 and np.pi < phi_intersect < (
-                lim_phi_accretion + np.pi)):
-            return True
+        if (-ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0):
+            # if (np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
+            if (0 < phi_intersect < lim_phi_accretion):
+                return True
 
     return False
 
@@ -471,6 +473,14 @@ arr_sum_simps_integrate = [0] * 4
 arr_analytic_integral_phi = [0] * 4
 arr_position_of_max = [0] * 4
 
+# нижняя колонка углы
+theta_accretion_begin_1 = np.pi - theta_accretion_begin
+theta_accretion_end_1 = np.pi - theta_accretion_end
+step_theta_accretion = (theta_accretion_end_1 - theta_accretion_begin_1) / N_theta_accretion
+theta_range_1 = np.array([theta_accretion_begin_1 + step_theta_accretion * j for j in range(N_theta_accretion)])
+
+phi_range_1 = np.array([np.pi + step_phi_accretion * i for i in range(N_phi_accretion)])
+
 # верхняя колонка внешняя поверхность
 i = 0
 file_count = i
@@ -483,14 +493,6 @@ file_count = i
 array_normal = create_array_normal(phi_range, theta_range, False)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
     calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max, False)
-
-# нижняя колонка углы
-theta_accretion_begin_1 = np.pi - theta_accretion_begin
-theta_accretion_end_1 = np.pi - theta_accretion_end
-step_theta_accretion = (theta_accretion_end_1 - theta_accretion_begin_1) / N_theta_accretion
-theta_range_1 = np.array([theta_accretion_begin_1 + step_theta_accretion * j for j in range(N_theta_accretion)])
-
-phi_range_1 = np.array([np.pi + step_phi_accretion * i for i in range(N_phi_accretion)])
 
 # нижняя колонка внешняя поверхность
 i += 1
