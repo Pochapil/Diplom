@@ -6,44 +6,31 @@ import scipy.integrate
 
 import matplotlib.cm as cm
 from matplotlib.colors import Normalize
-from scipy.optimize import fsolve
+
 import BS_distribution_T_eff as get_T_eff
 import config  # const
 
-import plot_3d_configuration
-
 # смотри RotationSingleColorBar.py
 # const
-file_count = 29
 grad_to_rad = np.pi / 180
-file_count = 0
-# Parameters
-MSun = config.MSun  # масса молнца г
-G = config.G  # гравитационная постоянная см3·с−2·г−1
-M_ns = config.M_ns  # масса нз г
-R_ns = config.R_ns  # радиус нз см
-sigmStfBolc = config.sigmStfBolc  # постоянная стефана больцмана в сгс
-
-# new args (for new func)
-dRe_div_Re = config.dRe_div_Re  # взял просто число
-M_accretion_rate = config.M_accretion_rate  # темп аккреции
-print(M_accretion_rate)
-ksi_rad = config.ksi_rad
-H = config.H  # магнитное поле стр 19 над формулой 37
-a_portion = config.a_portion  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
-mu = config.mu  # магнитный момент Гаусс * см3
+# угол между нормалью к двойной системе и наблюдателем
+i_angle = 0 * grad_to_rad
 ksi_param = 0.5  # между 1 и 2 формулой в статье
-R_alfven = (mu ** 2 / (2 * M_accretion_rate * (2 * G * M_ns) ** (1 / 2))) ** (2 / 7)  # альфвеновский радиус
-R_e = ksi_param * R_alfven  # между 1 и 2 формулой в статье
-print("R_e :%f" % R_e)
-print("R_e/R_* = %f" % (R_e / R_ns))
+file_count = 29
+file_count = 0
 
 # количество шагов
 N_phi_accretion = 100
 N_theta_accretion = 100
 
-# угол между нормалью к двойной системе и наблюдателем
-i_angle = 0 * grad_to_rad
+# new args (for new func)
+print(config.M_accretion_rate)
+R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (
+        2 / 7)  # альфвеновский радиус
+R_e = ksi_param * R_alfven  # между 1 и 2 формулой в статье
+print("R_e :%f" % R_e)
+print("R_e/R_* = %f" % (R_e / config.R_ns))
+
 # вектор на наблюдателя в системе координат двойной системы
 e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
@@ -61,36 +48,42 @@ phi_mu_0 = 0 * grad_to_rad
 # формула 2 в статье
 def delta_distance(theta):
     # R=R_e * sin_theta ** 2
-    return R_e * np.sin(theta) ** 3 / (1 + 3 * np.cos(theta) ** 2) ** (1 / 2) * dRe_div_Re
+    return R_e * np.sin(theta) ** 3 / (1 + 3 * np.cos(theta) ** 2) ** (1 / 2) * config.dRe_div_Re
 
 
 # формула 3 в статье
 def A_normal(theta):
     # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
-    return 2 * delta_distance(theta) * 2 * np.pi * a_portion * R_e * np.sin(theta) ** 3
+    return 2 * delta_distance(theta) * 2 * np.pi * config.a_portion * R_e * np.sin(theta) ** 3
 
 
-theta_accretion_begin = np.arcsin((R_ns / R_e) ** (1 / 2))  # от поверхности NS - угол при котором радиус = радиусу НЗ
+# ---------------- начало блока вычисления углов тета --------------------------
+theta_accretion_begin = np.arcsin(
+    (config.R_ns / R_e) ** (1 / 2))  # от поверхности NS - угол при котором радиус = радиусу НЗ
 
-print("A|(R*)/R*2 = %f" % (A_normal(theta_accretion_begin) / R_ns ** 2))
-print("delta(R*)/R* = %f" % (delta_distance(theta_accretion_begin) / R_ns))
+print("A|(R*)/R*2 = %f" % (A_normal(theta_accretion_begin) / config.R_ns ** 2))
+print("delta(R*)/R* = %f" % (delta_distance(theta_accretion_begin) / config.R_ns))
 
+# получаем распределение
 Teff, ksiShock, L_x = get_T_eff.get_Teff_distribution(N_theta_accretion, R_e, delta_distance(theta_accretion_begin),
                                                       A_normal(theta_accretion_begin))
 # ksiShock = 4.523317
 print("ksiShock: %f" % ksiShock)
 print("Rshock/R*: %f" % ksiShock)
-print("table 2 column 3  %f" % (G * M_ns * M_accretion_rate / (R_ns * config.L_edd)))  # значение в табличке
-# print("arcsin begin: %f" % (R_ns / R_e) ** (1 / 2))
-# print("arcsin end: %f" % (R_ns * ksiShock / R_e) ** (1 / 2))
+print("table 2 column 3  %f" % (
+        config.G * config.M_ns * config.M_accretion_rate / (config.R_ns * config.L_edd)))  # значение в табличке
+# print("arcsin begin: %f" % (config.R_ns / R_e) ** (1 / 2))
+# print("arcsin end: %f" % (config.R_ns * ksiShock / R_e) ** (1 / 2))
 
-theta_accretion_end = np.arcsin((R_ns * ksiShock / R_e) ** (1 / 2))  # до шока - угол когда радиус = радиус шока
+theta_accretion_end = np.arcsin((config.R_ns * ksiShock / R_e) ** (1 / 2))  # до шока - угол когда радиус = радиус шока
+# ---------------- конец блока вычисления углов тета --------------------------
 
-R_phi = R_ns * np.sin(theta_accretion_begin)
+R_phi = config.R_ns * np.sin(theta_accretion_begin)
 
 l0 = A_normal(theta_accretion_begin) / (2 * delta_distance(theta_accretion_begin))
 print("l0 = %.5f" % l0)
-lim_phi_accretion = 360 * grad_to_rad * 1.01 * a_portion  # полный круг для наложения. на карте были пробелы
+
+lim_phi_accretion = config.lim_phi_accretion  # верхний предел по phi
 
 print("phi = %f" % (lim_phi_accretion / grad_to_rad))
 print("theta_accretion_begin = %f" % (theta_accretion_begin / grad_to_rad))
@@ -106,14 +99,15 @@ phi_range = np.array([step_phi_accretion * i for i in range(N_phi_accretion)])
 theta_range = np.array([theta_accretion_begin + step_theta_accretion * j for j in range(N_theta_accretion)])
 cos_psi_range = np.empty([N_phi_accretion, N_theta_accretion])
 
-# сохраняю для показа в 3д
+# сохраняю для показа в 3д - сетку колонки
 print('phi_theta_range saved')
 file_name = "save_phi_range.txt"
 np.savetxt(file_name, phi_range)
 file_name = "save_theta_range.txt"
 np.savetxt(file_name, theta_range)
 
-# тут беру значения из Teff в промежутках так как нахожу по отрезку кси а нужно по тета!!
+# тут беру значения из Teff в промежутках, так как нахожу по отрезку кси, а нужно по theta!!
+# нужно сместить для увеличения точности
 
 ksiStop1 = 1.
 ksiInc1 = - (ksiShock - ksiStop1) / N_theta_accretion
@@ -122,7 +116,7 @@ ksi_bs = ksi1[::-1]
 i = 0  # left_border
 true_T_eff = []
 for theta in theta_range:
-    while ksi_bs[i + 1] < R_e / R_ns * np.sin(theta) ** 2 and (i < len(theta_range) - 2):
+    while ksi_bs[i + 1] < R_e / config.R_ns * np.sin(theta) ** 2 and (i < len(theta_range) - 2):
         i += 1
     true_T_eff.append(Teff[i])
 
@@ -147,9 +141,6 @@ def create_array_normal(phi_range, theta_range, flag=True):
             array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
     return array_normal
 
-
-array_normal = create_array_normal(phi_range, theta_range, True)
-
 dS = []  # массив единичных площадок при интегрировании так как зависит только от theta посчитаю 1 раз
 dS_simps = []
 # формула 5 из статьи для dl
@@ -162,7 +153,7 @@ for j in range(N_theta_accretion):
     dphi_simps = R_e * np.sin(theta_range[j]) ** 3
     dS_simps.append(dphi_simps * dl_simps)
 
-omega_ns = 8  # скорость вращения НЗ - будет меняться только угол phi_mu!
+omega_ns = config.omega_ns  # скорость вращения НЗ - будет меняться только угол phi_mu!
 # цикл для поворотов, сколько точек на графике интегралов - для фазы от 0 до 2 - с перекрытием чтобы форму макс
 max_phase_angle = 720
 t_max = (max_phase_angle // omega_ns) + (1 if max_phase_angle % omega_ns > 0 else 0)
@@ -228,16 +219,18 @@ def calculate_total_luminosity(phi_range, theta_range):
     N_phi_accretion = len(phi_range)
     total_luminosity_step = [0] * N_phi_accretion
     for i in range(N_phi_accretion):
-        total_luminosity_step[i] = sigmStfBolc * scipy.integrate.simps(Teff ** 4 * dS_simps, theta_range)
+        total_luminosity_step[i] = config.sigmStfBolc * scipy.integrate.simps(Teff ** 4 * dS_simps, theta_range)
     total_luminosity = scipy.integrate.simps(total_luminosity_step, phi_range)
     return total_luminosity
 
 
 def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accretion, lim_theta_top, lim_theta_bot,
                        flag):
+    # сначала поиск со сферой после - с конусом (а нужно ли со сферой искать ?)
     # все отнормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
-    r = R_e * np.sin(origin_theta) ** 2 / R_ns
+    r = R_e * np.sin(origin_theta) ** 2 / config.R_ns
+
     x_origin = np.sin(origin_theta) * np.cos(origin_phi) * r
     y_origin = np.sin(origin_theta) * np.sin(origin_phi) * r
     z_origin = np.cos(origin_theta) * r
@@ -267,34 +260,9 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     if t_sphere[0] > 0 or t_sphere[1] > 0:
         return True
 
-    # def equations(variables):
-    #     theta, phi, t = variables
-    #     eqn = np.empty(3)
-    #
-    #     x = x_origin + x_direction * t
-    #     y = y_origin + y_direction * t
-    #     z = z_origin + z_direction * t
-    #
-    #     eqn[0] = R_e * np.sin(theta) ** 3 * np.cos(phi) - x
-    #     eqn[1] = R_e * np.sin(theta) ** 3 * np.sin(phi) - y
-    #     eqn[2] = R_e * np.sin(theta) ** 2 * np.cos(theta) - z
-    #
-    #     return eqn
-    #
-    #     # result_theta, result_phi, result_t = fsolve(equations, (0, 0, 0))
-    #
-    #
-    # result = fsolve(equations, (origin_theta, origin_phi, 1))
-    #
-    # result_theta = result[0] - np.floor(result[0] / np.pi / 2) * 2 * np.pi
-    # result_phi = result[1] - np.floor(result[1] / np.pi / 2) * 2 * np.pi
-    #
-    # if result[2] > 0 and (
-    #         theta_accretion_begin < result_theta < theta_accretion_end or theta_accretion_end_1 < result_theta < theta_accretion_begin_1) and result_phi < lim_phi_accretion:
-    #     return True
-
     # cone x**2 + y**2 == z**2
     # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
+    #
     lim_theta = lim_theta_top
     if flag:
         lim_theta = lim_theta_bot
@@ -337,6 +305,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
 
 
 def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max, flag):
+    array_normal = create_array_normal(phi_range, theta_range, flag)
     integral_max = -1
     # sum_intense изотропная светимость ( * 4 pi еще надо)
     sum_intense = [0] * t_max
@@ -376,14 +345,14 @@ def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_t
                                           theta_accretion_begin, theta_accretion_end, flag):
                         simps_cos[j] = 0
                     else:
-                        sum_intense[i1] += sigmStfBolc * Teff[j] ** 4 * cos_psi_range[i, j] * dS[j]
+                        sum_intense[i1] += config.sigmStfBolc * Teff[j] ** 4 * cos_psi_range[i, j] * dS[j]
                         simps_cos[j] = cos_psi_range[i, j]
                     # * S=R**2 * step_phi_accretion * step_theta_accretion
                 else:
                     simps_cos[j] = 0
 
             simps_integrate_step[i] = np.abs(
-                sigmStfBolc * scipy.integrate.simps(Teff ** 4 * simps_cos * dS_simps, theta_range))
+                config.sigmStfBolc * scipy.integrate.simps(Teff ** 4 * simps_cos * dS_simps, theta_range))
         # находим позицию максимума
         if integral_max < sum_intense[i1]:
             position_of_max = i1
@@ -401,7 +370,7 @@ def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_t
                 np.array(np.sin(2 * np.pi - np.array(lim_phi_begin))) - np.array(np.sin(lim_phi_begin))) + 3 * np.sin(
             theta_range) * np.cos(theta_range) * np.cos(theta_obs) * 2 * (np.pi - np.array(lim_phi_begin))
 
-        L = sigmStfBolc * Teff ** 4 * R_e ** 2 * np.sin(theta_range) ** 4 * L1
+        L = config.sigmStfBolc * Teff ** 4 * R_e ** 2 * np.sin(theta_range) ** 4 * L1
         analytic_integral_phi[i1] = scipy.integrate.simps(L, theta_range)
 
     return sum_intense, sum_simps_integrate, analytic_integral_phi, position_of_max
@@ -503,8 +472,8 @@ arr_position_of_max = [0] * 4
 theta_accretion_begin_1 = np.pi - theta_accretion_begin
 theta_accretion_end_1 = np.pi - theta_accretion_end
 step_theta_accretion = (theta_accretion_end_1 - theta_accretion_begin_1) / N_theta_accretion
-theta_range_1 = np.array([theta_accretion_begin_1 + step_theta_accretion * j for j in range(N_theta_accretion)])
 
+theta_range_1 = np.array([theta_accretion_begin_1 + step_theta_accretion * j for j in range(N_theta_accretion)])
 phi_range_1 = np.array([np.pi + step_phi_accretion * i for i in range(N_phi_accretion)])
 
 # верхняя колонка внешняя поверхность
@@ -516,21 +485,18 @@ arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], ar
 # верхняя колонка внутрення поверхность
 i += 1
 file_count = i
-array_normal = create_array_normal(phi_range, theta_range, False)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
     calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_theta_accretion, t_max, False)
 
 # нижняя колонка внешняя поверхность
 i += 1
 file_count = i
-array_normal = create_array_normal(phi_range_1, theta_range_1, True)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
     calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max, True)
 
 # нижняя колонка внутрення поверхность
 i += 1
 file_count = i
-array_normal = create_array_normal(phi_range_1, theta_range_1, False)
 arr_sum_intense[i], arr_sum_simps_integrate[i], arr_analytic_integral_phi[i], arr_position_of_max[i] = \
     calculate_integral_distribution(phi_range_1, theta_range_1, N_phi_accretion, N_theta_accretion, t_max, False)
 
@@ -586,20 +552,6 @@ if map_flag:
                           column_number)
 
 
-# print("theta1")
-# for theta in theta_range_1:
-#     print(theta)
-# print("phi1")
-# for phi in phi_range_1:
-#     print(phi)
-# print("normal1")
-# for normal in array_normal:
-#     print(normal)
-
-
-# print("max: %d" % position_of_max)
-
-
 def plot_map_t_eff(T_eff, N_phi_accretion, N_theta_accretion):
     fig, ax = plt.subplots(subplot_kw={'projection': 'polar'})
     # fig = plt.figure(figsize=(8, 8), projection="polar")
@@ -612,58 +564,14 @@ def plot_map_t_eff(T_eff, N_phi_accretion, N_theta_accretion):
     plt.show()
 
 
-# for i in range(t_max):
-#     print("%d - " % i, end='')
-#     print(sum_intense[i], sum_simps_integrate[i])
-
 print("BS total luminosity: ", L_x)
 print("Calculated total luminosity: ", calculate_total_luminosity(phi_range, theta_range))
 print("difference: Calc/BS = %.5f" % (calculate_total_luminosity(phi_range, theta_range) / L_x))
 
-print(M_accretion_rate)
-print(H)
+print(config.M_accretion_rate)
+print(config.H)
 
 phi_for_plot = list(omega_ns * i / (2 * np.pi) for i in range(t_max))
 # file_name = "save%d.txt" % file_count
 # np.savetxt("phi_for_plot.txt", phi_for_plot)
 # np.savetxt(file_name, np.append(analytic_integral_phi[position_of_max:], analytic_integral_phi[0:position_of_max]))
-
-plot_3D_flag = False
-# рисуем 3D
-
-if (plot_3D_flag):
-    fig = plt.figure(figsize=(8, 8))
-    ax = plt.axes(projection='3d')
-
-    # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi, 2 * np.pi / N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_accretion_begin) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
-
-    # рисуем силовые линии
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 1 / 2 * np.pi, 1 / 2 * np.pi / N_phi_accretion)
-
-    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
-    r1 = r * np.sin(theta_range)
-    x = r1 * np.cos(p)
-    y = r1 * np.sin(p)
-    z = r * np.cos(theta_range)
-
-    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color="r", alpha=0.2)
-    # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
-
-    ax.set_xlim([-1, 1])
-    ax.set_ylim([-1, 1])
-    ax.set_zlim([-1, 1])
-    plt.show()
-
-# plot_3d_configuration.plot_3d_configuration(phi_range, theta_range, betta_rotate / grad_to_rad, betta_mu / grad_to_rad,
-#                                             0)
