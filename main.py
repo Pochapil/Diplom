@@ -54,7 +54,7 @@ phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 60 * grad_to_rad
+betta_mu = 30 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -266,6 +266,32 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
     # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
     if t_sphere[0] > 0 or t_sphere[1] > 0:
         return True
+
+    # def equations(variables):
+    #     theta, phi, t = variables
+    #     eqn = np.empty(3)
+    #
+    #     x = x_origin + x_direction * t
+    #     y = y_origin + y_direction * t
+    #     z = z_origin + z_direction * t
+    #
+    #     eqn[0] = R_e * np.sin(theta) ** 3 * np.cos(phi) - x
+    #     eqn[1] = R_e * np.sin(theta) ** 3 * np.sin(phi) - y
+    #     eqn[2] = R_e * np.sin(theta) ** 2 * np.cos(theta) - z
+    #
+    #     return eqn
+    #
+    #     # result_theta, result_phi, result_t = fsolve(equations, (0, 0, 0))
+    #
+    #
+    # result = fsolve(equations, (origin_theta, origin_phi, 1))
+    #
+    # result_theta = result[0] - np.floor(result[0] / np.pi / 2) * 2 * np.pi
+    # result_phi = result[1] - np.floor(result[1] / np.pi / 2) * 2 * np.pi
+    #
+    # if result[2] > 0 and (
+    #         theta_accretion_begin < result_theta < theta_accretion_end or theta_accretion_end_1 < result_theta < theta_accretion_begin_1) and result_phi < lim_phi_accretion:
+    #     return True
 
     # cone x**2 + y**2 == z**2
     # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
