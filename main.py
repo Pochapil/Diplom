@@ -141,6 +141,7 @@ def create_array_normal(phi_range, theta_range, flag=True):
             array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
     return array_normal
 
+
 dS = []  # массив единичных площадок при интегрировании так как зависит только от theta посчитаю 1 раз
 dS_simps = []
 # формула 5 из статьи для dl
@@ -284,8 +285,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             return True
         # для нижнего конуса:
         if -ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0:
-            # if (np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
-            if (0 < phi_intersect < lim_phi_accretion):
+            if (0 < phi_intersect < lim_phi_accretion - np.pi) or (np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
                 return True
 
     if t_cone[1] > 0:
@@ -297,8 +297,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, lim_phi_accre
             return True
         # для нижнего конуса:
         if (-ksiShock * np.cos(lim_theta_top) < intersect_point[2] < 0):
-            # if (np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
-            if (0 < phi_intersect < lim_phi_accretion):
+            if (0 < phi_intersect < lim_phi_accretion - np.pi) or (np.pi < phi_intersect < (lim_phi_accretion + np.pi)):
                 return True
 
     return False
