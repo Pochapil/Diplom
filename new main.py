@@ -1,12 +1,9 @@
-import geometricTask.matrix as matrix
 import numpy as np
 import matplotlib.pyplot as plt
-
 import scipy.integrate
 
-import matplotlib.cm as cm
-from matplotlib.colors import Normalize
-
+import geometricTask.matrix as matrix
+import vectors
 import BS_distribution_T_eff as get_T_eff
 import config
 
@@ -35,6 +32,73 @@ def get_theta_accretion_begin(R_e):
     return np.arcsin((config.R_ns / R_e) ** (1 / 2))
 
 
+def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, lim_theta_top, lim_theta_bot, flag):
+    # сначала поиск со сферой после - с конусом (а нужно ли со сферой искать ?)
+    # все нормирую на радиус НЗ
+    # r = origin + t * direction - уравнение луча
+    r = R_e * np.sin(origin_theta) ** 2 / config.R_ns
+
+    x_origin = np.sin(origin_theta) * np.cos(origin_phi) * r
+    y_origin = np.sin(origin_theta) * np.sin(origin_phi) * r
+    z_origin = np.cos(origin_theta) * r
+    # origin_point = [x, y, z]
+
+    x_direction = direction_vector[0, 0]
+    y_direction = direction_vector[0, 1]
+    z_direction = direction_vector[0, 2]
+
+    def find_intersect_solution(a, b, c):
+        if b ** 2 - 4 * a * c >= 0:
+            t_1 = (-b + (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
+            t_2 = (-b - (b ** 2 - 4 * a * c) ** (1 / 2)) / (2 * a)
+            return t_1, t_2
+        else:
+            return -1, -1
+
+    # sphere x**2 + y**2 + z**2 == 1
+    a_sphere = x_direction ** 2 + y_direction ** 2 + z_direction ** 2
+    b_sphere = 2 * (x_origin * x_direction + y_origin * y_direction + z_origin * z_direction)
+    c_sphere = x_origin ** 2 + y_origin ** 2 + z_origin ** 2 - 1
+
+    # solution for sphere
+    t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
+
+    # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
+    if t_sphere[0] > 0 or t_sphere[1] > 0:
+        return True
+
+    # cone x**2 + y**2 == z**2
+    # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
+    #
+    lim_theta = lim_theta_top
+    if flag:
+        lim_theta = lim_theta_bot
+
+    a_cone = (x_direction ** 2 + y_direction ** 2) / (np.tan(lim_theta) ** 2) - z_direction ** 2
+    b_cone = 2 * ((x_origin * x_direction + y_origin * y_direction) / (np.tan(lim_theta) ** 2) - z_origin * z_direction)
+    c_cone = (x_origin ** 2 + y_origin ** 2) / (np.tan(lim_theta) ** 2) - z_origin ** 2
+
+    # solution for cone
+    t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
+    # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
+
+    for t in t_cone:
+        if t > 0:
+            intersect_point = np.array([x_origin, y_origin, z_origin]) + t * np.array(
+                [x_direction, y_direction, z_direction])
+            phi_intersect, theta_intersect = vectors.get_angles_from_vector_one_dimension(intersect_point)
+            # для верхнего конуса:
+            if (0 < intersect_point[2] < ksi_shock * np.cos(
+                    lim_theta_top) and phi_intersect < config.lim_phi_accretion):
+                return True
+            # для нижнего конуса:
+            if -ksi_shock * np.cos(lim_theta_top) < intersect_point[2] < 0:
+                if (0 < phi_intersect < config.lim_phi_accretion - np.pi) or (
+                        np.pi < phi_intersect < (config.lim_phi_accretion + np.pi)):
+                    return True
+    return False
+
+
 # от поверхности NS - угол при котором радиус = радиусу НЗ
 theta_accretion_begin_outer_surface = get_theta_accretion_begin(R_e_outer_surface)
 theta_accretion_begin_inner_surface = get_theta_accretion_begin(R_e_inner_surface)
@@ -50,7 +114,7 @@ class AccretionColumn:
     class Surface:
         def __init__(self, theta_accretion_begin, R_e, flag):
             self.R_e = R_e
-            self.flag = flag
+            self.flag = flag  # True - внешняя поверхность, False - внутренняя
 
             self.T_eff, self.ksi_shock, self.L_x = get_T_eff.get_Teff_distribution(config.N_theta_accretion, R_e,
                                                                                    get_delta_distance(
@@ -67,6 +131,7 @@ class AccretionColumn:
                 [config.phi_accretion_begin + step_phi_accretion * i for i in range(config.N_phi_accretion)])
 
             self.cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+
             '''тут создать матрицу косинусов 1 раз и использовать потом'''
 
             self.array_normal = self.create_array_normal(self.phi_range, self.theta_range, self.flag)
@@ -76,10 +141,9 @@ class AccretionColumn:
             coefficient = -1
             if flag:  # True - внешняя поверхность, False - внутренняя
                 coefficient = 1
-            # matrix_normal = np.empty([N_phi_accretion, N_theta_accretion])
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
-                    # matrix_normal[i, j] = matrix.newE_n(phi_range[i], theta_range[j])
                     array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
             return array_normal
 
+# буду через 4 массива сохранять массивы косинусов
