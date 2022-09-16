@@ -23,6 +23,7 @@ def add_vector(ax, origin, vector, color, lim_value):
     vector = np.array(vector) * lim_value / np.linalg.norm(vector)
     ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2], color=color)
 
+
 def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu, phase):
     phase = phase * 360
 
@@ -200,7 +201,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     # рисуем звезду
     theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi, 2 * np.pi / N_phi_accretion)
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / N_phi_accretion)
 
     u, v = np.meshgrid(phi_range, theta_range)
     r1 = np.sin(theta_range_column[0]) ** 2
@@ -248,11 +249,11 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     azimuth, elevation = get_angles_from_vector(e_obs_mu)
 
-    omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
-                    -np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
-                    np.cos(betta_mu * grad_to_rad)]
-
-    add_vector(ax, origin, omega_vector, 'blue', lim_value)
+    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
+    #                 -np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
+    #                 np.cos(betta_mu * grad_to_rad)]
+    #
+    # add_vector(ax, origin, omega_vector, 'blue', lim_value)
     ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     def rotate(val):
@@ -296,5 +297,5 @@ if __name__ == "__main__":
     theta_range_column = np.loadtxt(file_name)
 
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
-    visualise_3d_configuration(phi_range_column, theta_range_column, 40, 30)
+    visualise_3d_configuration(phi_range_column, theta_range_column, 40, 60)
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)

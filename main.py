@@ -41,7 +41,7 @@ phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 30 * grad_to_rad
+betta_mu = 60 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -70,8 +70,8 @@ Teff, ksiShock, L_x = get_T_eff.get_Teff_distribution(N_theta_accretion, R_e, de
 # ksiShock = 4.523317
 print("ksiShock: %f" % ksiShock)
 print("Rshock/R*: %f" % ksiShock)
-print("table 2 column 3  %f" % (
-        config.G * config.M_ns * config.M_accretion_rate / (config.R_ns * config.L_edd)))  # значение в табличке
+# значение в табличке
+print("table 2 column 3  %f" % (config.G * config.M_ns * config.M_accretion_rate / (config.R_ns * config.L_edd)))
 # print("arcsin begin: %f" % (config.R_ns / R_e) ** (1 / 2))
 # print("arcsin end: %f" % (config.R_ns * ksiShock / R_e) ** (1 / 2))
 
@@ -571,6 +571,3 @@ print(config.M_accretion_rate)
 print(config.H)
 
 phi_for_plot = list(omega_ns * i / (2 * np.pi) for i in range(t_max))
-# file_name = "save%d.txt" % file_count
-# np.savetxt("phi_for_plot.txt", phi_for_plot)
-# np.savetxt(file_name, np.append(analytic_integral_phi[position_of_max:], analytic_integral_phi[0:position_of_max]))
