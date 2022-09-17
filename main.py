@@ -332,7 +332,7 @@ def calculate_integral_distribution(phi_range, theta_range, N_phi_accretion, N_t
 
         phi, theta = get_angles_from_vector(e_obs_mu)
         # print("thetaObs%d = %f" % (i1, (theta / grad_to_rad)))
-
+        w = cos_psi_range
         # sum_intense изотропная светимость ( * 4 pi еще надо)
         for i in range(N_phi_accretion):
             for j in range(N_theta_accretion):
@@ -474,6 +474,8 @@ step_theta_accretion = (theta_accretion_end_1 - theta_accretion_begin_1) / N_the
 
 theta_range_1 = np.array([theta_accretion_begin_1 + step_theta_accretion * j for j in range(N_theta_accretion)])
 phi_range_1 = np.array([np.pi + step_phi_accretion * i for i in range(N_phi_accretion)])
+
+print(phi_range_1)
 
 # верхняя колонка внешняя поверхность
 i = 0

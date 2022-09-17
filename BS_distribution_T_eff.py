@@ -15,12 +15,12 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
     # 50 формула статья
     gamma = (config.c * config.R_ns * A_normal * 3) / \
             (config.k * delta_ns ** 2 * config.M_accretion_rate * 2 * config.ksi_rad)
-    print("gamma = %f" % gamma)
+    #print("gamma = %f" % gamma)
 
     # 51 формула статья
     eta = ((8 * config.k * u0 * delta_ns ** 2 * 2 * config.ksi_rad) /
            (21 * config.c * (2 * config.G * config.M_ns * config.R_ns) ** (1 / 2) * 3)) ** (1 / 4)
-    print("eta = %f" % eta)
+    #print("eta = %f" % eta)
 
     # 30 формула, du/dksi; dv/dksi = производная от 3 равенства
     # возвращает u, v
@@ -126,7 +126,7 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
     # формула 37, 1 - полная светимость
     L_x = (1 - betta) * config.M_accretion_rate * config.G * config.M_ns / config.R_ns
 
-    print("bettaBS = %f" % betta)
-    print("e = %.5f" % e)
+    #print("bettaBS = %f" % betta)
+    #print("e = %.5f" % e)
 
     return Teff, ksiShock, L_x

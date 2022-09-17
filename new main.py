@@ -99,20 +99,16 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
     return False
 
 
-# от поверхности NS - угол при котором радиус = радиусу НЗ
-theta_accretion_begin_outer_surface = get_theta_accretion_begin(R_e_outer_surface)
-theta_accretion_begin_inner_surface = get_theta_accretion_begin(R_e_inner_surface)
-
-
 class AccretionColumn:
 
     def __init__(self, R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
-                 theta_accretion_begin_inner_surface):
-        self.outer_surface = self.Surface(theta_accretion_begin_outer_surface, R_e_outer_surface, True)
-        self.inner_surface = self.Surface(theta_accretion_begin_inner_surface, R_e_inner_surface, False)
+                 theta_accretion_begin_inner_surface, flag):
+        self.flag = flag
+        self.outer_surface = self.Surface(theta_accretion_begin_outer_surface, R_e_outer_surface, True, self.flag)
+        self.inner_surface = self.Surface(theta_accretion_begin_inner_surface, R_e_inner_surface, False, self.flag)
 
     class Surface:
-        def __init__(self, theta_accretion_begin, R_e, flag):
+        def __init__(self, theta_accretion_begin, R_e, flag, column_flag):
             self.R_e = R_e
             self.flag = flag  # True - внешняя поверхность, False - внутренняя
 
@@ -120,20 +116,22 @@ class AccretionColumn:
                                                                                    get_delta_distance(
                                                                                        theta_accretion_begin),
                                                                                    get_A_normal(theta_accretion_begin))
-            theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
-
+            phi_delta = 0
+            if column_flag:
+                theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
+            else:
+                theta_accretion_end = np.pi - np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
+                phi_delta = np.pi
             step_phi_accretion = config.lim_phi_accretion / config.N_phi_accretion
             step_theta_accretion = (theta_accretion_end - theta_accretion_begin) / config.N_theta_accretion
 
             self.theta_range = np.array(
                 [theta_accretion_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
             self.phi_range = np.array(
-                [config.phi_accretion_begin + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+                [config.phi_accretion_begin + phi_delta + step_phi_accretion * i for i in
+                 range(config.N_phi_accretion)])
 
-            self.cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
-
-            '''тут создать матрицу косинусов 1 раз и использовать потом'''
-
+            self.cos_psi_range = []  # тут создать матрицу косинусов 1 раз и использовать потом
             self.array_normal = self.create_array_normal(self.phi_range, self.theta_range, self.flag)
 
         def create_array_normal(self, phi_range, theta_range, flag=True):
@@ -146,4 +144,111 @@ class AccretionColumn:
                     array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
             return array_normal
 
+        def fill_cos_psi_range(self, theta_accretion_begin, theta_accretion_end):
+            # sum_intense изотропная светимость ( * 4 pi еще надо)
+            # для интеграла по simpson
+            cos_psi_range_final = []
+            simps_cos = [0] * config.N_theta_accretion  # cos для интеграла по симпсону
+            for t in range(config.t_max):
+                cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+                # поворот
+                phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
+                # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+                A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                             config.betta_mu)
+                e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+                # sum_intense изотропная светимость ( * 4 pi еще надо)
+                for i in range(config.N_phi_accretion):
+                    for j in range(config.N_theta_accretion):
+                        # умножать на N_theta
+                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        if cos_psi_range[i, j] > 0:
+                            if check_if_intersect(self.phi_range[i], self.theta_range[j], e_obs_mu, self.ksi_shock,
+                                                  theta_accretion_begin, theta_accretion_end, self.flag):
+                                cos_psi_range[i, j] = 0
+                        else:
+                            cos_psi_range[i, j] = 0
+                cos_psi_range_final.append(cos_psi_range)
+            self.cos_psi_range = cos_psi_range_final
+
+        def calculate_integral_distribution(self):
+            # для интеграла по simpson
+            sum_simps_integrate = [0] * config.t_max
+            simps_integrate_step = [0] * config.N_phi_accretion
+            dS_simps = []
+            for j in range(config.N_theta_accretion):
+                # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
+                dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(self.theta_range[j])
+                dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
+                dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
+
+            for t in range(config.t_max):
+                for i in range(config.N_phi_accretion):
+                    simps_integrate_step[i] = np.abs(config.sigmStfBolc * scipy.integrate.simps(
+                        self.T_eff ** 4 * np.array(self.cos_psi_range[t][i][:]) * np.array(dS_simps), self.theta_range))
+                sum_simps_integrate[t] = scipy.integrate.simps(simps_integrate_step, self.phi_range)
+
+            return sum_simps_integrate
+
+
 # буду через 4 массива сохранять массивы косинусов
+
+
+# от поверхности NS - угол при котором радиус = радиусу НЗ
+theta_accretion_begin_outer_surface = get_theta_accretion_begin(R_e_outer_surface)
+theta_accretion_begin_inner_surface = get_theta_accretion_begin(R_e_inner_surface)
+
+top_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
+                             theta_accretion_begin_inner_surface, True)
+
+theta_accretion_begin_outer_surface = np.pi - theta_accretion_begin_outer_surface
+theta_accretion_begin_inner_surface = np.pi - theta_accretion_begin_inner_surface
+
+bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
+                             theta_accretion_begin_inner_surface, False)
+
+theta_accretion_begin = top_column.outer_surface.theta_range[0]
+theta_accretion_end = top_column.outer_surface.theta_range[-1]
+
+top_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
+# for j in top_column.outer_surface.cos_psi_range:
+#     for j1 in j:
+#         print(j1)
+top_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
+
+bot_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
+bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
+
+
+arr_sum_simps_integrate = [0] * 4
+i = 0
+arr_sum_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution()
+i += 1
+arr_sum_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution()
+i += 1
+arr_sum_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution()
+i += 1
+arr_sum_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution()
+i += 1
+
+sum_simps_integrate = np.array(arr_sum_simps_integrate[0])
+for i in range(1, 4):
+    sum_simps_integrate += np.array(arr_sum_simps_integrate[i])
+
+fig = plt.figure(figsize=(8, 8))
+phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
+ax3 = fig.add_subplot(111)
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[0],
+         label='top outer')
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[1],
+         label='top inner')
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[2],
+         label='bot outer', marker='*')
+ax3.plot(phi_for_plot, arr_sum_simps_integrate[3],
+         label='bot inner')
+ax3.plot(phi_for_plot, sum_simps_integrate,
+         label='sum')
+ax3.legend()
+# plt.yscale('log')
+plt.show()
