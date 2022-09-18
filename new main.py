@@ -179,7 +179,8 @@ class AccretionColumn:
             dS_simps = []
             for j in range(config.N_theta_accretion):
                 # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
-                dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(self.theta_range[j])
+                dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(
+                    self.theta_range[j])
                 dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
                 dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
 
@@ -192,34 +193,35 @@ class AccretionColumn:
             return sum_simps_integrate
 
 
-# буду через 4 массива сохранять массивы косинусов
-
-
 # от поверхности NS - угол при котором радиус = радиусу НЗ
+# ----------------- начало инициализации верхней колонки ------------------------
 theta_accretion_begin_outer_surface = get_theta_accretion_begin(R_e_outer_surface)
 theta_accretion_begin_inner_surface = get_theta_accretion_begin(R_e_inner_surface)
 
 top_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
                              theta_accretion_begin_inner_surface, True)
+# ----------------- конец инициализации верхней колонки ------------------------
 
+# ----------------- начало инициализации нижней колонки ------------------------
 theta_accretion_begin_outer_surface = np.pi - theta_accretion_begin_outer_surface
 theta_accretion_begin_inner_surface = np.pi - theta_accretion_begin_inner_surface
 
 bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
                              theta_accretion_begin_inner_surface, False)
+# ----------------- конец инициализации нижней колонки ------------------------
 
+# ----------------- углы для нахождения пересечений -------------------------
 theta_accretion_begin = top_column.outer_surface.theta_range[0]
 theta_accretion_end = top_column.outer_surface.theta_range[-1]
+# ---------------------------------------------------------------------------
 
+# ------------------ начало заполнения матриц косинусов ---------------------------
 top_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
-# for j in top_column.outer_surface.cos_psi_range:
-#     for j1 in j:
-#         print(j1)
 top_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
 
 bot_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
 bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
-
+# ------------------ конец заполнения матриц косинусов ---------------------------
 
 arr_sum_simps_integrate = [0] * 4
 i = 0
@@ -235,6 +237,12 @@ i += 1
 sum_simps_integrate = np.array(arr_sum_simps_integrate[0])
 for i in range(1, 4):
     sum_simps_integrate += np.array(arr_sum_simps_integrate[i])
+
+print('phi_theta_range saved')
+file_name = "save_phi_range.txt"
+np.savetxt(file_name, top_column.outer_surface.phi_range)
+file_name = "save_theta_range.txt"
+np.savetxt(file_name, top_column.outer_surface.theta_range)
 
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
