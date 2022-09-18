@@ -32,7 +32,8 @@ def get_theta_accretion_begin(R_e):
     return np.arcsin((config.R_ns / R_e) ** (1 / 2))
 
 
-def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, lim_theta_top, lim_theta_bot, flag):
+def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, lim_theta_top, lim_theta_bot,
+                       top_column_phi_range, bot_column_phi_range, flag):
     # сначала поиск со сферой после - с конусом (а нужно ли со сферой искать ?)
     # все нормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
@@ -88,13 +89,13 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
                 [x_direction, y_direction, z_direction])
             phi_intersect, theta_intersect = vectors.get_angles_from_vector_one_dimension(intersect_point)
             # для верхнего конуса:
-            if (0 < intersect_point[2] < ksi_shock * np.cos(
-                    lim_theta_top) and phi_intersect < config.lim_phi_accretion):
-                return True
+            if 0 < intersect_point[2] < ksi_shock * np.cos(lim_theta_top):
+                if top_column_phi_range[0] < phi_intersect < top_column_phi_range[-1]:
+                    return True
             # для нижнего конуса:
             if -ksi_shock * np.cos(lim_theta_top) < intersect_point[2] < 0:
-                if (0 < phi_intersect < config.lim_phi_accretion - np.pi) or (
-                        np.pi < phi_intersect < (config.lim_phi_accretion + np.pi)):
+                if (0 < phi_intersect < bot_column_phi_range[-1] - 2 * np.pi) or (
+                        bot_column_phi_range[0] < phi_intersect < bot_column_phi_range[-1]):
                     return True
     return False
 
@@ -144,7 +145,8 @@ class AccretionColumn:
                     array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
             return array_normal
 
-        def fill_cos_psi_range(self, theta_accretion_begin, theta_accretion_end):
+        def fill_cos_psi_range(self, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
+                               bot_column_phi_range):
             # sum_intense изотропная светимость ( * 4 pi еще надо)
             # для интеграла по simpson
             cos_psi_range_final = []
@@ -165,7 +167,8 @@ class AccretionColumn:
                         cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
                         if cos_psi_range[i, j] > 0:
                             if check_if_intersect(self.phi_range[i], self.theta_range[j], e_obs_mu, self.ksi_shock,
-                                                  theta_accretion_begin, theta_accretion_end, self.flag):
+                                                  theta_accretion_begin, theta_accretion_end, top_column_phi_range,
+                                                  bot_column_phi_range, self.flag):
                                 cos_psi_range[i, j] = 0
                         else:
                             cos_psi_range[i, j] = 0
@@ -216,11 +219,15 @@ theta_accretion_end = top_column.outer_surface.theta_range[-1]
 # ---------------------------------------------------------------------------
 
 # ------------------ начало заполнения матриц косинусов ---------------------------
-top_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
-top_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
+top_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
+                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range)
+top_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
+                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range)
 
-bot_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
-bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end)
+bot_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
+                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range)
+bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
+                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range)
 # ------------------ конец заполнения матриц косинусов ---------------------------
 
 arr_sum_simps_integrate = [0] * 4
