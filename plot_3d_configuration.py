@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, TextBox, Button
 
+import config
+
 
 def get_angles_from_vector(vector):
     x = vector[0, 0]
@@ -297,5 +299,6 @@ if __name__ == "__main__":
     theta_range_column = np.loadtxt(file_name)
 
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
-    visualise_3d_configuration(phi_range_column, theta_range_column, 40, 60)
+    visualise_3d_configuration(phi_range_column, theta_range_column, config.betta_rotate / config.grad_to_rad,
+                               config.betta_mu / config.grad_to_rad)
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)

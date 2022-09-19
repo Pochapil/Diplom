@@ -38,7 +38,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
     # все нормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
     r = R_e * np.sin(origin_theta) ** 2 / config.R_ns
-
+    # декартовая СК из сферических
     x_origin = np.sin(origin_theta) * np.cos(origin_phi) * r
     y_origin = np.sin(origin_theta) * np.sin(origin_phi) * r
     z_origin = np.cos(origin_theta) * r
@@ -89,15 +89,15 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
                 [x_direction, y_direction, z_direction])
             phi_intersect, theta_intersect = vectors.get_angles_from_vector_one_dimension(intersect_point)
             # для верхнего конуса:
-            if 0 < intersect_point[2] < ksi_shock * np.cos(lim_theta_top):
-                if top_column_phi_range[0] < phi_intersect < top_column_phi_range[-1]:
+            if 0 < intersect_point[2] <= ksi_shock * np.cos(lim_theta_top):
+                if top_column_phi_range[0] <= phi_intersect <= top_column_phi_range[-1]:
                     return True
             # для нижнего конуса:
-            if -ksi_shock * np.cos(lim_theta_top) < intersect_point[2] < 0:
+            if -ksi_shock * np.cos(lim_theta_top) <= intersect_point[2] < 0:
                 # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
                 # нужно учесть углы которые превышают 2 pi в 1 скобке условия
-                if (0 < phi_intersect < bot_column_phi_range[-1] - 2 * np.pi) or (
-                        bot_column_phi_range[0] < phi_intersect < bot_column_phi_range[-1]):
+                if (0 <= phi_intersect <= bot_column_phi_range[-1] - 2 * np.pi) or (
+                        bot_column_phi_range[0] <= phi_intersect <= bot_column_phi_range[-1]):
                     return True
     return False
 
@@ -152,7 +152,6 @@ class AccretionColumn:
             # sum_intense изотропная светимость ( * 4 pi еще надо)
             # для интеграла по simpson
             cos_psi_range_final = []
-            simps_cos = [0] * config.N_theta_accretion  # cos для интеграла по симпсону
             for t in range(config.t_max):
                 cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
                 # поворот
@@ -161,8 +160,6 @@ class AccretionColumn:
                 A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
                                                              config.betta_mu)
                 e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
-
-                # sum_intense изотропная светимость ( * 4 pi еще надо)
                 for i in range(config.N_phi_accretion):
                     for j in range(config.N_theta_accretion):
                         # умножать на N_theta
@@ -179,9 +176,7 @@ class AccretionColumn:
 
         def calculate_integral_distribution(self):
             # для интеграла по simpson
-            sum_simps_integrate = [0] * config.t_max
-            simps_integrate_step = [0] * config.N_phi_accretion
-            dS_simps = []
+            dS_simps = []  # единичная площадка при интегрировании
             for j in range(config.N_theta_accretion):
                 # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
                 dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(
@@ -189,6 +184,8 @@ class AccretionColumn:
                 dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
                 dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
 
+            sum_simps_integrate = [0] * config.t_max
+            simps_integrate_step = [0] * config.N_phi_accretion
             for t in range(config.t_max):
                 for i in range(config.N_phi_accretion):
                     simps_integrate_step[i] = np.abs(config.sigmStfBolc * scipy.integrate.simps(

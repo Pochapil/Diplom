@@ -36,12 +36,12 @@ e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
 
 # угол между осью вращения системы и собственным вращенеим НЗ
 betta_rotate = (file_count // 3) * 15 * grad_to_rad
-betta_rotate = 40 * grad_to_rad
+betta_rotate = config.betta_rotate
 phi_rotate = 0 * grad_to_rad
 
 # угол между собственным вращенеим НЗ и магнитной осью
 betta_mu = (file_count % 3) * 15 * grad_to_rad
-betta_mu = 60 * grad_to_rad
+betta_mu = config.betta_mu
 phi_mu_0 = 0 * grad_to_rad
 
 
@@ -475,7 +475,7 @@ step_theta_accretion = (theta_accretion_end_1 - theta_accretion_begin_1) / N_the
 theta_range_1 = np.array([theta_accretion_begin_1 + step_theta_accretion * j for j in range(N_theta_accretion)])
 phi_range_1 = np.array([np.pi + step_phi_accretion * i for i in range(N_phi_accretion)])
 
-print(phi_range_1)
+# print(phi_range_1)
 
 # верхняя колонка внешняя поверхность
 i = 0
