@@ -89,15 +89,15 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
                 [x_direction, y_direction, z_direction])
             phi_intersect, theta_intersect = vectors.get_angles_from_vector_one_dimension(intersect_point)
             # для верхнего конуса:
-            if 0 < intersect_point[2] <= ksi_shock * np.cos(lim_theta_top):
-                if top_column_phi_range[0] <= phi_intersect <= top_column_phi_range[-1]:
+            if 0 < intersect_point[2] < ksi_shock * np.cos(lim_theta_top):
+                if top_column_phi_range[0] < phi_intersect < top_column_phi_range[-1]:
                     return True
             # для нижнего конуса:
-            if -ksi_shock * np.cos(lim_theta_top) <= intersect_point[2] < 0:
+            if -ksi_shock * np.cos(lim_theta_top) < intersect_point[2] < 0:
                 # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
                 # нужно учесть углы которые превышают 2 pi в 1 скобке условия
-                if (0 <= phi_intersect <= bot_column_phi_range[-1] - 2 * np.pi) or (
-                        bot_column_phi_range[0] <= phi_intersect <= bot_column_phi_range[-1]):
+                if (0 < phi_intersect < bot_column_phi_range[-1] - 2 * np.pi) or (
+                        bot_column_phi_range[0] < phi_intersect < bot_column_phi_range[-1]):
                     return True
     return False
 
