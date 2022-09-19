@@ -33,7 +33,7 @@ def get_theta_accretion_begin(R_e):
 
 
 def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, lim_theta_top, lim_theta_bot,
-                       top_column_phi_range, bot_column_phi_range, flag):
+                       top_column_phi_range, bot_column_phi_range, surface_type):
     # сначала поиск со сферой после - с конусом (а нужно ли со сферой искать ?)
     # все нормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
@@ -72,7 +72,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
     # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
     #
     lim_theta = lim_theta_top
-    if flag:
+    if surface_type:
         lim_theta = lim_theta_bot
 
     a_cone = (x_direction ** 2 + y_direction ** 2) / (np.tan(lim_theta) ** 2) - z_direction ** 2
@@ -105,22 +105,24 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
 class AccretionColumn:
 
     def __init__(self, R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
-                 theta_accretion_begin_inner_surface, flag):
-        self.flag = flag
-        self.outer_surface = self.Surface(theta_accretion_begin_outer_surface, R_e_outer_surface, True, self.flag)
-        self.inner_surface = self.Surface(theta_accretion_begin_inner_surface, R_e_inner_surface, False, self.flag)
+                 theta_accretion_begin_inner_surface, column_type):
+        self.column_type = column_type
+        self.outer_surface = self.Surface(theta_accretion_begin_outer_surface, R_e_outer_surface, True,
+                                          self.column_type)
+        self.inner_surface = self.Surface(theta_accretion_begin_inner_surface, R_e_inner_surface, False,
+                                          self.column_type)
 
     class Surface:
-        def __init__(self, theta_accretion_begin, R_e, flag, column_flag):
+        def __init__(self, theta_accretion_begin, R_e, surface_type, column_type):
             self.R_e = R_e
-            self.flag = flag  # True - внешняя поверхность, False - внутренняя
+            self.surface_type = surface_type  # True - внешняя поверхность, False - внутренняя
 
             self.T_eff, self.ksi_shock, self.L_x = get_T_eff.get_Teff_distribution(config.N_theta_accretion, R_e,
                                                                                    get_delta_distance(
                                                                                        theta_accretion_begin),
                                                                                    get_A_normal(theta_accretion_begin))
             phi_delta = 0
-            if column_flag:
+            if column_type:
                 theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
             else:
                 theta_accretion_end = np.pi - np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
@@ -135,12 +137,12 @@ class AccretionColumn:
                  range(config.N_phi_accretion)])
 
             self.cos_psi_range = []  # тут создать матрицу косинусов 1 раз и использовать потом
-            self.array_normal = self.create_array_normal(self.phi_range, self.theta_range, self.flag)
+            self.array_normal = self.create_array_normal(self.phi_range, self.theta_range, self.surface_type)
 
-        def create_array_normal(self, phi_range, theta_range, flag=True):
+        def create_array_normal(self, phi_range, theta_range, surface_type=True):
             array_normal = []  # матрица нормалей
             coefficient = -1
-            if flag:  # True - внешняя поверхность, False - внутренняя
+            if surface_type:  # True - внешняя поверхность, False - внутренняя
                 coefficient = 1
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
@@ -167,7 +169,7 @@ class AccretionColumn:
                         if cos_psi_range[i, j] > 0:
                             if check_if_intersect(self.phi_range[i], self.theta_range[j], e_obs_mu, self.ksi_shock,
                                                   theta_accretion_begin, theta_accretion_end, top_column_phi_range,
-                                                  bot_column_phi_range, self.flag):
+                                                  bot_column_phi_range, self.surface_type):
                                 cos_psi_range[i, j] = 0
                         else:
                             cos_psi_range[i, j] = 0
