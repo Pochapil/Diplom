@@ -32,21 +32,24 @@ def get_theta_accretion_begin(R_e):
     return np.arcsin((config.R_ns / R_e) ** (1 / 2))
 
 
-def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, lim_theta_top, lim_theta_bot,
-                       top_column_phi_range, bot_column_phi_range, surface_type):
+def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, theta_accretion_begin,
+                       theta_accretion_end, top_column_phi_range, bot_column_phi_range, surface_type):
     # сначала поиск со сферой после - с конусом (а нужно ли со сферой искать ?)
     # все нормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
+
     r = R_e * np.sin(origin_theta) ** 2 / config.R_ns
     # декартовая СК из сферических
-    x_origin = np.sin(origin_theta) * np.cos(origin_phi) * r
-    y_origin = np.sin(origin_theta) * np.sin(origin_phi) * r
-    z_origin = np.cos(origin_theta) * r
+    origin_x = np.sin(origin_theta) * np.cos(origin_phi) * r
+    origin_y = np.sin(origin_theta) * np.sin(origin_phi) * r
+    origin_z = np.cos(origin_theta) * r
     # origin_point = [x, y, z]
 
-    x_direction = direction_vector[0, 0]
-    y_direction = direction_vector[0, 1]
-    z_direction = direction_vector[0, 2]
+    direction_x = direction_vector[0, 0]
+    direction_y = direction_vector[0, 1]
+    direction_z = direction_vector[0, 2]
+
+    direction_phi, direction_theta = vectors.get_angles_from_vector(direction_vector)
 
     def find_intersect_solution(a, b, c):
         if b ** 2 - 4 * a * c >= 0:
@@ -56,50 +59,111 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, li
         else:
             return -1, -1
 
-    # sphere x**2 + y**2 + z**2 == 1
-    a_sphere = x_direction ** 2 + y_direction ** 2 + z_direction ** 2
-    b_sphere = 2 * (x_origin * x_direction + y_origin * y_direction + z_origin * z_direction)
-    c_sphere = x_origin ** 2 + y_origin ** 2 + z_origin ** 2 - 1
+    def intersection_with_sphere():
+        # sphere x**2 + y**2 + z**2 == 1
+        a_sphere = direction_x ** 2 + direction_y ** 2 + direction_z ** 2
+        b_sphere = 2 * (origin_x * direction_x + origin_y * direction_y + origin_z * direction_z)
+        c_sphere = origin_x ** 2 + origin_y ** 2 + origin_z ** 2 - 1
 
-    # solution for sphere
-    t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
+        # solution for sphere
+        t_sphere = find_intersect_solution(a_sphere, b_sphere, c_sphere)
 
-    # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
-    if t_sphere[0] > 0 or t_sphere[1] > 0:
-        return True
+        # print("t_sphere1 = %f,t_sphere2 = %f" % (t_sphere[0], t_sphere[1]))
+        if t_sphere[0] > 0 or t_sphere[1] > 0:
+            return True
 
-    # cone x**2 + y**2 == z**2
-    # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
-    #
-    lim_theta = lim_theta_top
-    if surface_type:
-        lim_theta = lim_theta_bot
+        return False
 
-    a_cone = (x_direction ** 2 + y_direction ** 2) / (np.tan(lim_theta) ** 2) - z_direction ** 2
-    b_cone = 2 * ((x_origin * x_direction + y_origin * y_direction) / (np.tan(lim_theta) ** 2) - z_origin * z_direction)
-    c_cone = (x_origin ** 2 + y_origin ** 2) / (np.tan(lim_theta) ** 2) - z_origin ** 2
+    def intersection_with_cone():
+        # cone x**2 + y**2 == z**2
+        # ограничиваю 2 конусами в зависимости от поверхности (чтобы не закрыть большую часть аппроксимацией)
+        #
+        lim_theta = theta_accretion_begin
+        if surface_type:
+            lim_theta = theta_accretion_end
 
-    # solution for cone
-    t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
-    # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
+        a_cone = (direction_x ** 2 + direction_y ** 2) / (np.tan(lim_theta) ** 2) - direction_z ** 2
+        b_cone = 2 * ((origin_x * direction_x + origin_y * direction_y) / (
+                np.tan(lim_theta) ** 2) - origin_z * direction_z)
+        c_cone = (origin_x ** 2 + origin_y ** 2) / (np.tan(lim_theta) ** 2) - origin_z ** 2
 
-    for t in t_cone:
-        if t > 0:
-            intersect_point = np.array([x_origin, y_origin, z_origin]) + t * np.array(
-                [x_direction, y_direction, z_direction])
-            phi_intersect, theta_intersect = vectors.get_angles_from_vector_one_dimension(intersect_point)
-            # для верхнего конуса:
-            if 0 < intersect_point[2] < ksi_shock * np.cos(lim_theta_top):
-                if top_column_phi_range[0] < phi_intersect < top_column_phi_range[-1]:
+        # solution for cone
+        t_cone = find_intersect_solution(a_cone, b_cone, c_cone)
+        # print("t_cone1 = %f,t_cone2 = %f" % (t_cone[0], t_cone[1]))
+
+        for t in t_cone:
+            if t > 0:
+                intersect_point = np.array([origin_x, origin_y, origin_z]) + t * np.array(
+                    [direction_x, direction_y, direction_z])
+                intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension(intersect_point)
+                # для верхнего конуса:
+                if 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_begin):
+                    if top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]:
+                        return True
+                # для нижнего конуса:
+                if -ksi_shock * np.cos(theta_accretion_begin) < intersect_point[2] < 0:
+                    # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
+                    # нужно учесть углы которые превышают 2 pi в 1 скобке условия
+                    if (0 < intersect_phi < bot_column_phi_range[-1] - 2 * np.pi) or (
+                            bot_column_phi_range[0] < intersect_phi < bot_column_phi_range[-1]):
+                        return True
+        return False
+
+    def intersection_with_dipole_lines():
+        '''
+        есть аналитическое уравнение для полинома дипольной линии 5 степени
+        находим уравнение в сферических координатах.
+
+        достаем корни
+        ищем положительные
+        находим пересечение с колонками
+            если пересекается то истина
+            если нет то ложь
+        '''
+        phi_delta = origin_phi - direction_phi
+        eta = np.sin(direction_theta) / np.sin(origin_theta)
+        cos_alpha = np.sin(origin_theta) * np.cos(phi_delta) * np.sin(direction_theta) + np.cos(origin_theta) * np.cos(
+            direction_theta)
+
+        c_x_5 = 1
+        c_x_4 = 6 * cos_alpha
+        c_x_3 = 3 + 12 * cos_alpha ** 2 - eta ** 4
+        c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(phi_delta) * eta ** 3
+        c_x_1 = 3 + 12 * cos_alpha ** 2 - 2 * eta ** 2 - 4 * np.cos(phi_delta) ** 2 * eta ** 2
+        c_x_0 = 6 * cos_alpha - 4 * np.cos(phi_delta) * eta
+
+        coefficients = [c_x_5, c_x_4, c_x_3, c_x_2, c_x_1, c_x_0]
+
+        solutions = np.roots(coefficients)
+        for solution in solutions:
+            if solution.real > 0 and solution.imag == 0:
+                direction_t = solution.real * r
+                intersect_point = np.array([origin_x, origin_y, origin_z]) + direction_t * np.array(
+                    [direction_x, direction_y, direction_z])
+                intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension(intersect_point)
+
+                # для верхнего конуса:
+                # intersect_z_correct = 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_begin)
+                intersect_theta_correct = theta_accretion_begin < intersect_theta < theta_accretion_end
+                intersect_phi_correct = top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]
+
+                if intersect_theta_correct and intersect_phi_correct:
                     return True
-            # для нижнего конуса:
-            if -ksi_shock * np.cos(lim_theta_top) < intersect_point[2] < 0:
+
+                # для нижнего конуса:
+                # intersect_z_correct = -ksi_shock * np.cos(theta_accretion_begin) < intersect_point[2] < 0
+                intersect_theta_correct = np.pi - theta_accretion_end < intersect_theta < np.pi - theta_accretion_begin
                 # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
                 # нужно учесть углы которые превышают 2 pi в 1 скобке условия
-                if (0 < phi_intersect < bot_column_phi_range[-1] - 2 * np.pi) or (
-                        bot_column_phi_range[0] < phi_intersect < bot_column_phi_range[-1]):
+                intersect_phi_correct = (0 < intersect_phi < bot_column_phi_range[-1] - 2 * np.pi) or (
+                        bot_column_phi_range[0] < intersect_phi < bot_column_phi_range[-1])
+
+                if intersect_theta_correct and intersect_phi_correct:
                     return True
-    return False
+        return False
+
+    # return (intersection_with_sphere() or intersection_with_cone())
+    return (intersection_with_sphere() or intersection_with_dipole_lines())
 
 
 class AccretionColumn:
@@ -122,10 +186,9 @@ class AccretionColumn:
                                                                                        theta_accretion_begin),
                                                                                    get_A_normal(theta_accretion_begin))
             phi_delta = 0
-            if column_type:
-                theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
-            else:
-                theta_accretion_end = np.pi - np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
+            theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
+            if not column_type:
+                theta_accretion_end = np.pi - theta_accretion_end
                 phi_delta = np.pi
             step_phi_accretion = config.lim_phi_accretion / config.N_phi_accretion
             step_theta_accretion = (theta_accretion_end - theta_accretion_begin) / config.N_theta_accretion
@@ -231,20 +294,20 @@ bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accreti
                                             top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range)
 # ------------------ конец заполнения матриц косинусов ---------------------------
 
-arr_sum_simps_integrate = [0] * 4
+arr_simps_integrate = [0] * 4
 i = 0
-arr_sum_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution()
+arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution()
 i += 1
-arr_sum_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution()
+arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution()
 i += 1
-arr_sum_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution()
+arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution()
 i += 1
-arr_sum_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution()
+arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution()
 i += 1
 
-sum_simps_integrate = np.array(arr_sum_simps_integrate[0])
+sum_simps_integrate = np.array(arr_simps_integrate[0])
 for i in range(1, 4):
-    sum_simps_integrate += np.array(arr_sum_simps_integrate[i])
+    sum_simps_integrate += np.array(arr_simps_integrate[i])
 
 print('phi_theta_range saved')
 file_name = "save_phi_range.txt"
@@ -255,13 +318,13 @@ np.savetxt(file_name, top_column.outer_surface.theta_range)
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
 ax3 = fig.add_subplot(111)
-ax3.plot(phi_for_plot, arr_sum_simps_integrate[0],
+ax3.plot(phi_for_plot, arr_simps_integrate[0],
          label='top outer')
-ax3.plot(phi_for_plot, arr_sum_simps_integrate[1],
+ax3.plot(phi_for_plot, arr_simps_integrate[1],
          label='top inner')
-ax3.plot(phi_for_plot, arr_sum_simps_integrate[2],
+ax3.plot(phi_for_plot, arr_simps_integrate[2],
          label='bot outer', marker='*')
-ax3.plot(phi_for_plot, arr_sum_simps_integrate[3],
+ax3.plot(phi_for_plot, arr_simps_integrate[3],
          label='bot inner')
 ax3.plot(phi_for_plot, sum_simps_integrate,
          label='sum')
