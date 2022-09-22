@@ -96,17 +96,23 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
                 intersect_point = np.array([origin_x, origin_y, origin_z]) + t * np.array(
                     [direction_x, direction_y, direction_z])
                 intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension(intersect_point)
+
                 # для верхнего конуса:
-                if 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_begin):
-                    if top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]:
-                        return True
+                intersect_z_correct = 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_end)
+                intersect_phi_correct = top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]
+
+                if intersect_z_correct and intersect_phi_correct:
+                    return True
+
                 # для нижнего конуса:
-                if -ksi_shock * np.cos(theta_accretion_begin) < intersect_point[2] < 0:
-                    # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
-                    # нужно учесть углы которые превышают 2 pi в 1 скобке условия
-                    if (0 < intersect_phi < bot_column_phi_range[-1] - 2 * np.pi) or (
-                            bot_column_phi_range[0] < intersect_phi < bot_column_phi_range[-1]):
-                        return True
+                intersect_z_correct = -ksi_shock * np.cos(theta_accretion_end) < intersect_point[2] < 0
+                # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
+                # нужно учесть углы которые превышают 2 pi в 1 скобке условия
+                intersect_phi_correct = (0 < intersect_phi < bot_column_phi_range[-1] - 2 * np.pi) or (
+                        bot_column_phi_range[0] < intersect_phi < bot_column_phi_range[-1])
+
+                if intersect_z_correct and intersect_phi_correct:
+                    return True
         return False
 
     def intersection_with_dipole_lines():
@@ -120,30 +126,57 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
             если пересекается то истина
             если нет то ложь
         '''
-        phi_delta = origin_phi - direction_phi
+        # phi_delta = origin_phi - direction_phi
+        # eta = np.sin(direction_theta) / np.sin(origin_theta)
+        # cos_alpha = np.sin(origin_theta) * np.cos(phi_delta) * np.sin(direction_theta) + np.cos(origin_theta) * np.cos(
+        #     direction_theta)
+        #
+        # c_x_5 = 1
+        # c_x_4 = 6 * cos_alpha
+        # c_x_3 = 3 + 12 * cos_alpha ** 2 - eta ** 4
+        # c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(phi_delta) * eta ** 3
+        # c_x_1 = 3 + 12 * cos_alpha ** 2 - 2 * eta ** 2 - 4 * np.cos(phi_delta) ** 2 * eta ** 2
+        # c_x_0 = 6 * cos_alpha - 4 * np.cos(phi_delta) * eta
+
+        # для не 0 угла наблюдателя по фи
+
         eta = np.sin(direction_theta) / np.sin(origin_theta)
-        cos_alpha = np.sin(origin_theta) * np.cos(phi_delta) * np.sin(direction_theta) + np.cos(origin_theta) * np.cos(
-            direction_theta)
+        cos_alpha = np.sin(origin_theta) * np.cos(origin_phi) * np.sin(direction_theta) * np.cos(direction_phi) \
+                    + np.sin(origin_theta) * np.sin(origin_phi) * np.sin(direction_theta) * np.sin(direction_phi) \
+                    + np.cos(origin_theta) * np.cos(direction_theta)
 
         c_x_5 = 1
         c_x_4 = 6 * cos_alpha
         c_x_3 = 3 + 12 * cos_alpha ** 2 - eta ** 4
-        c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(phi_delta) * eta ** 3
-        c_x_1 = 3 + 12 * cos_alpha ** 2 - 2 * eta ** 2 - 4 * np.cos(phi_delta) ** 2 * eta ** 2
-        c_x_0 = 6 * cos_alpha - 4 * np.cos(phi_delta) * eta
+        c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(origin_phi) * np.cos(direction_phi) * eta ** 3 \
+                - 4 * np.sin(origin_phi) * np.sin(direction_phi) * eta ** 3
+        c_x_1 = 3 + 12 * cos_alpha ** 2 \
+                - 2 * eta ** 2 \
+                - 4 * np.cos(origin_phi) ** 2 * np.cos(direction_phi) ** 2 * eta ** 2 \
+                - 4 * np.sin(origin_phi) ** 2 * np.sin(direction_phi) ** 2 * eta ** 2 \
+                - 8 * np.cos(origin_phi) * np.cos(direction_phi) * np.sin(origin_phi) * np.sin(direction_phi) * eta ** 2
+        c_x_0 = 6 * cos_alpha - 4 * np.cos(origin_phi) * np.cos(direction_phi) * eta \
+                - 4 * np.sin(origin_phi) * np.sin(direction_phi) * eta
 
         coefficients = [c_x_5, c_x_4, c_x_3, c_x_2, c_x_1, c_x_0]
-
         solutions = np.roots(coefficients)
+
+        r = R_e * np.sin(origin_theta) ** 2
+        # декартовая СК из сферических
+        origin_x = np.sin(origin_theta) * np.cos(origin_phi) * r
+        origin_y = np.sin(origin_theta) * np.sin(origin_phi) * r
+        origin_z = np.cos(origin_theta) * r
+
         for solution in solutions:
             if solution.real > 0 and solution.imag == 0:
                 direction_t = solution.real * r
                 intersect_point = np.array([origin_x, origin_y, origin_z]) + direction_t * np.array(
                     [direction_x, direction_y, direction_z])
-                intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension(intersect_point)
+                intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension_with_r(intersect_point)
 
                 # для верхнего конуса:
-                # intersect_z_correct = 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_begin)
+                # intersect_z_correct = 0 < intersect_point[2] < ksi_shock * config.R_ns * np.cos(theta_accretion_begin)
+                # intersect_z_correct = 0 < intersect_point[2] < R_e * np.sin(theta_accretion_end) ** 2 * np.cos(theta_accretion_end)
                 intersect_theta_correct = theta_accretion_begin < intersect_theta < theta_accretion_end
                 intersect_phi_correct = top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]
 
@@ -151,7 +184,8 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
                     return True
 
                 # для нижнего конуса:
-                # intersect_z_correct = -ksi_shock * np.cos(theta_accretion_begin) < intersect_point[2] < 0
+                # intersect_z_correct = -ksi_shock * np.cos(theta_accretion_begin) * config.R_ns < intersect_point[2] < 0
+                # intersect_z_correct = - R_e * np.sin(theta_accretion_end) ** 2 * np.cos(theta_accretion_end) < intersect_point[2] < 0
                 intersect_theta_correct = np.pi - theta_accretion_end < intersect_theta < np.pi - theta_accretion_begin
                 # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
                 # нужно учесть углы которые превышают 2 pi в 1 скобке условия
