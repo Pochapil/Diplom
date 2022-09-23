@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, TextBox, Button
 
 import config
+import vectors
 
 
 def get_angles_from_vector(vector):
@@ -192,7 +193,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
 
 def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
     # fig, ax = plt.subplots()
-    lim_value = 0.2
+    lim_value = 0.8
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -242,14 +243,13 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
 
-    i_angle = 0 * grad_to_rad
     phase = 0
-    e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+    e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
     A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
                                                  betta_mu * grad_to_rad)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
-    azimuth, elevation = get_angles_from_vector(e_obs_mu)
+    azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
 
     # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
     #                 -np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
@@ -260,14 +260,13 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     def rotate(val):
         phase = slider1.val  # slider1.val
-        i_angle = 0 * grad_to_rad
         phase = phase * 360
-        e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+        e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
         A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
                                                      betta_mu * grad_to_rad)
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
-        azimuth, elevation = get_angles_from_vector(e_obs_mu)
+        azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
 
         # observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
         #                       np.sin(elevation) * np.sin(azimuth),

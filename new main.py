@@ -11,9 +11,17 @@ import config
 # альфвеновский радиус и радиус магнитного диполя
 R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
 R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
+print(R_e / config.R_ns)
 R_e_outer_surface, R_e_inner_surface = R_e, R_e
 # вектор на наблюдателя в системе координат двойной системы
 e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
+file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
+                      % (config.betta_rotate, config.betta_mu, config.a_portion, config.M_rate_c2_Led)
+
+approx_type = True
+approx_method = "cone"
+if approx_type:
+    approx_method = "dipole"
 
 
 # формула 2 в статье
@@ -38,7 +46,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
     # все нормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
 
-    r = R_e * np.sin(origin_theta) ** 2 / config.R_ns
+    r = R_e / config.R_ns * np.sin(origin_theta) ** 2
     # декартовая СК из сферических
     origin_x = np.sin(origin_theta) * np.cos(origin_phi) * r
     origin_y = np.sin(origin_theta) * np.sin(origin_phi) * r
@@ -126,78 +134,54 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
             если пересекается то истина
             если нет то ложь
         '''
-        # phi_delta = origin_phi - direction_phi
-        # eta = np.sin(direction_theta) / np.sin(origin_theta)
-        # cos_alpha = np.sin(origin_theta) * np.cos(phi_delta) * np.sin(direction_theta) + np.cos(origin_theta) * np.cos(
-        #     direction_theta)
-        #
-        # c_x_5 = 1
-        # c_x_4 = 6 * cos_alpha
-        # c_x_3 = 3 + 12 * cos_alpha ** 2 - eta ** 4
-        # c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(phi_delta) * eta ** 3
-        # c_x_1 = 3 + 12 * cos_alpha ** 2 - 2 * eta ** 2 - 4 * np.cos(phi_delta) ** 2 * eta ** 2
-        # c_x_0 = 6 * cos_alpha - 4 * np.cos(phi_delta) * eta
+        # для 0 угла наблюдателя по фи
 
-        # для не 0 угла наблюдателя по фи
-
+        phi_delta = origin_phi - direction_phi
         eta = np.sin(direction_theta) / np.sin(origin_theta)
-        cos_alpha = np.sin(origin_theta) * np.cos(origin_phi) * np.sin(direction_theta) * np.cos(direction_phi) \
-                    + np.sin(origin_theta) * np.sin(origin_phi) * np.sin(direction_theta) * np.sin(direction_phi) \
-                    + np.cos(origin_theta) * np.cos(direction_theta)
+        cos_alpha = np.sin(origin_theta) * np.cos(phi_delta) * np.sin(direction_theta) + np.cos(origin_theta) * np.cos(
+            direction_theta)
 
         c_x_5 = 1
         c_x_4 = 6 * cos_alpha
         c_x_3 = 3 + 12 * cos_alpha ** 2 - eta ** 4
-        c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(origin_phi) * np.cos(direction_phi) * eta ** 3 \
-                - 4 * np.sin(origin_phi) * np.sin(direction_phi) * eta ** 3
-        c_x_1 = 3 + 12 * cos_alpha ** 2 \
-                - 2 * eta ** 2 \
-                - 4 * np.cos(origin_phi) ** 2 * np.cos(direction_phi) ** 2 * eta ** 2 \
-                - 4 * np.sin(origin_phi) ** 2 * np.sin(direction_phi) ** 2 * eta ** 2 \
-                - 8 * np.cos(origin_phi) * np.cos(direction_phi) * np.sin(origin_phi) * np.sin(direction_phi) * eta ** 2
-        c_x_0 = 6 * cos_alpha - 4 * np.cos(origin_phi) * np.cos(direction_phi) * eta \
-                - 4 * np.sin(origin_phi) * np.sin(direction_phi) * eta
+        c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(phi_delta) * eta ** 3
+        c_x_1 = 3 + 12 * cos_alpha ** 2 - 2 * eta ** 2 - 4 * np.cos(phi_delta) ** 2 * eta ** 2
+        c_x_0 = 6 * cos_alpha - 4 * np.cos(phi_delta) * eta
 
         coefficients = [c_x_5, c_x_4, c_x_3, c_x_2, c_x_1, c_x_0]
         solutions = np.roots(coefficients)
-
-        r = R_e * np.sin(origin_theta) ** 2
-        # декартовая СК из сферических
-        origin_x = np.sin(origin_theta) * np.cos(origin_phi) * r
-        origin_y = np.sin(origin_theta) * np.sin(origin_phi) * r
-        origin_z = np.cos(origin_theta) * r
 
         for solution in solutions:
             if solution.real > 0 and solution.imag == 0:
                 direction_t = solution.real * r
                 intersect_point = np.array([origin_x, origin_y, origin_z]) + direction_t * np.array(
                     [direction_x, direction_y, direction_z])
-                intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension_with_r(intersect_point)
+                intersect_phi, intersect_theta = vectors.get_angles_from_vector_one_dimension(intersect_point)
+                intersect_r = (intersect_point[0] ** 2 + intersect_point[1] ** 2 + intersect_point[2] ** 2) ** (1 / 2)
+
+                intersect_r_correct = intersect_r < ksi_shock
 
                 # для верхнего конуса:
-                # intersect_z_correct = 0 < intersect_point[2] < ksi_shock * config.R_ns * np.cos(theta_accretion_begin)
-                # intersect_z_correct = 0 < intersect_point[2] < R_e * np.sin(theta_accretion_end) ** 2 * np.cos(theta_accretion_end)
-                intersect_theta_correct = theta_accretion_begin < intersect_theta < theta_accretion_end
+                intersect_z_correct = 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_end)
                 intersect_phi_correct = top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]
-
-                if intersect_theta_correct and intersect_phi_correct:
+                if intersect_z_correct and intersect_phi_correct and intersect_r_correct:
                     return True
 
                 # для нижнего конуса:
-                # intersect_z_correct = -ksi_shock * np.cos(theta_accretion_begin) * config.R_ns < intersect_point[2] < 0
-                # intersect_z_correct = - R_e * np.sin(theta_accretion_end) ** 2 * np.cos(theta_accretion_end) < intersect_point[2] < 0
-                intersect_theta_correct = np.pi - theta_accretion_end < intersect_theta < np.pi - theta_accretion_begin
+                intersect_z_correct = - (ksi_shock * np.cos(theta_accretion_end)) < intersect_point[2] < 0
                 # условие - так как углы из метода get_angles_from_vector_one_dimension от 0 до 2 pi поэтому
                 # нужно учесть углы которые превышают 2 pi в 1 скобке условия
                 intersect_phi_correct = (0 < intersect_phi < bot_column_phi_range[-1] - 2 * np.pi) or (
                         bot_column_phi_range[0] < intersect_phi < bot_column_phi_range[-1])
-
-                if intersect_theta_correct and intersect_phi_correct:
+                if intersect_z_correct and intersect_phi_correct and intersect_r_correct:
                     return True
+
         return False
 
-    # return (intersection_with_sphere() or intersection_with_cone())
-    return (intersection_with_sphere() or intersection_with_dipole_lines())
+    if approx_type:
+        return (intersection_with_sphere() or intersection_with_dipole_lines())
+    else:
+        return (intersection_with_sphere() or intersection_with_cone())
 
 
 class AccretionColumn:
@@ -311,6 +295,12 @@ bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surf
                              theta_accretion_begin_inner_surface, False)
 # ----------------- конец инициализации нижней колонки ------------------------
 
+print('phi_theta_range saved')
+file_name = "save_phi_range.txt"
+np.savetxt(file_name, top_column.outer_surface.phi_range)
+file_name = "save_theta_range.txt"
+np.savetxt(file_name, top_column.outer_surface.theta_range)
+
 # ----------------- углы для нахождения пересечений -------------------------
 theta_accretion_begin = top_column.outer_surface.theta_range[0]
 theta_accretion_end = top_column.outer_surface.theta_range[-1]
@@ -331,23 +321,27 @@ bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accreti
 arr_simps_integrate = [0] * 4
 i = 0
 arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution()
+file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution()
+file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution()
+file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution()
+file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
+
+print(bot_column.outer_surface.ksi_shock)
 
 sum_simps_integrate = np.array(arr_simps_integrate[0])
 for i in range(1, 4):
     sum_simps_integrate += np.array(arr_simps_integrate[i])
-
-print('phi_theta_range saved')
-file_name = "save_phi_range.txt"
-np.savetxt(file_name, top_column.outer_surface.phi_range)
-file_name = "save_theta_range.txt"
-np.savetxt(file_name, top_column.outer_surface.theta_range)
 
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
