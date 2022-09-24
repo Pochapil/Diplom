@@ -220,6 +220,24 @@ class AccretionColumn:
             self.cos_psi_range = []  # тут создать матрицу косинусов 1 раз и использовать потом
             self.array_normal = self.create_array_normal(self.phi_range, self.theta_range, self.surface_type)
 
+            self.correct_T_eff()
+
+        def correct_T_eff(self):
+            # так как нахожу распределение Teff по отрезку кси, то нужно привести к виду по сетке theta !!
+            # нужно сместить для увеличения точности
+            ksi_stop = 1.
+            ksi_inc = - (self.ksi_shock - ksi_stop) / config.N_theta_accretion
+            ksi_range = np.arange(self.ksi_shock, ksi_stop, ksi_inc)
+            ksi_bs = ksi_range[::-1]
+            i = 0  # left_border
+            true_T_eff = []
+            for theta in self.theta_range:
+                while ksi_bs[i + 1] < self.R_e / config.R_ns * np.sin(theta) ** 2 and (
+                        i < config.N_theta_accretion - 2):
+                    i += 1
+                true_T_eff.append(self.T_eff[i])
+            self.T_eff = true_T_eff
+
         def create_array_normal(self, phi_range, theta_range, surface_type=True):
             array_normal = []  # матрица нормалей
             coefficient = -1
