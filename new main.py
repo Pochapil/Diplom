@@ -277,6 +277,19 @@ class AccretionColumn:
 
             return sum_simps_integrate
 
+        def calculate_integral_distribution_in_range(self, wavelength_bot, wavelength_top):
+            '''
+            на каждом слое по тета берем в данном диапазоне интеграл по формуле планка
+            переходя на след слой меняем температуру
+            суммируем
+            конец
+            '''
+
+            def plank_energy_on_wavelength(wavelength, T):
+                return 2 * np.pi * config.h_plank * config.c ** 2 / wavelength ** 5 \
+                       * 1 / (np.e ** (config.h_plank * config.c / (wavelength * config.k * T)) - 1)
+            pass
+
 
 # от поверхности NS - угол при котором радиус = радиусу НЗ
 # ----------------- начало инициализации верхней колонки ------------------------
