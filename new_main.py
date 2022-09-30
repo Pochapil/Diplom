@@ -432,7 +432,7 @@ ax.plot(phi_for_plot, arr_simps_integrate[3],
 ax.plot(phi_for_plot, sum_simps_integrate,
         label='sum')
 ax.legend()
-fig.suptitle('', fontsize=14)
+fig.suptitle('total luminosity of surfaces', fontsize=14)
 # plt.yscale('log')
 plt.show()
 
@@ -452,6 +452,7 @@ ax = fig.add_subplot(111)
 ax.plot(phi_for_plot, observer_theta, label=r'$\theta_{observer}$')
 ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
 ax.legend()
+fig.suptitle('Observer angles', fontsize=14)
 plt.show()
 
 while True:
@@ -487,5 +488,6 @@ while True:
     ax.plot(phi_for_plot, sum_simps_integrate,
             label='sum')
     ax.legend()
+    fig.suptitle('luminosity in range %0.2f - %0.2f KeV of surfaces' % (energy_bot, energy_top), fontsize=14)
     # plt.yscale('log')
     plt.show()
