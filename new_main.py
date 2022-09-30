@@ -11,7 +11,7 @@ import config
 # альфвеновский радиус и радиус магнитного диполя
 R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
 R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
-print(R_e / config.R_ns)
+print('R_e = %f' % (R_e / config.R_ns))
 R_e_outer_surface, R_e_inner_surface = R_e, R_e
 # вектор на наблюдателя в системе координат двойной системы
 e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
@@ -236,7 +236,7 @@ class AccretionColumn:
                         i < config.N_theta_accretion - 2):
                     i += 1
                 true_T_eff.append(self.T_eff[i])
-            self.T_eff = true_T_eff
+            self.T_eff = np.array(true_T_eff)
 
         def create_array_normal(self, phi_range, theta_range, surface_type=True):
             array_normal = []  # матрица нормалей
@@ -295,18 +295,59 @@ class AccretionColumn:
 
             return sum_simps_integrate
 
-        def calculate_integral_distribution_in_range(self, wavelength_bot, wavelength_top):
+        def calculate_integral_distribution_in_range(self, energy_bot, energy_top):
+            # КэВ
             '''
             на каждом слое по тета берем в данном диапазоне интеграл по формуле планка
             переходя на след слой меняем температуру
             суммируем
             конец
+            
+            внешний цикл - по длине волны
+            внутри - идем в цикле по углам тета
             '''
 
+            # нужно ли на пи?
             def plank_energy_on_wavelength(wavelength, T):
-                return 2 * np.pi * config.h_plank * config.c ** 2 / wavelength ** 5 \
-                       * 1 / (np.e ** (config.h_plank * config.c / (wavelength * config.k * T)) - 1)
-            pass
+                return 2 * config.h_plank_ergs * config.c ** 2 / wavelength ** 5 \
+                       * 1 / (np.e ** (config.h_plank_ergs * config.c / (wavelength * config.k_bolc * T)) - 1)
+
+            def plank_energy_on_frequency(frequency, T):
+                return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
+                       * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
+
+            frequency_top = energy_top / config.h_plank_evs
+            frequency_bot = energy_bot / config.h_plank_evs
+            frequency_step = (frequency_top - frequency_bot) / config.N_frequency_range
+            frequency_range = [frequency_bot + frequency_step * i for i in range(config.N_frequency_range)]
+
+            dS_simps = []  # единичная площадка при интегрировании
+            for j in range(config.N_theta_accretion):
+                # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
+                dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(
+                    self.theta_range[j])
+                dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
+                dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
+
+            sum_simps_integrate = [0] * config.t_max
+            simps_integrate_step = [0] * config.N_phi_accretion
+
+            theta_step = self.theta_range[1] - self.theta_range[0]
+            phi_step = self.phi_range[1] - self.phi_range[0]
+            dS = np.array(dS_simps) * theta_step * phi_step
+            integrate_sum = [0] * config.t_max
+
+            for rotation_index in range(config.t_max):
+                for frequency_index in range(config.N_frequency_range):
+                    for phi_index in range(config.N_phi_accretion):
+                        for theta_index in range(config.N_theta_accretion):
+                            plank_func_step = plank_energy_on_frequency(frequency_range[frequency_index],
+                                                                        self.T_eff[theta_index]) * frequency_step
+                            integrate_step = np.abs(plank_func_step * dS[theta_index] * np.array(
+                                self.cos_psi_range[rotation_index][phi_index][theta_index]))
+                            integrate_sum[rotation_index] += integrate_step
+
+            return integrate_sum
 
 
 # от поверхности NS - угол при котором радиус = радиусу НЗ
@@ -368,7 +409,39 @@ file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
 np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 
-print(bot_column.outer_surface.ksi_shock)
+print('ksi_shok = %f' % bot_column.outer_surface.ksi_shock)
+
+sum_simps_integrate = np.array(arr_simps_integrate[0])
+for i in range(1, 4):
+    sum_simps_integrate += np.array(arr_simps_integrate[i])
+
+fig = plt.figure(figsize=(8, 8))
+phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
+ax3 = fig.add_subplot(111)
+ax3.plot(phi_for_plot, arr_simps_integrate[0],
+         label='top outer')
+ax3.plot(phi_for_plot, arr_simps_integrate[1],
+         label='top inner')
+ax3.plot(phi_for_plot, arr_simps_integrate[2],
+         label='bot outer', marker='*')
+ax3.plot(phi_for_plot, arr_simps_integrate[3],
+         label='bot inner')
+ax3.plot(phi_for_plot, sum_simps_integrate,
+         label='sum')
+ax3.legend()
+# plt.yscale('log')
+plt.show()
+
+arr_simps_integrate = [0] * 4
+i = 0
+arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution_in_range(10, 100)
+i += 1
+arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution_in_range(10, 100)
+i += 1
+arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution_in_range(10, 100)
+i += 1
+arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution_in_range(10, 100)
+i += 1
 
 sum_simps_integrate = np.array(arr_simps_integrate[0])
 for i in range(1, 4):

@@ -193,7 +193,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
 
 def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
     # fig, ax = plt.subplots()
-    lim_value = 0.8
+    lim_value = 0.2
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -229,7 +229,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
 
     # низ
-    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="r", alpha=0.2)
+    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="green", alpha=0.2)
 
     # вектора
     origin = [0, 0, 0]
