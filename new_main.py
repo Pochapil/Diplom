@@ -316,8 +316,9 @@ class AccretionColumn:
                 return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
                        * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
 
-            frequency_top = energy_top / config.h_plank_evs
-            frequency_bot = energy_bot / config.h_plank_evs
+            coefficient = 1000  # КэВ а не эВ
+            frequency_top = coefficient * energy_top / config.h_plank_evs
+            frequency_bot = coefficient * energy_bot / config.h_plank_evs
             frequency_step = (frequency_top - frequency_bot) / config.N_frequency_range
             frequency_range = [frequency_bot + frequency_step * i for i in range(config.N_frequency_range)]
 
@@ -372,6 +373,9 @@ np.savetxt(file_name, top_column.outer_surface.phi_range)
 file_name = "save_theta_range.txt"
 np.savetxt(file_name, top_column.outer_surface.theta_range)
 
+# print('T_eff:')
+# print(top_column.outer_surface.T_eff)
+
 # ----------------- углы для нахождения пересечений -------------------------
 theta_accretion_begin = top_column.outer_surface.theta_range[0]
 theta_accretion_end = top_column.outer_surface.theta_range[-1]
@@ -408,7 +412,7 @@ file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
 np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 
-print('ksi_shok = %f' % bot_column.outer_surface.ksi_shock)
+print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)
 
 sum_simps_integrate = np.array(arr_simps_integrate[0])
 for i in range(1, 4):
@@ -416,24 +420,43 @@ for i in range(1, 4):
 
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
-ax3 = fig.add_subplot(111)
-ax3.plot(phi_for_plot, arr_simps_integrate[0],
-         label='top outer')
-ax3.plot(phi_for_plot, arr_simps_integrate[1],
-         label='top inner')
-ax3.plot(phi_for_plot, arr_simps_integrate[2],
-         label='bot outer', marker='*')
-ax3.plot(phi_for_plot, arr_simps_integrate[3],
-         label='bot inner')
-ax3.plot(phi_for_plot, sum_simps_integrate,
-         label='sum')
-ax3.legend()
+ax = fig.add_subplot(111)
+ax.plot(phi_for_plot, arr_simps_integrate[0],
+        label='top outer')
+ax.plot(phi_for_plot, arr_simps_integrate[1],
+        label='top inner')
+ax.plot(phi_for_plot, arr_simps_integrate[2],
+        label='bot outer', marker='*')
+ax.plot(phi_for_plot, arr_simps_integrate[3],
+        label='bot inner')
+ax.plot(phi_for_plot, sum_simps_integrate,
+        label='sum')
+ax.legend()
+fig.suptitle('', fontsize=14)
 # plt.yscale('log')
+plt.show()
+
+observer_theta = [0] * config.t_max
+observer_phi = [0] * config.t_max
+
+for t in range(config.t_max):
+    phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
+    # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+    A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                 config.betta_mu)
+    e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+    observer_phi[t], observer_theta[t] = vectors.get_angles_from_vector(e_obs_mu)
+
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111)
+ax.plot(phi_for_plot, observer_theta, label=r'$\theta_{observer}$')
+ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
+ax.legend()
 plt.show()
 
 while True:
     energy_bot = float(input('введите нижний предел в КэВ: '))
-    energy_top = float(input('введите нижний предел в КэВ: '))
+    energy_top = float(input('введите верхний предел в КэВ: '))
 
     arr_simps_integrate = [0] * 4
     i = 0
@@ -452,17 +475,17 @@ while True:
 
     fig = plt.figure(figsize=(8, 8))
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
-    ax3 = fig.add_subplot(111)
-    ax3.plot(phi_for_plot, arr_simps_integrate[0],
-             label='top outer')
-    ax3.plot(phi_for_plot, arr_simps_integrate[1],
-             label='top inner')
-    ax3.plot(phi_for_plot, arr_simps_integrate[2],
-             label='bot outer', marker='*')
-    ax3.plot(phi_for_plot, arr_simps_integrate[3],
-             label='bot inner')
-    ax3.plot(phi_for_plot, sum_simps_integrate,
-             label='sum')
-    ax3.legend()
+    ax = fig.add_subplot(111)
+    ax.plot(phi_for_plot, arr_simps_integrate[0],
+            label='top outer')
+    ax.plot(phi_for_plot, arr_simps_integrate[1],
+            label='top inner')
+    ax.plot(phi_for_plot, arr_simps_integrate[2],
+            label='bot outer', marker='*')
+    ax.plot(phi_for_plot, arr_simps_integrate[3],
+            label='bot inner')
+    ax.plot(phi_for_plot, sum_simps_integrate,
+            label='sum')
+    ax.legend()
     # plt.yscale('log')
     plt.show()

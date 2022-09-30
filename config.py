@@ -49,7 +49,7 @@ phi_accretion_begin = 0 * grad_to_rad  # нижний предел по phi
 N_phi_accretion = 100
 N_theta_accretion = 100
 N_wavelength_range = 10
-N_frequency_range = 10
+N_frequency_range = 100
 
 i_angle = 0 * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
 # угол между осью вращения системы и собственным вращением НЗ
