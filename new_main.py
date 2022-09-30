@@ -329,23 +329,22 @@ class AccretionColumn:
                 dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
                 dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
 
-            sum_simps_integrate = [0] * config.t_max
-            simps_integrate_step = [0] * config.N_phi_accretion
-
-            theta_step = self.theta_range[1] - self.theta_range[0]
-            phi_step = self.phi_range[1] - self.phi_range[0]
-            dS = np.array(dS_simps) * theta_step * phi_step
-            integrate_sum = [0] * config.t_max
-
-            for rotation_index in range(config.t_max):
+            plank_func = [0] * config.N_theta_accretion
+            plank_func_step = [0] * config.N_frequency_range
+            for theta_index in range(config.N_theta_accretion):
                 for frequency_index in range(config.N_frequency_range):
-                    for phi_index in range(config.N_phi_accretion):
-                        for theta_index in range(config.N_theta_accretion):
-                            plank_func_step = plank_energy_on_frequency(frequency_range[frequency_index],
-                                                                        self.T_eff[theta_index]) * frequency_step
-                            integrate_step = np.abs(plank_func_step * dS[theta_index] * np.array(
-                                self.cos_psi_range[rotation_index][phi_index][theta_index]))
-                            integrate_sum[rotation_index] += integrate_step
+                    plank_func_step[frequency_index] = plank_energy_on_frequency(frequency_range[frequency_index],
+                                                                                 self.T_eff[theta_index])
+                plank_func[theta_index] = scipy.integrate.simps(plank_func_step, frequency_range)
+
+            integrate_step = [0] * config.N_phi_accretion
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                for phi_index in range(config.N_phi_accretion):
+                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                        plank_func * np.array(dS_simps) * np.array(
+                            self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
+                integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
             return integrate_sum
 
@@ -432,34 +431,38 @@ ax3.legend()
 # plt.yscale('log')
 plt.show()
 
-arr_simps_integrate = [0] * 4
-i = 0
-arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution_in_range(10, 100)
-i += 1
-arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution_in_range(10, 100)
-i += 1
-arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution_in_range(10, 100)
-i += 1
-arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution_in_range(10, 100)
-i += 1
+while True:
+    energy_bot = float(input('введите нижний предел в КэВ: '))
+    energy_top = float(input('введите нижний предел в КэВ: '))
 
-sum_simps_integrate = np.array(arr_simps_integrate[0])
-for i in range(1, 4):
-    sum_simps_integrate += np.array(arr_simps_integrate[i])
+    arr_simps_integrate = [0] * 4
+    i = 0
+    arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
+    i += 1
+    arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
+    i += 1
+    arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
+    i += 1
+    arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
+    i += 1
 
-fig = plt.figure(figsize=(8, 8))
-phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
-ax3 = fig.add_subplot(111)
-ax3.plot(phi_for_plot, arr_simps_integrate[0],
-         label='top outer')
-ax3.plot(phi_for_plot, arr_simps_integrate[1],
-         label='top inner')
-ax3.plot(phi_for_plot, arr_simps_integrate[2],
-         label='bot outer', marker='*')
-ax3.plot(phi_for_plot, arr_simps_integrate[3],
-         label='bot inner')
-ax3.plot(phi_for_plot, sum_simps_integrate,
-         label='sum')
-ax3.legend()
-# plt.yscale('log')
-plt.show()
+    sum_simps_integrate = np.array(arr_simps_integrate[0])
+    for i in range(1, 4):
+        sum_simps_integrate += np.array(arr_simps_integrate[i])
+
+    fig = plt.figure(figsize=(8, 8))
+    phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
+    ax3 = fig.add_subplot(111)
+    ax3.plot(phi_for_plot, arr_simps_integrate[0],
+             label='top outer')
+    ax3.plot(phi_for_plot, arr_simps_integrate[1],
+             label='top inner')
+    ax3.plot(phi_for_plot, arr_simps_integrate[2],
+             label='bot outer', marker='*')
+    ax3.plot(phi_for_plot, arr_simps_integrate[3],
+             label='bot inner')
+    ax3.plot(phi_for_plot, sum_simps_integrate,
+             label='sum')
+    ax3.legend()
+    # plt.yscale('log')
+    plt.show()

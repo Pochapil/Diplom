@@ -125,3 +125,21 @@ print(z_origin + z_direction * result[2])
 #                 wavelength_integrate_step[wavelength_index] = plank_energy_on_wavelength(
 #                     wavelength_range[wavelength_index], self.T_eff)
 #             wavelength_integrate = scipy.integrate.simps(wavelength_integrate_step, wavelength_range)
+
+
+# for rotation_index in range(config.t_max):
+#     for frequency_index in range(config.N_frequency_range):
+#         for phi_index in range(config.N_phi_accretion):
+#             for theta_index in range(config.N_theta_accretion):
+#                 plank_func_step = plank_energy_on_frequency(frequency_range[frequency_index],
+#                                                             self.T_eff[theta_index]) * frequency_step
+#                 integrate_step = np.abs(plank_func_step * dS[theta_index] * np.array(
+#                     self.cos_psi_range[rotation_index][phi_index][theta_index]))
+#                 integrate_sum[rotation_index] += integrate_step
+
+# sum_simps_integrate = [0] * config.t_max
+#             simps_integrate_step = [0] * config.N_phi_accretion
+#
+#             theta_step = self.theta_range[1] - self.theta_range[0]
+#             phi_step = self.phi_range[1] - self.phi_range[0]
+#             dS = np.array(dS_simps) * theta_step * phi_step
