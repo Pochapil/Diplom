@@ -422,9 +422,10 @@ for i in range(1, 4):
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
+append_index = config.t_max_for_plot - config.t_max
 for i in range(4):
-    arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i])
-sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate)
+    arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i][0:append_index])
+sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
 ax = fig.add_subplot(111)
 ax.plot(phi_for_plot, arr_simps_integrate[0],
@@ -483,9 +484,10 @@ while True:
     fig = plt.figure(figsize=(8, 8))
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
+    append_index = config.t_max_for_plot - config.t_max
     for i in range(4):
-        arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i])
-    sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate)
+        arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i][0:append_index])
+    sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
     ax = fig.add_subplot(111)
     ax.plot(phi_for_plot, arr_simps_integrate[0],
