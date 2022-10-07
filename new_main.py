@@ -289,7 +289,8 @@ class AccretionColumn:
             simps_integrate_step = [0] * config.N_phi_accretion
             for t in range(config.t_max):
                 for i in range(config.N_phi_accretion):
-                    simps_integrate_step[i] = np.abs(config.sigmStfBolc * scipy.integrate.simps(
+                    # /pi т.к считаем мощность, которая приходит на наблюдателя, а не всю светимость (пи входит в сигма)
+                    simps_integrate_step[i] = np.abs(config.sigmStfBolc / np.pi * scipy.integrate.simps(
                         self.T_eff ** 4 * np.array(self.cos_psi_range[t][i][:]) * np.array(dS_simps), self.theta_range))
                 sum_simps_integrate[t] = scipy.integrate.simps(simps_integrate_step, self.phi_range)
 
