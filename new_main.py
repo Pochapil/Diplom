@@ -420,7 +420,12 @@ for i in range(1, 4):
     sum_simps_integrate += np.array(arr_simps_integrate[i])
 
 fig = plt.figure(figsize=(8, 8))
-phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
+phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
+
+for i in range(4):
+    arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i])
+sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate)
+
 ax = fig.add_subplot(111)
 ax.plot(phi_for_plot, arr_simps_integrate[0],
         label='top outer')
@@ -437,10 +442,10 @@ fig.suptitle('total luminosity of surfaces', fontsize=14)
 # plt.yscale('log')
 plt.show()
 
-observer_theta = [0] * config.t_max
-observer_phi = [0] * config.t_max
+observer_theta = [0] * config.t_max_for_plot
+observer_phi = [0] * config.t_max_for_plot
 
-for t in range(config.t_max):
+for t in range(config.t_max_for_plot):
     phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
     # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
     A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
@@ -476,7 +481,12 @@ while True:
         sum_simps_integrate += np.array(arr_simps_integrate[i])
 
     fig = plt.figure(figsize=(8, 8))
-    phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max))
+    phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
+
+    for i in range(4):
+        arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i])
+    sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate)
+
     ax = fig.add_subplot(111)
     ax.plot(phi_for_plot, arr_simps_integrate[0],
             label='top outer')
