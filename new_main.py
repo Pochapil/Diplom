@@ -23,6 +23,7 @@ approx_method = "cone"
 if approx_type:
     approx_method = "dipole"
 
+download_folder = 'figs/'
 
 # формула 2 в статье
 def get_delta_distance(theta):
@@ -318,8 +319,8 @@ class AccretionColumn:
                        * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
 
             coefficient = 1000  # КэВ а не эВ
-            frequency_top = coefficient * energy_top / config.h_plank_evs
-            frequency_bot = coefficient * energy_bot / config.h_plank_evs
+            frequency_top = coefficient * energy_top / config.h_plank_evs  # E = h f
+            frequency_bot = coefficient * energy_bot / config.h_plank_evs  # E = h f
             frequency_step = (frequency_top - frequency_bot) / config.N_frequency_range
             frequency_range = [frequency_bot + frequency_step * i for i in range(config.N_frequency_range)]
 
@@ -397,20 +398,20 @@ bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accreti
 arr_simps_integrate = [0] * 4
 i = 0
 arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution()
-file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-np.savetxt(file_name, arr_simps_integrate[i])
+# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+# np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution()
-file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-np.savetxt(file_name, arr_simps_integrate[i])
+# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+# np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution()
-file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-np.savetxt(file_name, arr_simps_integrate[i])
+# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+# np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution()
-file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-np.savetxt(file_name, arr_simps_integrate[i])
+# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
+# np.savetxt(file_name, arr_simps_integrate[i])
 i += 1
 
 print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)
@@ -441,6 +442,7 @@ ax.plot(phi_for_plot, sum_simps_integrate,
 ax.legend()
 fig.suptitle('total luminosity of surfaces', fontsize=14)
 # plt.yscale('log')
+fig.savefig(download_folder + 'total_luminosity_of_surfaces.png', dpi=fig.dpi)
 plt.show()
 
 observer_theta = [0] * config.t_max_for_plot
@@ -460,6 +462,7 @@ ax.plot(phi_for_plot, observer_theta, label=r'$\theta_{observer}$')
 ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
 ax.legend()
 fig.suptitle('Observer angles', fontsize=14)
+fig.savefig(download_folder + 'Observer_angles.png', dpi=fig.dpi)
 plt.show()
 
 while True:
@@ -501,6 +504,13 @@ while True:
     ax.plot(phi_for_plot, sum_simps_integrate,
             label='sum')
     ax.legend()
-    fig.suptitle('luminosity in range %0.2f - %0.2f KeV of surfaces' % (energy_bot, energy_top), fontsize=14)
+
+    file_name = download_folder + "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
+    np.savetxt(file_name, sum_simps_integrate)
+
+    fig_title = 'luminosity in range%0.2f - %0.2f KeV of surfaces' % (energy_bot, energy_top)
+    file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces' % (energy_bot, energy_top)
+    fig.suptitle(fig_title, fontsize=14)
+    fig.savefig(download_folder + file_name + '.png', dpi=fig.dpi)
     # plt.yscale('log')
     plt.show()
