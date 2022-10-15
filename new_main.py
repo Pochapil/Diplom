@@ -25,6 +25,7 @@ if approx_type:
 
 download_folder = 'figs/'
 
+
 # формула 2 в статье
 def get_delta_distance(theta):
     # R=R_e * sin_theta ** 2
@@ -183,6 +184,12 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
         return (intersection_with_sphere() or intersection_with_dipole_lines())
     else:
         return (intersection_with_sphere() or intersection_with_cone())
+
+
+def get_pulsed_fraction(arr):
+    min_value = min(arr)
+    max_value = max(arr)
+    return (max_value - min_value) / (max_value + min_value)
 
 
 class AccretionColumn:
@@ -484,6 +491,8 @@ while True:
     for i in range(1, 4):
         sum_simps_integrate += np.array(arr_simps_integrate[i])
 
+    PF = get_pulsed_fraction(sum_simps_integrate)
+
     fig = plt.figure(figsize=(8, 8))
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
@@ -493,22 +502,23 @@ while True:
     sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
     ax = fig.add_subplot(111)
-    ax.plot(phi_for_plot, arr_simps_integrate[0],
-            label='top outer')
-    ax.plot(phi_for_plot, arr_simps_integrate[1],
-            label='top inner')
-    ax.plot(phi_for_plot, arr_simps_integrate[2],
-            label='bot outer', marker='*')
-    ax.plot(phi_for_plot, arr_simps_integrate[3],
-            label='bot inner')
+    # ax.plot(phi_for_plot, arr_simps_integrate[0],
+    #         label='top outer')
+    # ax.plot(phi_for_plot, arr_simps_integrate[1],
+    #         label='top inner')
+    # ax.plot(phi_for_plot, arr_simps_integrate[2],
+    #         label='bot outer', marker='*')
+    # ax.plot(phi_for_plot, arr_simps_integrate[3],
+    #         label='bot inner')
     ax.plot(phi_for_plot, sum_simps_integrate,
             label='sum')
     ax.legend()
 
-    file_name = download_folder + "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
+    file_name = download_folder + "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (
+    energy_bot, energy_top)
     np.savetxt(file_name, sum_simps_integrate)
 
-    fig_title = 'luminosity in range%0.2f - %0.2f KeV of surfaces' % (energy_bot, energy_top)
+    fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
     file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces' % (energy_bot, energy_top)
     fig.suptitle(fig_title, fontsize=14)
     fig.savefig(download_folder + file_name + '.png', dpi=fig.dpi)
