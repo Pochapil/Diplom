@@ -1,13 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 import geometricTask.matrix as matrix
 import config
 import accretionColumnService
 from accretionColumn import AccretionColumn
 import vectors
-
 
 R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
 R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
@@ -17,7 +15,7 @@ R_e_outer_surface, R_e_inner_surface = R_e, R_e
 e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
 file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
                       % (config.betta_rotate, config.betta_mu, config.a_portion, config.M_rate_c2_Led)
-
+approx_method = accretionColumnService.approx_method
 
 file_folder = 'figs/'
 
@@ -39,10 +37,12 @@ ax = fig.add_subplot(111)
 ax.plot(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff)
 plt.show()
 
-
 bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
                              theta_accretion_begin_inner_surface, False)
 # ----------------- конец инициализации нижней колонки ------------------------
+
+surfaces = {0: top_column.outer_surface, 1: top_column.inner_surface, 2: bot_column.outer_surface,
+            3: bot_column.inner_surface}
 
 print('phi_theta_range saved')
 file_name = "save_phi_range.txt"
@@ -61,41 +61,19 @@ theta_accretion_end = top_column.outer_surface.theta_range[-1]
 # ---------------------------------------------------------------------------
 
 # ------------------ начало заполнения матриц косинусов ---------------------------
-top_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
-                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range, e_obs)
-top_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
-                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range, e_obs)
-
-bot_column.outer_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
-                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range, e_obs)
-bot_column.inner_surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
-                                            top_column.outer_surface.phi_range, bot_column.outer_surface.phi_range, e_obs)
+for key, surface in surfaces.items():
+    surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end, top_column.outer_surface.phi_range,
+                               bot_column.outer_surface.phi_range, e_obs)
 # ------------------ конец заполнения матриц косинусов ---------------------------
 
 arr_simps_integrate = [0] * 4
-i = 0
-arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution()
-# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-# np.savetxt(file_name, arr_simps_integrate[i])
-i += 1
-arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution()
-# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-# np.savetxt(file_name, arr_simps_integrate[i])
-i += 1
-arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution()
-# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-# np.savetxt(file_name, arr_simps_integrate[i])
-i += 1
-arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution()
-# file_name = "%s %s %d.txt" % (file_name_variables, approx_method, i)
-# np.savetxt(file_name, arr_simps_integrate[i])
-i += 1
-
+sum_simps_integrate = 0
+for key, surface in surfaces.items():
+    arr_simps_integrate[key] = surface.calculate_integral_distribution()
+    # file_name = "%s %s %d.txt" % (file_name_variables, approx_method, key)
+    # np.savetxt(file_name, arr_simps_integrate[key])
+    sum_simps_integrate += np.array(arr_simps_integrate[key])
 print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)
-
-sum_simps_integrate = np.array(arr_simps_integrate[0])
-for i in range(1, 4):
-    sum_simps_integrate += np.array(arr_simps_integrate[i])
 
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
@@ -151,19 +129,10 @@ while True:
     energy_top = float(input('введите верхний предел в КэВ: '))
 
     arr_simps_integrate = [0] * 4
-    i = 0
-    arr_simps_integrate[i] = top_column.outer_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
-    i += 1
-    arr_simps_integrate[i] = top_column.inner_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
-    i += 1
-    arr_simps_integrate[i] = bot_column.outer_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
-    i += 1
-    arr_simps_integrate[i] = bot_column.inner_surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
-    i += 1
-
-    sum_simps_integrate = np.array(arr_simps_integrate[0])
-    for i in range(1, 4):
-        sum_simps_integrate += np.array(arr_simps_integrate[i])
+    sum_simps_integrate = 0
+    for key, surface in surfaces.items():
+        arr_simps_integrate[key] = surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
+        sum_simps_integrate += np.array(arr_simps_integrate[key])
 
     PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
