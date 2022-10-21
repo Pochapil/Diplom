@@ -6,6 +6,7 @@ import config
 import BS_distribution_T_eff as get_T_eff
 import geometricTask.matrix as matrix
 
+
 class AccretionColumn:
 
     def __init__(self, R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
@@ -89,9 +90,12 @@ class AccretionColumn:
                         # умножать на N_theta
                         cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
                         if cos_psi_range[i, j] > 0:
-                            if accretionColumnService.check_if_intersect(self.phi_range[i], self.theta_range[j], e_obs_mu, self.ksi_shock,
-                                                  theta_accretion_begin, theta_accretion_end, top_column_phi_range,
-                                                  bot_column_phi_range, self.surface_type, self.R_e):
+                            if accretionColumnService.check_if_intersect(self.phi_range[i], self.theta_range[j],
+                                                                         e_obs_mu, self.ksi_shock,
+                                                                         theta_accretion_begin, theta_accretion_end,
+                                                                         top_column_phi_range,
+                                                                         bot_column_phi_range, self.surface_type,
+                                                                         self.R_e):
                                 cos_psi_range[i, j] = 0
                         else:
                             cos_psi_range[i, j] = 0
@@ -161,6 +165,36 @@ class AccretionColumn:
                     plank_func_step[frequency_index] = plank_energy_on_frequency(frequency_range[frequency_index],
                                                                                  self.T_eff[theta_index])
                 plank_func[theta_index] = scipy.integrate.simps(plank_func_step, frequency_range)
+
+            integrate_step = [0] * config.N_phi_accretion
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                for phi_index in range(config.N_phi_accretion):
+                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                        plank_func * np.array(dS_simps) * np.array(
+                            self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
+                integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
+
+            return integrate_sum
+
+        def calculate_luminosity_on_energy(self, energy):
+            # КэВ
+            def plank_energy_on_frequency(frequency, T):
+                return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
+                       * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
+
+            coefficient = 1000  # КэВ а не эВ
+            frequency = coefficient * energy / config.h_plank_evs  # E = h f
+
+            dS_simps = []  # единичная площадка при интегрировании
+            for j in range(config.N_theta_accretion):
+                # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
+                dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(
+                    self.theta_range[j])
+                dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
+                dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
+
+            plank_func = frequency * plank_energy_on_frequency(frequency, self.T_eff)
 
             integrate_step = [0] * config.N_phi_accretion
             integrate_sum = [0] * config.t_max

@@ -134,9 +134,13 @@ full_file_name = file_folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 
 # ------------------ цикл для диапазона энергий ----------------------
+
 while True:
-    energy_bot = float(input('введите нижний предел в КэВ: '))
-    energy_top = float(input('введите верхний предел в КэВ: '))
+    try:
+        energy_bot = float(input('введите нижний предел в КэВ: '))
+        energy_top = float(input('введите верхний предел в КэВ: '))
+    except ValueError:
+        break
     # ------------------ начало заполнения массивов светимости -----------------------
     arr_simps_integrate = [0] * 4
     sum_simps_integrate = 0
@@ -181,5 +185,56 @@ while True:
     file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_bot, energy_top)
     full_file_name = file_folder + file_name
     fig.savefig(full_file_name, dpi=fig.dpi)
-
 # ------------------ цикл для диапазона энергий ----------------------
+
+print('спектр')
+
+while True:
+    try:
+        energy = float(input('введите энергию в КэВ: '))
+    except ValueError:
+        break
+    # ------------------ начало заполнения массивов светимости -----------------------
+    arr_simps_integrate = [0] * 4
+    sum_simps_integrate = 0
+    for key, surface in surfaces.items():
+        arr_simps_integrate[key] = surface.calculate_luminosity_on_energy(energy)
+        sum_simps_integrate += np.array(arr_simps_integrate[key])
+    # ------------------ конец заполнения массивов светимости -----------------------
+
+    PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+
+    # --------------------- вывод графика светимости ----------------------------
+    fig = plt.figure(figsize=(8, 8))
+    phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
+
+    append_index = config.t_max_for_plot - config.t_max
+    for i in range(4):
+        arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i][0:append_index])
+    sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
+
+    ax = fig.add_subplot(111)
+    # ax.plot(phi_for_plot, arr_simps_integrate[0],
+    #         label='top outer')
+    # ax.plot(phi_for_plot, arr_simps_integrate[1],
+    #         label='top inner')
+    # ax.plot(phi_for_plot, arr_simps_integrate[2],
+    #         label='bot outer', marker='*')
+    # ax.plot(phi_for_plot, arr_simps_integrate[3],
+    #         label='bot inner')
+    ax.plot(phi_for_plot, sum_simps_integrate,
+            label='sum')
+    ax.legend()
+    fig_title = 'luminosity of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
+    fig.suptitle(fig_title, fontsize=14)
+    # plt.yscale('log')
+    plt.show()
+    # --------------------- вывод графика светимости ----------------------------
+
+    file_name = "sum_luminosity_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
+    full_file_name = file_folder + file_name
+    np.savetxt(full_file_name, sum_simps_integrate)
+
+    file_name = 'luminosity_of_energy_%0.2f_KeV_of_surfaces.png' % energy
+    full_file_name = file_folder + file_name
+    fig.savefig(full_file_name, dpi=fig.dpi)
