@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from itertools import repeat
-from functools import partial
 
 import geometricTask.matrix as matrix
 import config
 import accretionColumnService
 from accretionColumn import AccretionColumn
 import vectors
+
 
 if __name__ == '__main__':
     R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
@@ -67,13 +67,6 @@ if __name__ == '__main__':
     # ------------------ начало заполнения матриц косинусов ---------------------------
     for key, surface in surfaces.items():
         with mp.Pool(mp.cpu_count()) as pool:
-            # async_func = partial(surface.async_fill_cos_psi_range, self=surface,
-            #                      theta_accretion_begin=theta_accretion_begin,
-            #                      theta_accretion_end=theta_accretion_end,
-            #                      top_column_phi_range=top_column.outer_surface.phi_range,
-            #                      bot_column_phi_range=bot_column.outer_surface.phi_range, e_obs=e_obs)
-            # result = pool.apply_async(try_mp.async_fill_cos_psi_range, (10,))
-            # result = (pool.map(async_func, range(config.t_max)))
             result = pool.starmap(surface.async_fill_cos_psi_range,
                          zip(range(config.t_max), repeat(theta_accretion_begin), repeat(theta_accretion_end),
                                                          repeat(top_column.outer_surface.phi_range),
@@ -83,7 +76,6 @@ if __name__ == '__main__':
         for num in result:
             cos_psi_range_final.append(num)
         surface.cos_psi_range = cos_psi_range_final
-
     # ------------------ конец заполнения матриц косинусов ---------------------------
 
     # ------------------ начало заполнения массивов светимости -----------------------
