@@ -23,7 +23,7 @@ approx_method = "cone"
 if approx_type:
     approx_method = "dipole"
 
-download_folder = 'figs/'
+file_folder = 'figs/'
 
 
 # формула 2 в статье
@@ -372,15 +372,24 @@ top_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surf
 theta_accretion_begin_outer_surface = np.pi - theta_accretion_begin_outer_surface
 theta_accretion_begin_inner_surface = np.pi - theta_accretion_begin_inner_surface
 
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111)
+ax.plot(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff)
+ax.legend()
+plt.show()
+
+
 bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
                              theta_accretion_begin_inner_surface, False)
 # ----------------- конец инициализации нижней колонки ------------------------
 
 print('phi_theta_range saved')
 file_name = "save_phi_range.txt"
-np.savetxt(file_name, top_column.outer_surface.phi_range)
+full_file_name = file_folder + file_name
+np.savetxt(full_file_name, top_column.outer_surface.phi_range)
 file_name = "save_theta_range.txt"
-np.savetxt(file_name, top_column.outer_surface.theta_range)
+full_file_name = file_folder + file_name
+np.savetxt(full_file_name, top_column.outer_surface.theta_range)
 
 # print('T_eff:')
 # print(top_column.outer_surface.T_eff)
@@ -449,7 +458,9 @@ ax.plot(phi_for_plot, sum_simps_integrate,
 ax.legend()
 fig.suptitle('total luminosity of surfaces', fontsize=14)
 # plt.yscale('log')
-fig.savefig(download_folder + 'total_luminosity_of_surfaces.png', dpi=fig.dpi)
+file_name = 'total_luminosity_of_surfaces.png'
+full_file_name = file_folder + file_name
+fig.savefig(full_file_name + 'total_luminosity_of_surfaces.png', dpi=fig.dpi)
 plt.show()
 
 observer_theta = [0] * config.t_max_for_plot
@@ -469,7 +480,9 @@ ax.plot(phi_for_plot, observer_theta, label=r'$\theta_{observer}$')
 ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
 ax.legend()
 fig.suptitle('Observer angles', fontsize=14)
-fig.savefig(download_folder + 'Observer_angles.png', dpi=fig.dpi)
+file_name = 'Observer_angles.png'
+full_file_name = file_folder + file_name
+fig.savefig(full_file_name + 'Observer_angles.png', dpi=fig.dpi)
 plt.show()
 
 while True:
@@ -513,14 +526,14 @@ while True:
     ax.plot(phi_for_plot, sum_simps_integrate,
             label='sum')
     ax.legend()
-
-    file_name = download_folder + "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (
-    energy_bot, energy_top)
-    np.savetxt(file_name, sum_simps_integrate)
+    file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
+    full_file_name = file_folder + file_name
+    np.savetxt(full_file_name, sum_simps_integrate)
 
     fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
-    file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces' % (energy_bot, energy_top)
+    file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_bot, energy_top)
+    full_file_name = file_folder + file_name
     fig.suptitle(fig_title, fontsize=14)
-    fig.savefig(download_folder + file_name + '.png', dpi=fig.dpi)
+    fig.savefig(full_file_name, dpi=fig.dpi)
     # plt.yscale('log')
     plt.show()
