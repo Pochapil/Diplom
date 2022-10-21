@@ -102,6 +102,33 @@ class AccretionColumn:
                 cos_psi_range_final.append(cos_psi_range)
             self.cos_psi_range = cos_psi_range_final
 
+        def async_fill_cos_psi_range(self,  t_index, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
+                                     bot_column_phi_range, e_obs):
+
+            cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+            # поворот
+            phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t_index
+            # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+            A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                         config.betta_mu)
+            e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+            for i in range(config.N_phi_accretion):
+                for j in range(config.N_theta_accretion):
+                    # умножать на N_theta
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    if cos_psi_range[i, j] > 0:
+                        if accretionColumnService.check_if_intersect(self.phi_range[i], self.theta_range[j],
+                                                                     e_obs_mu, self.ksi_shock,
+                                                                     theta_accretion_begin, theta_accretion_end,
+                                                                     top_column_phi_range,
+                                                                     bot_column_phi_range, self.surface_type,
+                                                                     self.R_e):
+                            cos_psi_range[i, j] = 0
+                    else:
+                        cos_psi_range[i, j] = 0
+
+            return cos_psi_range
+
         def calculate_integral_distribution(self):
             # для интеграла по simpson
             dS_simps = []  # единичная площадка при интегрировании
