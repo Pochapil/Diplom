@@ -66,6 +66,7 @@ for key, surface in surfaces.items():
                                bot_column.outer_surface.phi_range, e_obs)
 # ------------------ конец заполнения матриц косинусов ---------------------------
 
+# ------------------ начало заполнения массивов светимости -----------------------
 arr_simps_integrate = [0] * 4
 sum_simps_integrate = 0
 for key, surface in surfaces.items():
@@ -73,8 +74,11 @@ for key, surface in surfaces.items():
     # file_name = "%s %s %d.txt" % (file_name_variables, approx_method, key)
     # np.savetxt(file_name, arr_simps_integrate[key])
     sum_simps_integrate += np.array(arr_simps_integrate[key])
+# ------------------ конец заполнения массивов светимости -----------------------
+
 print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)
 
+# --------------------- вывод графика светимости ----------------------------
 fig = plt.figure(figsize=(8, 8))
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
@@ -97,11 +101,14 @@ ax.plot(phi_for_plot, sum_simps_integrate,
 ax.legend()
 fig.suptitle('total luminosity of surfaces', fontsize=14)
 # plt.yscale('log')
+plt.show()
+# --------------------- вывод графика светимости ----------------------------
+
 file_name = 'total_luminosity_of_surfaces.png'
 full_file_name = file_folder + file_name
-fig.savefig(full_file_name + 'total_luminosity_of_surfaces.png', dpi=fig.dpi)
-plt.show()
+fig.savefig(full_file_name, dpi=fig.dpi)
 
+# --------------------- вывод графика углов наблюдателя ----------------------------
 observer_theta = [0] * config.t_max_for_plot
 observer_phi = [0] * config.t_max_for_plot
 
@@ -119,23 +126,28 @@ ax.plot(phi_for_plot, observer_theta, label=r'$\theta_{observer}$')
 ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
 ax.legend()
 fig.suptitle('Observer angles', fontsize=14)
+plt.show()
+# --------------------- вывод графика углов наблюдателя ----------------------------
+
 file_name = 'Observer_angles.png'
 full_file_name = file_folder + file_name
-fig.savefig(full_file_name + 'Observer_angles.png', dpi=fig.dpi)
-plt.show()
+fig.savefig(full_file_name, dpi=fig.dpi)
 
+# ------------------ цикл для диапазона энергий ----------------------
 while True:
     energy_bot = float(input('введите нижний предел в КэВ: '))
     energy_top = float(input('введите верхний предел в КэВ: '))
-
+    # ------------------ начало заполнения массивов светимости -----------------------
     arr_simps_integrate = [0] * 4
     sum_simps_integrate = 0
     for key, surface in surfaces.items():
         arr_simps_integrate[key] = surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
         sum_simps_integrate += np.array(arr_simps_integrate[key])
+    # ------------------ конец заполнения массивов светимости -----------------------
 
     PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
+    # --------------------- вывод графика светимости ----------------------------
     fig = plt.figure(figsize=(8, 8))
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
@@ -156,14 +168,18 @@ while True:
     ax.plot(phi_for_plot, sum_simps_integrate,
             label='sum')
     ax.legend()
+    fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
+    fig.suptitle(fig_title, fontsize=14)
+    # plt.yscale('log')
+    plt.show()
+    # --------------------- вывод графика светимости ----------------------------
+
     file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
     full_file_name = file_folder + file_name
     np.savetxt(full_file_name, sum_simps_integrate)
 
-    fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
     file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_bot, energy_top)
     full_file_name = file_folder + file_name
-    fig.suptitle(fig_title, fontsize=14)
     fig.savefig(full_file_name, dpi=fig.dpi)
-    # plt.yscale('log')
-    plt.show()
+
+# ------------------ цикл для диапазона энергий ----------------------
