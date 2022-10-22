@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import multiprocessing as mp
 from itertools import repeat
+import pathlib
 
 import geometricTask.matrix as matrix
 import config
@@ -21,6 +22,9 @@ if __name__ == '__main__':
     approx_method = accretionColumnService.approx_method
 
     file_folder = 'figs/'
+    args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
+    file_folder = file_folder + args_folder
+    pathlib.Path(file_folder).mkdir(parents=True, exist_ok=True)
 
     # от поверхности NS - угол при котором радиус = радиусу НЗ
     # ----------------- начало инициализации верхней колонки ------------------------
@@ -51,9 +55,11 @@ if __name__ == '__main__':
     file_name = "save_phi_range.txt"
     full_file_name = file_folder + file_name
     np.savetxt(full_file_name, top_column.outer_surface.phi_range)
+    np.savetxt(file_name, top_column.outer_surface.phi_range)
     file_name = "save_theta_range.txt"
     full_file_name = file_folder + file_name
     np.savetxt(full_file_name, top_column.outer_surface.theta_range)
+    np.savetxt(file_name, top_column.outer_surface.theta_range)
 
     # print('T_eff:')
     # print(top_column.outer_surface.T_eff)
@@ -64,6 +70,7 @@ if __name__ == '__main__':
     # ---------------------------------------------------------------------------
 
     # ------------------ начало заполнения матриц косинусов ---------------------------
+    # распараллелил
     for key, surface in surfaces.items():
         with mp.Pool(mp.cpu_count()) as pool:
             result = pool.starmap(surface.async_fill_cos_psi_range,
@@ -99,16 +106,11 @@ if __name__ == '__main__':
     sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
     ax = fig.add_subplot(111)
-    ax.plot(phi_for_plot, arr_simps_integrate[0],
-            label='top outer')
-    ax.plot(phi_for_plot, arr_simps_integrate[1],
-            label='top inner')
-    ax.plot(phi_for_plot, arr_simps_integrate[2],
-            label='bot outer', marker='*')
-    ax.plot(phi_for_plot, arr_simps_integrate[3],
-            label='bot inner')
-    ax.plot(phi_for_plot, sum_simps_integrate,
-            label='sum')
+    ax.plot(phi_for_plot, arr_simps_integrate[0], label='top outer')
+    ax.plot(phi_for_plot, arr_simps_integrate[1], label='top inner')
+    ax.plot(phi_for_plot, arr_simps_integrate[2], label='bot outer', marker='*')
+    ax.plot(phi_for_plot, arr_simps_integrate[3], label='bot inner')
+    ax.plot(phi_for_plot, sum_simps_integrate, label='sum')
     ax.legend()
     fig.suptitle('total luminosity of surfaces', fontsize=14)
     # plt.yscale('log')
@@ -173,16 +175,11 @@ if __name__ == '__main__':
         sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
         ax = fig.add_subplot(111)
-        # ax.plot(phi_for_plot, arr_simps_integrate[0],
-        #         label='top outer')
-        # ax.plot(phi_for_plot, arr_simps_integrate[1],
-        #         label='top inner')
-        # ax.plot(phi_for_plot, arr_simps_integrate[2],
-        #         label='bot outer', marker='*')
-        # ax.plot(phi_for_plot, arr_simps_integrate[3],
-        #         label='bot inner')
-        ax.plot(phi_for_plot, sum_simps_integrate,
-                label='sum')
+        # ax.plot(phi_for_plot, arr_simps_integrate[0], label='top outer')
+        # ax.plot(phi_for_plot, arr_simps_integrate[1], label='top inner')
+        # ax.plot(phi_for_plot, arr_simps_integrate[2], label='bot outer', marker='*')
+        # ax.plot(phi_for_plot, arr_simps_integrate[3], label='bot inner')
+        ax.plot(phi_for_plot, sum_simps_integrate, label='sum')
         ax.legend()
         fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
         fig.suptitle(fig_title, fontsize=14)
@@ -190,13 +187,17 @@ if __name__ == '__main__':
         plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
+        folder = 'luminosity_in_range/'
+        pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
+
         file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
-        full_file_name = file_folder + file_name
+        full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
         file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_bot, energy_top)
-        full_file_name = file_folder + file_name
+        full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
+
     # ------------------ цикл для диапазона энергий ----------------------
 
     print('спектр')
@@ -227,16 +228,7 @@ if __name__ == '__main__':
         sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
         ax = fig.add_subplot(111)
-        # ax.plot(phi_for_plot, arr_simps_integrate[0],
-        #         label='top outer')
-        # ax.plot(phi_for_plot, arr_simps_integrate[1],
-        #         label='top inner')
-        # ax.plot(phi_for_plot, arr_simps_integrate[2],
-        #         label='bot outer', marker='*')
-        # ax.plot(phi_for_plot, arr_simps_integrate[3],
-        #         label='bot inner')
-        ax.plot(phi_for_plot, sum_simps_integrate,
-                label='sum')
+        ax.plot(phi_for_plot, sum_simps_integrate, label=r'$\nu * L_{\nu}(\nu)$')
         ax.legend()
         fig_title = 'luminosity of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
         fig.suptitle(fig_title, fontsize=14)
@@ -244,10 +236,13 @@ if __name__ == '__main__':
         plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
-        file_name = "sum_luminosity_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
-        full_file_name = file_folder + file_name
+        folder = 'nu_L_nu/'
+        pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
+
+        file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
+        full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
-        file_name = 'luminosity_of_energy_%0.2f_KeV_of_surfaces.png' % energy
-        full_file_name = file_folder + file_name
+        file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
+        full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
