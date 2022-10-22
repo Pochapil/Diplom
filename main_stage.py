@@ -9,7 +9,6 @@ import accretionColumnService
 from accretionColumn import AccretionColumn
 import vectors
 
-
 if __name__ == '__main__':
     R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
     R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
@@ -68,9 +67,9 @@ if __name__ == '__main__':
     for key, surface in surfaces.items():
         with mp.Pool(mp.cpu_count()) as pool:
             result = pool.starmap(surface.async_fill_cos_psi_range,
-                         zip(range(config.t_max), repeat(theta_accretion_begin), repeat(theta_accretion_end),
-                                                         repeat(top_column.outer_surface.phi_range),
-                                                         repeat(bot_column.outer_surface.phi_range),repeat(e_obs)))
+                                  zip(range(config.t_max), repeat(theta_accretion_begin), repeat(theta_accretion_end),
+                                      repeat(top_column.outer_surface.phi_range),
+                                      repeat(bot_column.outer_surface.phi_range), repeat(e_obs)))
 
         cos_psi_range_final = []
         for num in result:

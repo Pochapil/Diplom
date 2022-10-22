@@ -1,5 +1,6 @@
 import numpy as np
 import scipy.integrate
+from scipy import interpolate
 
 import accretionColumnService
 import config
@@ -48,19 +49,21 @@ class AccretionColumn:
 
         def correct_T_eff(self):
             # так как нахожу распределение Teff по отрезку кси, то нужно привести к виду по сетке theta !!
-            # нужно сместить для увеличения точности
-            ksi_stop = 1.
+            # нужно проинтерполировать внутри отрезка
+            ksi_stop = 0.99
             ksi_inc = - (self.ksi_shock - ksi_stop) / config.N_theta_accretion
             ksi_range = np.arange(self.ksi_shock, ksi_stop, ksi_inc)
             ksi_bs = ksi_range[::-1]
-            i = 0  # left_border
-            true_T_eff = []
-            for theta in self.theta_range:
-                while ksi_bs[i + 1] < self.R_e / config.R_ns * np.sin(theta) ** 2 and (
-                        i < config.N_theta_accretion - 2):
-                    i += 1
-                true_T_eff.append(self.T_eff[i])
-            self.T_eff = np.array(true_T_eff)
+
+            x = ksi_bs
+            y = self.T_eff
+            f = interpolate.interp1d(x, y, kind='cubic')
+
+            x_new = self.R_e / config.R_ns * np.sin(self.theta_range[1:-1]) ** 2
+            y_new = f(x_new)
+
+            for i in range(0, (len(y_new))):
+                self.T_eff[i + 1] = y_new[i]
 
         def create_array_normal(self, phi_range, theta_range, surface_type=True):
             array_normal = []  # матрица нормалей
@@ -102,7 +105,7 @@ class AccretionColumn:
                 cos_psi_range_final.append(cos_psi_range)
             self.cos_psi_range = cos_psi_range_final
 
-        def async_fill_cos_psi_range(self,  t_index, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
+        def async_fill_cos_psi_range(self, t_index, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
                                      bot_column_phi_range, e_obs):
 
             cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
