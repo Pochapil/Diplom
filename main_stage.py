@@ -43,6 +43,7 @@ if __name__ == '__main__':
     ax = fig.add_subplot(111)
     ax.plot(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff)
     plt.show()
+    plt.close()
 
     bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
                                  theta_accretion_begin_inner_surface, False)
@@ -115,6 +116,7 @@ if __name__ == '__main__':
     fig.suptitle('total luminosity of surfaces', fontsize=14)
     # plt.yscale('log')
     plt.show()
+    plt.close()
     # --------------------- вывод графика светимости ----------------------------
 
     file_name = 'total_luminosity_of_surfaces.png'
@@ -140,6 +142,7 @@ if __name__ == '__main__':
     ax.legend()
     fig.suptitle('Observer angles', fontsize=14)
     plt.show()
+    plt.close()
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
     file_name = 'Observer_angles.png'
@@ -147,13 +150,20 @@ if __name__ == '__main__':
     fig.savefig(full_file_name, dpi=fig.dpi)
 
     # ------------------ цикл для диапазона энергий ----------------------
-
-    while True:
-        try:
-            energy_bot = float(input('введите нижний предел в КэВ: '))
-            energy_top = float(input('введите верхний предел в КэВ: '))
-        except ValueError:
-            break
+    energy_i = 0
+    while energy_i < 10:
+        if energy_i == 0:
+            energy_bot = 1
+            energy_top = 4
+        else:
+            energy_bot = energy_top
+            energy_top = energy_top + 4
+        energy_i += 1
+        # try:
+        #     energy_bot = float(input('введите нижний предел в КэВ: '))
+        #     energy_top = float(input('введите верхний предел в КэВ: '))
+        # except ValueError:
+        #     break
         # ------------------ начало заполнения массивов светимости -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
@@ -184,29 +194,32 @@ if __name__ == '__main__':
         fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
         fig.suptitle(fig_title, fontsize=14)
         # plt.yscale('log')
-        plt.show()
+        # plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
         folder = 'luminosity_in_range/'
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
 
-        file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
+        pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+        file_name = "txt/sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
         full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
         file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_bot, energy_top)
         full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
-
+        plt.close()
     # ------------------ цикл для диапазона энергий ----------------------
 
     print('спектр')
-
-    while True:
-        try:
-            energy = float(input('введите энергию в КэВ: '))
-        except ValueError:
-            break
+    energy_i = 1
+    while energy_i < 32:
+        # try:
+        #     energy = float(input('введите энергию в КэВ: '))
+        # except ValueError:
+        #     break
+        energy = energy_i
+        energy_i += 1
         # ------------------ начало заполнения массивов светимости -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
@@ -233,16 +246,18 @@ if __name__ == '__main__':
         fig_title = 'luminosity of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
         fig.suptitle(fig_title, fontsize=14)
         # plt.yscale('log')
-        plt.show()
+        # plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
         folder = 'nu_L_nu/'
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
 
-        file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
+        pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+        file_name = "txt/nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
         full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
         file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
         full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
+        plt.close()
