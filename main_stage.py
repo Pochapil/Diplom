@@ -42,7 +42,12 @@ if __name__ == '__main__':
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
     ax.plot(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff)
-    plt.show()
+    ax.set_xlabel('phase')
+    ax.set_ylabel('T_eff, K')
+
+    file_name = 'T_eff.png'
+    full_file_name = file_folder + file_name
+    fig.savefig(full_file_name, dpi=fig.dpi)
     plt.close()
 
     bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
@@ -112,10 +117,12 @@ if __name__ == '__main__':
     ax.plot(phi_for_plot, arr_simps_integrate[2], label='bot outer', marker='*')
     ax.plot(phi_for_plot, arr_simps_integrate[3], label='bot inner')
     ax.plot(phi_for_plot, sum_simps_integrate, label='sum')
+    ax.set_xlabel('phase')
+    ax.set_ylabel('luminosity, erg/s')
     ax.legend()
     fig.suptitle('total luminosity of surfaces', fontsize=14)
     # plt.yscale('log')
-    plt.show()
+    # plt.show()
     plt.close()
     # --------------------- вывод графика светимости ----------------------------
 
@@ -141,7 +148,7 @@ if __name__ == '__main__':
     ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
     ax.legend()
     fig.suptitle('Observer angles', fontsize=14)
-    plt.show()
+    # plt.show()
     plt.close()
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
@@ -211,8 +218,10 @@ if __name__ == '__main__':
         plt.close()
     # ------------------ цикл для диапазона энергий ----------------------
 
-    print('спектр')
+    print('Spectral Energy Distribution')
     energy_i = 1
+
+    # ------------------ цикл для Spectral Energy Distribution ------------------
     while energy_i < 32:
         # try:
         #     energy = float(input('введите энергию в КэВ: '))
@@ -220,13 +229,13 @@ if __name__ == '__main__':
         #     break
         energy = energy_i
         energy_i += 1
-        # ------------------ начало заполнения массивов светимости -----------------------
+        # ------------------ начало заполнения массивов Spectral Energy -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = surface.calculate_luminosity_on_energy(energy)
+            arr_simps_integrate[key] = surface.calculate_nu_L_nu_on_energy(energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
-        # ------------------ конец заполнения массивов светимости -----------------------
+        # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
         PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
@@ -242,8 +251,10 @@ if __name__ == '__main__':
 
         ax = fig.add_subplot(111)
         ax.plot(phi_for_plot, sum_simps_integrate, label=r'$\nu * L_{\nu}(\nu)$')
+        ax.set_xlabel('phase')
+        ax.set_ylabel('Spectral energy, erg/s')
         ax.legend()
-        fig_title = 'luminosity of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
+        fig_title = 'Spectral Energy Distribution of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
         fig.suptitle(fig_title, fontsize=14)
         # plt.yscale('log')
         # plt.show()
@@ -261,3 +272,61 @@ if __name__ == '__main__':
         full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
+        # ------------------ цикл для Spectral Energy Distribution ------------------
+
+    print('спектр')
+    energy_i = 1
+
+    # ------------------ цикл для Spectral Energy Distribution ------------------
+    while energy_i < 32:
+        # try:
+        #     energy = float(input('введите энергию в КэВ: '))
+        # except ValueError:
+        #     break
+        energy = energy_i
+        energy_i += 1
+        # ------------------ начало заполнения массивов Spectral Energy -----------------------
+        arr_simps_integrate = [0] * 4
+        sum_simps_integrate = 0
+        for key, surface in surfaces.items():
+            arr_simps_integrate[key] = surface.calculate_L_nu_on_energy(energy)
+            sum_simps_integrate += np.array(arr_simps_integrate[key])
+        # ------------------ конец заполнения массивов Spectral Energy -----------------------
+
+        PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+
+        # --------------------- вывод графика светимости ----------------------------
+        fig = plt.figure(figsize=(8, 8))
+        phi_for_plot = list(
+            config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
+
+        append_index = config.t_max_for_plot - config.t_max
+        for i in range(4):
+            arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i][0:append_index])
+        sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
+
+        ax = fig.add_subplot(111)
+        ax.plot(phi_for_plot, sum_simps_integrate, label=r'$\nu * L_{\nu}(\nu)$')
+        ax.set_xlabel('phase')
+        ax.set_ylabel(r'$Spectrum, erg * s^{-1} hz^{-1}$')
+        ax.legend()
+        fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
+        fig.suptitle(fig_title, fontsize=14)
+        # plt.yscale('log')
+        # plt.show()
+        # --------------------- вывод графика светимости ----------------------------
+
+        folder = 'L_nu/'
+        pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
+
+        pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+        file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
+        full_file_name = file_folder + folder + file_name
+        np.savetxt(full_file_name, sum_simps_integrate)
+
+        file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
+        full_file_name = file_folder + folder + file_name
+        fig.savefig(full_file_name, dpi=fig.dpi)
+        plt.close()
+        # ------------------ цикл для Spectral Energy Distribution ------------------
+

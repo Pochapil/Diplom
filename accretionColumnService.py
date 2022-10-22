@@ -147,7 +147,8 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
 
                 # для верхнего конуса:
                 intersect_z_correct = 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_end)
-                intersect_phi_correct = top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]
+                intersect_phi_correct = (top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]) or (
+                            0 < intersect_phi < top_column_phi_range[-1] - 2 * np.pi)
                 if intersect_z_correct and intersect_phi_correct and intersect_r_correct:
                     return True
 

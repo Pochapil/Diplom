@@ -171,6 +171,7 @@ class AccretionColumn:
                        * 1 / (np.e ** (config.h_plank_ergs * config.c / (wavelength * config.k_bolc * T)) - 1)
 
             def plank_energy_on_frequency(frequency, T):
+                # erg / s / sr / cm**2 / hz
                 return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
                        * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
 
@@ -207,7 +208,7 @@ class AccretionColumn:
 
             return integrate_sum
 
-        def calculate_luminosity_on_energy(self, energy):
+        def calculate_L_nu_on_energy(self, energy):
             # КэВ
             def plank_energy_on_frequency(frequency, T):
                 return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
@@ -224,7 +225,7 @@ class AccretionColumn:
                 dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
                 dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
 
-            plank_func = frequency * plank_energy_on_frequency(frequency, self.T_eff)
+            plank_func = plank_energy_on_frequency(frequency, self.T_eff)
 
             integrate_step = [0] * config.N_phi_accretion
             integrate_sum = [0] * config.t_max
@@ -236,3 +237,11 @@ class AccretionColumn:
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
             return integrate_sum
+
+
+        def calculate_nu_L_nu_on_energy(self, energy):
+            # КэВ
+            coefficient = 1000  # КэВ а не эВ
+            frequency = coefficient * energy / config.h_plank_evs  # E = h f
+            return np.array(self.calculate_L_nu_on_energy(energy)) * frequency
+

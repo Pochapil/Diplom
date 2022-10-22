@@ -45,7 +45,7 @@ M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
 
 ksi_param = 0.5  # между 1 и 2 формулой в статье
 
-lim_phi_accretion = 360 * grad_to_rad * a_portion  # верхний предел по phi
+lim_phi_accretion = 2 * pi * a_portion  # верхний предел по phi
 phi_accretion_begin_deg = 0  # нижний предел по phi
 phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad  # нижний предел по phi
 # количество шагов
