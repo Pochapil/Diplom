@@ -158,14 +158,17 @@ if __name__ == '__main__':
 
     # ------------------ цикл для диапазона энергий ----------------------
     energy_i = 0
-    while energy_i < 10:
+    N_energy = 10
+    PF = [0] * N_energy
+    folder = 'luminosity_in_range/'
+    while energy_i < N_energy:
         if energy_i == 0:
-            energy_bot = 1
-            energy_top = 4
+            energy_min = 1
+            energy_max = 4
         else:
-            energy_bot = energy_top
-            energy_top = energy_top + 4
-        energy_i += 1
+            energy_min = energy_max
+            energy_max = energy_max + 4
+
         # try:
         #     energy_bot = float(input('введите нижний предел в КэВ: '))
         #     energy_top = float(input('введите верхний предел в КэВ: '))
@@ -175,12 +178,11 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = surface.calculate_integral_distribution_in_range(energy_bot, energy_top)
+            arr_simps_integrate[key] = surface.calculate_integral_distribution_in_range(energy_min, energy_max)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов светимости -----------------------
 
-        PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
-
+        PF[energy_i] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
         # --------------------- вывод графика светимости ----------------------------
         fig = plt.figure(figsize=(8, 8))
         phi_for_plot = list(
@@ -198,37 +200,44 @@ if __name__ == '__main__':
         # ax.plot(phi_for_plot, arr_simps_integrate[3], label='bot inner')
         ax.plot(phi_for_plot, sum_simps_integrate, label='sum')
         ax.legend()
-        fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (energy_bot, energy_top, PF)
+        fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (
+            energy_min, energy_max, PF[energy_i])
         fig.suptitle(fig_title, fontsize=14)
         # plt.yscale('log')
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
-
-        folder = 'luminosity_in_range/'
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
 
         pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
-        file_name = "txt/sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_bot, energy_top)
+        file_name = "txt/sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
         full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
-        file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_bot, energy_top)
+        file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_min, energy_max)
         full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
+        energy_i += 1
     # ------------------ цикл для диапазона энергий ----------------------
+    file_name = "PF.txt"
+    full_file_name = file_folder + folder + file_name
+    np.savetxt(full_file_name, PF)
 
     print('Spectral Energy Distribution')
-    energy_i = 1
-
+    energy_i = 0
+    N_energy = 10
+    PF = [0] * N_energy
+    folder = 'nu_L_nu/'
     # ------------------ цикл для Spectral Energy Distribution ------------------
-    while energy_i < 32:
+    while energy_i < N_energy:
+        if energy_i == 0:
+            energy = 1
+        else:
+            energy = energy_i * 4
         # try:
         #     energy = float(input('введите энергию в КэВ: '))
         # except ValueError:
         #     break
-        energy = energy_i
-        energy_i += 1
         # ------------------ начало заполнения массивов Spectral Energy -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
@@ -237,7 +246,7 @@ if __name__ == '__main__':
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
-        PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+        PF[energy_i] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
         # --------------------- вывод графика светимости ----------------------------
         fig = plt.figure(figsize=(8, 8))
@@ -254,13 +263,12 @@ if __name__ == '__main__':
         ax.set_xlabel('phase')
         ax.set_ylabel('Spectral energy, erg/s')
         ax.legend()
-        fig_title = 'Spectral Energy Distribution of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
+        fig_title = 'Spectral Energy Distribution of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF[energy_i])
         fig.suptitle(fig_title, fontsize=14)
         # plt.yscale('log')
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
-        folder = 'nu_L_nu/'
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
 
         pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
@@ -272,19 +280,29 @@ if __name__ == '__main__':
         full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
+        energy_i += 1
         # ------------------ цикл для Spectral Energy Distribution ------------------
 
-    print('спектр')
-    energy_i = 1
+    file_name = "PF.txt"
+    full_file_name = file_folder + folder + file_name
+    np.savetxt(full_file_name, PF)
 
-    # ------------------ цикл для Spectral Energy Distribution ------------------
-    while energy_i < 32:
+    print('спектр')
+    energy_i = 0
+    N_energy = 10
+    PF = [0] * N_energy
+    folder = 'L_nu/'
+    # ------------------ цикл для Spectrum Distribution ------------------
+    while energy_i < N_energy:
+        if energy_i == 0:
+            energy = 1
+        else:
+            energy = energy_i * 4
         # try:
         #     energy = float(input('введите энергию в КэВ: '))
         # except ValueError:
         #     break
-        energy = energy_i
-        energy_i += 1
+
         # ------------------ начало заполнения массивов Spectral Energy -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
@@ -293,7 +311,7 @@ if __name__ == '__main__':
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
-        PF = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+        PF[energy_i] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
         # --------------------- вывод графика светимости ----------------------------
         fig = plt.figure(figsize=(8, 8))
@@ -306,17 +324,16 @@ if __name__ == '__main__':
         sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
 
         ax = fig.add_subplot(111)
-        ax.plot(phi_for_plot, sum_simps_integrate, label=r'$\nu * L_{\nu}(\nu)$')
+        ax.plot(phi_for_plot, sum_simps_integrate, label=r'$L_{\nu}(\nu)$')
         ax.set_xlabel('phase')
         ax.set_ylabel(r'$Spectrum, erg * s^{-1} hz^{-1}$')
         ax.legend()
-        fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF)
+        fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF[energy_i])
         fig.suptitle(fig_title, fontsize=14)
         # plt.yscale('log')
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
-        folder = 'L_nu/'
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
 
         pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
@@ -328,5 +345,9 @@ if __name__ == '__main__':
         full_file_name = file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
-        # ------------------ цикл для Spectral Energy Distribution ------------------
+        energy_i += 1
+        # ------------------ цикл для Spectrum Distribution ------------------
 
+    file_name = "PF.txt"
+    full_file_name = file_folder + folder + file_name
+    np.savetxt(full_file_name, PF)

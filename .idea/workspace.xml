@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e4169d14-b72c-4590-b988-e001dae1939f" name="Changes" comment="исправление Тэфф">
+    <list default="true" id="e4169d14-b72c-4590-b988-e001dae1939f" name="Changes" comment="L_nu + nu L_nu + учел что top column.phi из за fi_0 может &gt; 360">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/new main.py" beforeDir="false" afterPath="$PROJECT_DIR$/new_main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/plot_3d_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/plot_3d_configuration.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/save29.txt" beforeDir="false" afterPath="$PROJECT_DIR$/save29.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/try.py" beforeDir="false" afterPath="$PROJECT_DIR$/try.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main_stage.py" beforeDir="false" afterPath="$PROJECT_DIR$/main_stage.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,7 +48,7 @@
       <recent name="D:\MyProgs\Python\Diplom" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.new_main (1)">
+  <component name="RunManager" selected="Python.plot_PF_and_L_nu">
     <configuration name="config" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Diplom" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -97,7 +93,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="new_main (1)" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="main_stage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Diplom" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -110,29 +106,7 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/new_main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="new_main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Diplom" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="D:\MyProgs\Python\Diplom\new_main.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main_stage.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -163,7 +137,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="try_staff" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+    <configuration name="plot_PF_and_L_nu" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Diplom" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -176,7 +150,29 @@
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/try_staff.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/plot_PF_and_L_nu.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="plot_fig_kevs" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Diplom" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/plot_fig_kevs.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -187,10 +183,10 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.new_main (1)" />
-        <item itemvalue="Python.new_main" />
+        <item itemvalue="Python.plot_PF_and_L_nu" />
+        <item itemvalue="Python.plot_fig_kevs" />
+        <item itemvalue="Python.main_stage" />
         <item itemvalue="Python.plot_3d_configuration" />
-        <item itemvalue="Python.try_staff" />
         <item itemvalue="Python.config" />
       </list>
     </recent_temporary>
@@ -253,91 +249,25 @@
       <workItem from="1663920465208" duration="8772000" />
       <workItem from="1664032664784" duration="4422000" />
       <workItem from="1664395746848" duration="1496000" />
-      <workItem from="1664526722838" duration="9325000" />
-    </task>
-    <task id="LOCAL-00001" summary="Initial">
-      <created>1657535244882</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1657535244882</updated>
-    </task>
-    <task id="LOCAL-00002" summary="T_eff для полной светимости но не помогло">
-      <created>1657742000295</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1657742000295</updated>
-    </task>
-    <task id="LOCAL-00003" summary="intersect">
-      <created>1657826105586</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1657826105586</updated>
-    </task>
-    <task id="LOCAL-00004" summary="intersect">
-      <created>1657826866705</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1657826866705</updated>
-    </task>
-    <task id="LOCAL-00005" summary="intersect">
-      <created>1657827755445</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1657827755445</updated>
-    </task>
-    <task id="LOCAL-00006" summary="theta corrections">
-      <created>1657829747404</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1657829747404</updated>
-    </task>
-    <task id="LOCAL-00007" summary="some adjustments in main - normal flag, delete some trash functions">
-      <created>1658168465502</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1658168465502</updated>
-    </task>
-    <task id="LOCAL-00008" summary="new func for lumiinosity + 2 column">
-      <created>1658229073443</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1658229073443</updated>
-    </task>
-    <task id="LOCAL-00009" summary="fix the 2 column">
-      <created>1658230850042</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1658230850042</updated>
-    </task>
-    <task id="LOCAL-00010" summary="sum, 4 columns">
-      <created>1658421312141</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1658421312141</updated>
-    </task>
-    <task id="LOCAL-00011" summary="intersect with both columns">
-      <created>1658423287066</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1658423287067</updated>
-    </task>
-    <task id="LOCAL-00012" summary="plot 3d as func">
-      <created>1658586247255</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1658586247255</updated>
+      <workItem from="1664526722838" duration="9458000" />
+      <workItem from="1664542809388" duration="6998000" />
+      <workItem from="1664565722704" duration="3050000" />
+      <workItem from="1664641883694" duration="14000" />
+      <workItem from="1665131486876" duration="8670000" />
+      <workItem from="1665762743036" duration="294000" />
+      <workItem from="1665763059425" duration="2911000" />
+      <workItem from="1665778131243" duration="4379000" />
+      <workItem from="1665823774460" duration="4180000" />
+      <workItem from="1665923559741" duration="4000" />
+      <workItem from="1666342769936" duration="11330000" />
+      <workItem from="1666380333703" duration="4408000" />
+      <workItem from="1666430078692" duration="3871000" />
+      <workItem from="1666433986653" duration="1804000" />
+      <workItem from="1666461174206" duration="4058000" />
+      <workItem from="1666524387596" duration="5321000" />
+      <workItem from="1666600266460" duration="612000" />
+      <workItem from="1666642499744" duration="318000" />
+      <workItem from="1666709709484" duration="4686000" />
     </task>
     <task id="LOCAL-00013" summary="3d vectors">
       <created>1658587456750</created>
@@ -549,7 +479,140 @@
       <option name="project" value="LOCAL" />
       <updated>1664040068068</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="функция планка + константы">
+      <created>1664538239013</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1664538239013</updated>
+    </task>
+    <task id="LOCAL-00044" summary="функция планка оптимизация">
+      <created>1664546105921</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1664546105921</updated>
+    </task>
+    <task id="LOCAL-00045" summary="Кэв а не эв! + углы наблюдателя">
+      <created>1664568905089</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1664568905089</updated>
+    </task>
+    <task id="LOCAL-00046" summary="title для графиков">
+      <created>1664569247394</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1664569247394</updated>
+    </task>
+    <task id="LOCAL-00047" summary="нужно делить на сигма">
+      <created>1665140187526</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1665140187526</updated>
+    </task>
+    <task id="LOCAL-00048" summary="были лишние итерации для интеграла и косинуса - оптимизировал">
+      <created>1665142015213</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1665142015213</updated>
+    </task>
+    <task id="LOCAL-00049" summary="общий случай для индекса присоединения">
+      <created>1665142624736</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1665142624736</updated>
+    </task>
+    <task id="LOCAL-00050" summary="save fig">
+      <created>1665782750891</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1665782750891</updated>
+    </task>
+    <task id="LOCAL-00051" summary="PF + better plot">
+      <created>1665827705493</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1665827705493</updated>
+    </task>
+    <task id="LOCAL-00052" summary="refactoring - new main is main_stage + file_names">
+      <created>1666354270059</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1666354270060</updated>
+    </task>
+    <task id="LOCAL-00053" summary="cycles for surfaces">
+      <created>1666355500479</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1666355500479</updated>
+    </task>
+    <task id="LOCAL-00054" summary="better order of plots and save">
+      <created>1666356152787</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1666356152787</updated>
+    </task>
+    <task id="LOCAL-00055" summary="спектр на определенной частоте - да пока с повторами">
+      <created>1666358297821</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1666358297821</updated>
+    </task>
+    <task id="LOCAL-00056" summary="now with multiprocessing - it's working!">
+      <created>1666384598939</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1666384598940</updated>
+    </task>
+    <task id="LOCAL-00057" summary="formatting">
+      <created>1666384779097</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1666384779097</updated>
+    </task>
+    <task id="LOCAL-00058" summary="interpolate t_eff">
+      <created>1666431646095</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1666431646095</updated>
+    </task>
+    <task id="LOCAL-00059" summary="save files at directory">
+      <created>1666434217845</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1666434217845</updated>
+    </task>
+    <task id="LOCAL-00060" summary="txt and figs dir">
+      <created>1666435194555</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1666435194555</updated>
+    </task>
+    <task id="LOCAL-00061" summary="L_nu + nu L_nu + учел что top column.phi из за fi_0 может &gt; 360">
+      <created>1666465204483</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1666465204483</updated>
+    </task>
+    <option name="localTasksCounter" value="62" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -567,41 +630,45 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="finally working!! wrong direction vector" />
-    <MESSAGE value="observer vector + comment" />
-    <MESSAGE value="origin point was wrong!!" />
-    <MESSAGE value="simple animation" />
-    <MESSAGE value="slider added" />
-    <MESSAGE value="slider init value" />
-    <MESSAGE value="set phase" />
-    <MESSAGE value="problem with 2 pi fixed" />
-    <MESSAGE value="some trials + more const in config file" />
-    <MESSAGE value="refactor some lines" />
-    <MESSAGE value="correct if clause for any value of a_portion" />
-    <MESSAGE value="небольшие улучшения" />
-    <MESSAGE value="как сделать пересечения?" />
-    <MESSAGE value="работает!!!!" />
-    <MESSAGE value="теперь main не нужен. перешел на new main" />
-    <MESSAGE value="исправил ошибки в условиях на пересечение, что то не так со сферой" />
-    <MESSAGE value="коммент + файл вектор" />
-    <MESSAGE value="самосогласованность + константы" />
-    <MESSAGE value="лучшее имя переменной" />
     <MESSAGE value="лучше строгое неравенство" />
     <MESSAGE value="разбил на подметоды + попытка полинома" />
     <MESSAGE value="исправил конус + добавил для произвольного угла" />
     <MESSAGE value="исправил диполь + 3д рис согласованно" />
     <MESSAGE value="начало для планка" />
     <MESSAGE value="исправление Тэфф" />
-    <option name="LAST_COMMIT_MESSAGE" value="исправление Тэфф" />
+    <MESSAGE value="функция планка + константы" />
+    <MESSAGE value="функция планка оптимизация" />
+    <MESSAGE value="Кэв а не эв! + углы наблюдателя" />
+    <MESSAGE value="title для графиков" />
+    <MESSAGE value="нужно делить на сигма" />
+    <MESSAGE value="были лишние итерации для интеграла и косинуса - оптимизировал" />
+    <MESSAGE value="общий случай для индекса присоединения" />
+    <MESSAGE value="save fig" />
+    <MESSAGE value="PF + better plot" />
+    <MESSAGE value="refactoring - new main is main_stage + file_names" />
+    <MESSAGE value="cycles for surfaces" />
+    <MESSAGE value="better order of plots and save" />
+    <MESSAGE value="спектр на определенной частоте - да пока с повторами" />
+    <MESSAGE value="now with multiprocessing - it's working!" />
+    <MESSAGE value="formatting" />
+    <MESSAGE value="interpolate t_eff" />
+    <MESSAGE value="save files at directory" />
+    <MESSAGE value="txt and figs dir" />
+    <MESSAGE value="L_nu + nu L_nu + учел что top column.phi из за fi_0 может &gt; 360" />
+    <option name="LAST_COMMIT_MESSAGE" value="L_nu + nu L_nu + учел что top column.phi из за fi_0 может &gt; 360" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Diplom$prev_version_of_main.coverage" NAME="prev version of main Coverage Results" MODIFIED="1663085663563" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Diplom$new_main__1_.coverage" NAME="new_main (1) Coverage Results" MODIFIED="1664537508181" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$plot_PF_and_L_nu.coverage" NAME="plot_PF_and_L_nu Coverage Results" MODIFIED="1666724541348" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$new_main__1_.coverage" NAME="new_main (1) Coverage Results" MODIFIED="1666354447700" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Diplom$try.coverage" NAME="try Coverage Results" MODIFIED="1662218241630" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Diplom$config.coverage" NAME="config Coverage Results" MODIFIED="1663594000322" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Diplom$try_staff.coverage" NAME="try_staff Coverage Results" MODIFIED="1664534851275" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$try_staff.coverage" NAME="try_staff Coverage Results" MODIFIED="1666382238118" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$accretionColumn.coverage" NAME="accretionColumn Coverage Results" MODIFIED="1666431207703" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$config.coverage" NAME="config Coverage Results" MODIFIED="1666464555620" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$plot_fig_kevs.coverage" NAME="plot_fig_kevs Coverage Results" MODIFIED="1666721698686" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Diplom$main.coverage" NAME="main Coverage Results" MODIFIED="1663595088284" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/Diplom$plot_3d_configuration.coverage" NAME="plot_3d_configuration Coverage Results" MODIFIED="1664536026182" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$main_stage.coverage" NAME="main_stage Coverage Results" MODIFIED="1666720758430" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Diplom$plot_3d_configuration.coverage" NAME="plot_3d_configuration Coverage Results" MODIFIED="1666465234098" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Diplom$new_main.coverage" NAME="new main Coverage Results" MODIFIED="1664536292386" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
