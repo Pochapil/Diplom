@@ -65,8 +65,10 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
     y0 = [u1, v1]
 
     ksiStop1 = 1.
-    ksiInc1 = - (ksiShock - ksiStop1) / number_of_steps
-    ksi1 = np.arange(ksiShock, ksiStop1, ksiInc1)
+    # ksiInc1 = - (ksiShock - ksiStop1) / number_of_steps
+    # ksi1 = np.arange(ksiShock, ksiStop1, ksiInc1)
+    ksiInc1 = - (ksiShock - ksiStop1) / (number_of_steps - 1)
+    ksi1 = np.arange(ksiShock, ksiStop1 + ksiInc1, ksiInc1)
     solution_before_ksi = odeint(func, y0, ksi1, args=(params,), mxstep=5000000)  # от 0 до ксишок
 
     # analytic solve bs
