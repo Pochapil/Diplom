@@ -33,8 +33,8 @@ class AccretionColumn:
             if not column_type:
                 theta_accretion_end = np.pi - theta_accretion_end
                 phi_delta = np.pi
-            step_phi_accretion = config.lim_phi_accretion / config.N_phi_accretion
-            step_theta_accretion = (theta_accretion_end - theta_accretion_begin) / config.N_theta_accretion
+            step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+            step_theta_accretion = (theta_accretion_end - theta_accretion_begin) / (config.N_theta_accretion - 1)
 
             self.theta_range = np.array(
                 [theta_accretion_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
@@ -50,17 +50,17 @@ class AccretionColumn:
         def correct_T_eff(self):
             # так как нахожу распределение Teff по отрезку кси, то нужно привести к виду по сетке theta !!
             # нужно проинтерполировать внутри отрезка
-            ksi_stop = 1.
-            ksi_inc = - (self.ksi_shock - ksi_stop) / (config.N_theta_accretion - 1)
-            ksi_range = np.arange(self.ksi_shock, ksi_stop + ksi_inc, ksi_inc)
-            ksi_bs = ksi_range[::-1]
+            ksi_stop = 1
+            ksi_inc = (self.ksi_shock - ksi_stop) / (config.N_theta_accretion - 1)
+            ksi_range = np.array([ksi_stop + ksi_inc * i for i in range(config.N_theta_accretion)])
 
-            x = ksi_bs
+            x = ksi_range
             y = self.T_eff
             f = interpolate.interp1d(x, y, kind='cubic')
 
-            x_new = self.R_e / config.R_ns * np.sin(self.theta_range[1:]) ** 2
+            x_new = self.R_e / config.R_ns * np.sin(self.theta_range[1:-1]) ** 2
             y_new = f(x_new)
+
             for i in range(0, (len(y_new))):
                 self.T_eff[i + 1] = y_new[i]
 
@@ -237,10 +237,8 @@ class AccretionColumn:
 
             return integrate_sum
 
-
         def calculate_nu_L_nu_on_energy(self, energy):
             # КэВ
             coefficient = 1000  # КэВ а не эВ
             frequency = coefficient * energy / config.h_plank_evs  # E = h f
             return np.array(self.calculate_L_nu_on_energy(energy)) * frequency
-
