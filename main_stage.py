@@ -24,6 +24,7 @@ if __name__ == '__main__':
     file_folder = 'figs/'
     args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
     file_folder = file_folder + args_folder
+
     pathlib.Path(file_folder).mkdir(parents=True, exist_ok=True)
 
     # от поверхности NS - угол при котором радиус = радиусу НЗ
@@ -207,8 +208,8 @@ if __name__ == '__main__':
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
-
         pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+
         file_name = "txt/sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
         full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
@@ -270,8 +271,8 @@ if __name__ == '__main__':
         # --------------------- вывод графика светимости ----------------------------
 
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
-
         pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+
         file_name = "txt/nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
         full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
@@ -335,8 +336,8 @@ if __name__ == '__main__':
         # --------------------- вывод графика светимости ----------------------------
 
         pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
-
         pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+
         file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
         full_file_name = file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)

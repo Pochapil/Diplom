@@ -48,12 +48,10 @@ ax.legend()
 fig_title = r'$L_{\nu}$'
 fig.suptitle(fig_title, fontsize=14)
 
-
 file_name = folder[:-1] + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
-
 
 folder = 'nu_L_nu/'
 arr = [0] * N_energy
@@ -71,8 +69,53 @@ ax.legend()
 fig_title = r'$\nu L_{\nu}$'
 fig.suptitle(fig_title, fontsize=14)
 
-
 file_name = folder[:-1] + '.png'
+full_file_name = file_folder + folder + file_name
+fig.savefig(full_file_name, dpi=fig.dpi)
+plt.close()
+
+folder = 'L_nu/'
+phase_index = 0
+arr = [0] * N_energy
+for i in range(N_energy):
+    file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
+    full_file_name = file_folder + folder + file_name
+    arr[i] = np.loadtxt(full_file_name)
+
+L_nu = []
+for i in range(N_energy):
+    L_nu.append(arr[i][phase_index])
+energy_i = 0
+energy = [1] * N_energy
+for i in range(1, N_energy):
+    energy[i] = i * 4
+
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111)
+ax.plot(energy, L_nu)
+fig_title = r'$L_{\nu}$'
+fig.suptitle(fig_title, fontsize=14)
+
+file_name = 'L_nu(nu)' + '.png'
+full_file_name = file_folder + folder + file_name
+fig.savefig(full_file_name, dpi=fig.dpi)
+plt.close()
+
+L_nu_avg_on_phase = [0] * N_energy
+for i in range(N_energy):
+    sum = 0
+    for j in range(config.t_max):
+        sum += arr[i][j]
+    avg = sum / config.t_max
+    L_nu_avg_on_phase[i] = avg
+
+fig = plt.figure(figsize=(8, 8))
+ax = fig.add_subplot(111)
+ax.plot(energy, L_nu_avg_on_phase)
+fig_title = r'$L_{\nu}$'
+fig.suptitle(fig_title, fontsize=14)
+
+file_name = 'L_nu(nu)_avg' + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
