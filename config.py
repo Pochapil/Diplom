@@ -36,7 +36,7 @@ t_max = (max_phase // omega_ns) + (1 if max_phase % omega_ns > 0 else 0)
 dRe_div_Re = 0.25  # взял просто число
 # M_accretion_rate = 10 ** 38 * R_ns / G / MSun  # темп аккреции
 ksi_rad = 3 / 2
-a_portion = 1  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
+a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
 k = 0.35  # opacity непрозрачность
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
@@ -46,7 +46,7 @@ M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
 ksi_param = 0.5  # между 1 и 2 формулой в статье
 
 lim_phi_accretion = 2 * pi * a_portion  # верхний предел по phi
-phi_accretion_begin_deg = 70  # нижний предел по phi
+phi_accretion_begin_deg = 0  # нижний предел по phi
 phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad  # нижний предел по phi
 # количество шагов
 N_phi_accretion = 100
