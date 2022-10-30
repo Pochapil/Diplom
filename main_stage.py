@@ -71,24 +71,30 @@ if __name__ == '__main__':
             return phi_for_plot, array_to_plot
 
 
+    def save_arr_as_txt(arr, file_folder, file_name):
+        full_file_name = file_folder + file_name
+        np.savetxt(full_file_name, arr)
+
+
     R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
     R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
     print('R_e = %f' % (R_e / config.R_ns))
-    R_e_outer_surface, R_e_inner_surface = R_e, R_e
+    R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
     # вектор на наблюдателя в системе координат двойной системы
     e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
     file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
                           % (config.betta_rotate, config.betta_mu, config.a_portion, config.M_rate_c2_Led)
     approx_method = accretionColumnService.approx_method
 
+    # ------------------- создание папки для графиков --------------------------
     file_folder = 'figs/'
     file_folder_args = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
     full_file_folder = file_folder + file_folder_args
-
     create_file_path(full_file_folder)
+    # ------------------- создание папки для графиков --------------------------
 
-    # от поверхности NS - угол при котором радиус = радиусу НЗ
     # ----------------- начало инициализации верхней колонки ------------------------
+    # от поверхности NS - угол при котором радиус = радиусу НЗ
     theta_accretion_begin_outer_surface = accretionColumnService.get_theta_accretion_begin(R_e_outer_surface)
     theta_accretion_begin_inner_surface = accretionColumnService.get_theta_accretion_begin(R_e_inner_surface)
 
@@ -100,36 +106,28 @@ if __name__ == '__main__':
     theta_accretion_begin_outer_surface = np.pi - theta_accretion_begin_outer_surface
     theta_accretion_begin_inner_surface = np.pi - theta_accretion_begin_inner_surface
 
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111)
-    ax.plot(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff)
-    ax.set_xlabel('phase')
-    ax.set_ylabel('T_eff, K')
-
-    file_name = 'T_eff.png'
-    full_file_name = full_file_folder + file_name
-    fig.savefig(full_file_name, dpi=fig.dpi)
-    plt.close()
-
     bot_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface, R_e_inner_surface,
                                  theta_accretion_begin_inner_surface, False)
     # ----------------- конец инициализации нижней колонки ------------------------
+
+    # ----------------------------- график T_eff --------------------------------
+    fig = create_figure(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff, x_axis_label='phase',
+                        y_axis_label='T_eff, K', figure_title='T_eff', is_y_2d=False)
+    file_name = 'T_eff.png'
+    save_figure(fig, full_file_folder, file_name)
+    # ----------------------------- график T_eff --------------------------------
 
     surfaces = {0: top_column.outer_surface, 1: top_column.inner_surface, 2: bot_column.outer_surface,
                 3: bot_column.inner_surface}
 
     print('phi_theta_range saved')
     file_name = "save_phi_range.txt"
-    full_file_name = full_file_folder + file_name
-    np.savetxt(full_file_name, top_column.outer_surface.phi_range)
-    np.savetxt(file_name, top_column.outer_surface.phi_range)
-    file_name = "save_theta_range.txt"
-    full_file_name = full_file_folder + file_name
-    np.savetxt(full_file_name, top_column.outer_surface.theta_range)
-    np.savetxt(file_name, top_column.outer_surface.theta_range)
+    save_arr_as_txt(top_column.outer_surface.phi_range, full_file_folder, file_name)
+    save_arr_as_txt(top_column.outer_surface.phi_range, '', file_name)
 
-    # print('T_eff:')
-    # print(top_column.outer_surface.T_eff)
+    file_name = "save_theta_range.txt"
+    save_arr_as_txt(top_column.outer_surface.theta_range, full_file_folder, file_name)
+    save_arr_as_txt(top_column.outer_surface.theta_range, '', file_name)
 
     # ----------------- углы для нахождения пересечений -------------------------
     theta_accretion_begin = top_column.outer_surface.theta_range[0]
@@ -164,32 +162,26 @@ if __name__ == '__main__':
     print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)
 
     # --------------------- вывод графика светимости ----------------------------
-    fig = plt.figure(figsize=(8, 8))
+
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-    append_index = config.t_max_for_plot - config.t_max
-    for i in range(4):
-        arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i][0:append_index])
-    sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
+    # 1 слитый массив - отдельные поверхности + сумма
+    combined_arrays = np.append(arr_simps_integrate, [sum_simps_integrate], 0)
+    arr_to_plt = [0] * len(combined_arrays)
+    for i in range(len(combined_arrays)):
+        arr_to_plt[i] = extend_arr_for_phase(combined_arrays[i])
 
-    ax = fig.add_subplot(111)
-    ax.plot(phi_for_plot, arr_simps_integrate[0], label='top outer')
-    ax.plot(phi_for_plot, arr_simps_integrate[1], label='top inner')
-    ax.plot(phi_for_plot, arr_simps_integrate[2], label='bot outer', marker='*')
-    ax.plot(phi_for_plot, arr_simps_integrate[3], label='bot inner')
-    ax.plot(phi_for_plot, sum_simps_integrate, label='sum')
-    ax.set_xlabel('phase')
-    ax.set_ylabel('luminosity, erg/s')
-    ax.legend()
-    fig.suptitle('total luminosity of surfaces', fontsize=14)
-    # plt.yscale('log')
-    # plt.show()
-    plt.close()
+    labels_arr = ['top outer', 'top inner', 'bot outer', 'bot inner', 'sum']
+    fig_title = 'total luminosity of surfaces'
+    fig = create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='phase', y_axis_label='luminosity, erg/s',
+                        figure_title=fig_title)
+    file_name = 'total_luminosity_of_surfaces.png'
+    save_figure(fig, full_file_folder, file_name)
+
     # --------------------- вывод графика светимости ----------------------------
 
-    file_name = 'total_luminosity_of_surfaces.png'
-    full_file_name = full_file_folder + file_name
-    fig.savefig(full_file_name, dpi=fig.dpi)
+    file_name = 'total_luminosity_of_surfaces.txt'
+    save_arr_as_txt(combined_arrays, full_file_folder, file_name)
 
     # --------------------- вывод графика углов наблюдателя ----------------------------
     observer_theta = [0] * config.t_max_for_plot
