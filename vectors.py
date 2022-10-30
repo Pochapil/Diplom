@@ -22,7 +22,8 @@ def get_angles_from_vector_one_dimension(vector):
     x = vector[0]
     y = vector[1]
     z = vector[2]
-    theta = np.arccos(z)  # np.arccos(z/r)
+    r = x**2 + y**2 + z**2
+    theta = np.arccos(z/r)  # np.arccos(z/r)
     if x > 0:
         if y >= 0:
             phi = np.arctan(y / x)
@@ -33,7 +34,7 @@ def get_angles_from_vector_one_dimension(vector):
     return phi, theta
 
 
-def get_angles_from_vector_one_dimension_with_r(vector):
+def get_angles_from_vector_one_dimension_with_r_ns(vector):
     x = vector[0] / config.R_ns
     y = vector[1] / config.R_ns
     z = vector[2] / config.R_ns

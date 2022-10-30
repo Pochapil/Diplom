@@ -11,6 +11,66 @@ from accretionColumn import AccretionColumn
 import vectors
 
 if __name__ == '__main__':
+
+    def create_file_path(file_path):
+        pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
+
+
+    def fill_arr_with_func(func, surface, energy):
+        return func(surface, energy)
+
+
+    def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True):
+        fig = plt.figure(figsize=(8, 8))
+        ax = fig.add_subplot(111)
+
+        if is_y_2d:
+            if labels_arr == '':
+                for i in range(len(y_arr)):
+                    ax.plot(x, y_arr[i])
+            else:
+                for i in range(len(y_arr)):
+                    ax.plot(x, y_arr[i], label=labels_arr[i])
+        else:
+            ax.plot(x, y_arr, label=labels_arr)
+
+        ax.set_xlabel(x_axis_label)
+        ax.set_ylabel(y_axis_label)
+        if not (labels_arr == ''):
+            ax.legend()
+        fig.suptitle(figure_title, fontsize=14)
+        return fig
+
+
+    def save_figure(fig, file_path, file_name):
+        create_file_path(file_path)
+        full_file_name = file_path + file_name
+        fig.savefig(full_file_name, dpi=fig.dpi)
+        plt.close(fig)
+
+
+    def extend_arr_for_phase(arr):
+        append_index = config.t_max_for_plot - config.t_max
+        array_to_plot = np.append(arr, arr[0:append_index])
+        return array_to_plot
+
+
+    def prepare_phase_and_extend_arr_for_phase(combined_arrays):
+        phi_for_plot = list(
+            config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
+
+        append_index = config.t_max_for_plot - config.t_max
+        arr_dimensions = combined_arrays.ndim
+        if arr_dimensions > 1:
+            arrays_to_plot = [0] * len(combined_arrays)
+            for i in range(len(combined_arrays)):
+                arrays_to_plot[i] = np.append(combined_arrays[i], combined_arrays[i][0:append_index])
+                return phi_for_plot, arrays_to_plot
+        else:
+            array_to_plot = np.append(combined_arrays, combined_arrays[0:append_index])
+            return phi_for_plot, array_to_plot
+
+
     R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
     R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
     print('R_e = %f' % (R_e / config.R_ns))
@@ -22,10 +82,10 @@ if __name__ == '__main__':
     approx_method = accretionColumnService.approx_method
 
     file_folder = 'figs/'
-    args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
-    file_folder = file_folder + args_folder
+    file_folder_args = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
+    full_file_folder = file_folder + file_folder_args
 
-    pathlib.Path(file_folder).mkdir(parents=True, exist_ok=True)
+    create_file_path(full_file_folder)
 
     # от поверхности NS - угол при котором радиус = радиусу НЗ
     # ----------------- начало инициализации верхней колонки ------------------------
@@ -47,7 +107,7 @@ if __name__ == '__main__':
     ax.set_ylabel('T_eff, K')
 
     file_name = 'T_eff.png'
-    full_file_name = file_folder + file_name
+    full_file_name = full_file_folder + file_name
     fig.savefig(full_file_name, dpi=fig.dpi)
     plt.close()
 
@@ -60,11 +120,11 @@ if __name__ == '__main__':
 
     print('phi_theta_range saved')
     file_name = "save_phi_range.txt"
-    full_file_name = file_folder + file_name
+    full_file_name = full_file_folder + file_name
     np.savetxt(full_file_name, top_column.outer_surface.phi_range)
     np.savetxt(file_name, top_column.outer_surface.phi_range)
     file_name = "save_theta_range.txt"
-    full_file_name = file_folder + file_name
+    full_file_name = full_file_folder + file_name
     np.savetxt(full_file_name, top_column.outer_surface.theta_range)
     np.savetxt(file_name, top_column.outer_surface.theta_range)
 
@@ -128,7 +188,7 @@ if __name__ == '__main__':
     # --------------------- вывод графика светимости ----------------------------
 
     file_name = 'total_luminosity_of_surfaces.png'
-    full_file_name = file_folder + file_name
+    full_file_name = full_file_folder + file_name
     fig.savefig(full_file_name, dpi=fig.dpi)
 
     # --------------------- вывод графика углов наблюдателя ----------------------------
@@ -154,7 +214,7 @@ if __name__ == '__main__':
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
     file_name = 'Observer_angles.png'
-    full_file_name = file_folder + file_name
+    full_file_name = full_file_folder + file_name
     fig.savefig(full_file_name, dpi=fig.dpi)
 
     # ------------------ цикл для диапазона энергий ----------------------
@@ -207,21 +267,21 @@ if __name__ == '__main__':
         # plt.yscale('log')
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
-        pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
-        pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+        pathlib.Path(full_file_folder + folder).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(full_file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
 
         file_name = "txt/sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
-        full_file_name = file_folder + folder + file_name
+        full_file_name = full_file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
         file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_min, energy_max)
-        full_file_name = file_folder + folder + file_name
+        full_file_name = full_file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
         energy_i += 1
     # ------------------ цикл для диапазона энергий ----------------------
     file_name = "PF.txt"
-    full_file_name = file_folder + folder + file_name
+    full_file_name = full_file_folder + folder + file_name
     np.savetxt(full_file_name, PF)
 
     print('Spectral Energy Distribution')
@@ -243,7 +303,8 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = surface.calculate_nu_L_nu_on_energy(energy)
+            arr_simps_integrate[key] = fill_arr_with_func(AccretionColumn.Surface.calculate_nu_L_nu_on_energy, surface,
+                                                          energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
@@ -270,22 +331,22 @@ if __name__ == '__main__':
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
-        pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
-        pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+        pathlib.Path(full_file_folder + folder).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(full_file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
 
         file_name = "txt/nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
-        full_file_name = file_folder + folder + file_name
+        full_file_name = full_file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
         file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
-        full_file_name = file_folder + folder + file_name
+        full_file_name = full_file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
         energy_i += 1
         # ------------------ цикл для Spectral Energy Distribution ------------------
 
     file_name = "PF.txt"
-    full_file_name = file_folder + folder + file_name
+    full_file_name = full_file_folder + folder + file_name
     np.savetxt(full_file_name, PF)
 
     print('спектр')
@@ -308,7 +369,8 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = surface.calculate_L_nu_on_energy(energy)
+            arr_simps_integrate[key] = fill_arr_with_func(AccretionColumn.Surface.calculate_L_nu_on_energy, surface,
+                                                          energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
@@ -335,20 +397,20 @@ if __name__ == '__main__':
         # plt.show()
         # --------------------- вывод графика светимости ----------------------------
 
-        pathlib.Path(file_folder + folder).mkdir(parents=True, exist_ok=True)
-        pathlib.Path(file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
+        pathlib.Path(full_file_folder + folder).mkdir(parents=True, exist_ok=True)
+        pathlib.Path(full_file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
 
         file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
-        full_file_name = file_folder + folder + file_name
+        full_file_name = full_file_folder + folder + file_name
         np.savetxt(full_file_name, sum_simps_integrate)
 
         file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
-        full_file_name = file_folder + folder + file_name
+        full_file_name = full_file_folder + folder + file_name
         fig.savefig(full_file_name, dpi=fig.dpi)
         plt.close()
         energy_i += 1
         # ------------------ цикл для Spectrum Distribution ------------------
 
     file_name = "PF.txt"
-    full_file_name = file_folder + folder + file_name
+    full_file_name = full_file_folder + folder + file_name
     np.savetxt(full_file_name, PF)
