@@ -72,6 +72,7 @@ if __name__ == '__main__':
 
 
     def save_arr_as_txt(arr, file_folder, file_name):
+        create_file_path(file_folder)
         full_file_name = file_folder + file_name
         np.savetxt(full_file_name, arr)
 
@@ -168,6 +169,7 @@ if __name__ == '__main__':
     # 1 слитый массив - отдельные поверхности + сумма
     combined_arrays = np.append(arr_simps_integrate, [sum_simps_integrate], 0)
     arr_to_plt = [0] * len(combined_arrays)
+    # нужно расширить массивы, чтобы покрыть фазу [0,2]
     for i in range(len(combined_arrays)):
         arr_to_plt[i] = extend_arr_for_phase(combined_arrays[i])
 
@@ -195,19 +197,15 @@ if __name__ == '__main__':
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
         observer_phi[t], observer_theta[t] = vectors.get_angles_from_vector(e_obs_mu)
 
-    fig = plt.figure(figsize=(8, 8))
-    ax = fig.add_subplot(111)
-    ax.plot(phi_for_plot, observer_theta, label=r'$\theta_{observer}$')
-    ax.plot(phi_for_plot, observer_phi, label=r'$\phi_{observer}$')
-    ax.legend()
-    fig.suptitle('Observer angles', fontsize=14)
-    # plt.show()
-    plt.close()
+    labels_arr = [r'$\theta_{observer}$', r'$\phi_{observer}$']
+    fig_title = 'Observer angles'
+    combined_arrays_for_plot = np.append([observer_theta], [observer_phi], 0)
+    fig = create_figure(phi_for_plot, combined_arrays_for_plot, labels_arr, x_axis_label='phase',
+                        figure_title=fig_title)
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
     file_name = 'Observer_angles.png'
-    full_file_name = full_file_folder + file_name
-    fig.savefig(full_file_name, dpi=fig.dpi)
+    save_figure(fig, full_file_folder, file_name)
 
     # ------------------ цикл для диапазона энергий ----------------------
     energy_i = 0
@@ -241,35 +239,17 @@ if __name__ == '__main__':
         phi_for_plot = list(
             config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-        append_index = config.t_max_for_plot - config.t_max
-        for i in range(4):
-            arr_simps_integrate[i] = np.append(arr_simps_integrate[i], arr_simps_integrate[i][0:append_index])
-        sum_simps_integrate = np.append(sum_simps_integrate, sum_simps_integrate[0:append_index])
-
-        ax = fig.add_subplot(111)
-        # ax.plot(phi_for_plot, arr_simps_integrate[0], label='top outer')
-        # ax.plot(phi_for_plot, arr_simps_integrate[1], label='top inner')
-        # ax.plot(phi_for_plot, arr_simps_integrate[2], label='bot outer', marker='*')
-        # ax.plot(phi_for_plot, arr_simps_integrate[3], label='bot inner')
-        ax.plot(phi_for_plot, sum_simps_integrate, label='sum')
-        ax.legend()
+        arr_to_plt = extend_arr_for_phase(sum_simps_integrate)
         fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (
             energy_min, energy_max, PF[energy_i])
-        fig.suptitle(fig_title, fontsize=14)
-        # plt.yscale('log')
-        # plt.show()
-        # --------------------- вывод графика светимости ----------------------------
-        pathlib.Path(full_file_folder + folder).mkdir(parents=True, exist_ok=True)
-        pathlib.Path(full_file_folder + folder + 'txt/').mkdir(parents=True, exist_ok=True)
-
-        file_name = "txt/sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
-        full_file_name = full_file_folder + folder + file_name
-        np.savetxt(full_file_name, sum_simps_integrate)
+        fig = create_figure(phi_for_plot, arr_to_plt, labels_arr='sum', figure_title=fig_title, is_y_2d=False)
 
         file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_min, energy_max)
-        full_file_name = full_file_folder + folder + file_name
-        fig.savefig(full_file_name, dpi=fig.dpi)
-        plt.close()
+        save_figure(fig, full_file_folder + folder, file_name)
+
+        file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
+        save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
+        # --------------------- вывод графика светимости ----------------------------
         energy_i += 1
     # ------------------ цикл для диапазона энергий ----------------------
     file_name = "PF.txt"
