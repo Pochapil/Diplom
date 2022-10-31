@@ -6,6 +6,8 @@ file_folder = 'figs/'
 args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
 file_folder = file_folder + args_folder
 
+phase_index = 0  # индекс фазы для nu_L_nu(nu), L_nu(nu)
+# --------------------------- PF --------------------------
 folder = 'luminosity_in_range/'
 # folder = 'L_nu/'
 # folder = 'nu_L_nu/'
@@ -31,7 +33,9 @@ file_name = "PF.png"
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- PF --------------------------
 
+# --------------------------- L_nu(phase) --------------------------
 folder = 'L_nu/'
 arr = [0] * N_energy
 for i in range(N_energy):
@@ -52,7 +56,9 @@ file_name = folder[:-1] + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- L_nu(phase) --------------------------
 
+# --------------------------- nu_L_nu(phase) --------------------------
 folder = 'nu_L_nu/'
 arr = [0] * N_energy
 for i in range(N_energy):
@@ -73,9 +79,11 @@ file_name = folder[:-1] + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- nu_L_nu(phase) --------------------------
 
+# --------------------------- L_nu(nu) --------------------------
 folder = 'L_nu/'
-phase_index = 0
+
 arr = [0] * N_energy
 for i in range(N_energy):
     file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
@@ -100,7 +108,9 @@ file_name = 'L_nu(nu)' + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- L_nu(nu) --------------------------
 
+# --------------------------- L_nu(nu)_avg --------------------------
 L_nu_avg_on_phase = [0] * N_energy
 for i in range(N_energy):
     sum = 0
@@ -119,9 +129,10 @@ file_name = 'L_nu(nu)_avg' + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- L_nu(nu)_avg --------------------------
 
+# --------------------------- nu_L_nu(nu) --------------------------
 folder = 'nu_L_nu/'
-phase_index = 0
 arr = [0] * N_energy
 for i in range(N_energy):
     file_name = "txt/nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
@@ -146,7 +157,9 @@ file_name = 'nu_L_nu(nu)' + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- nu_L_nu(nu) --------------------------
 
+# --------------------------- nu_L_nu(nu)_avg --------------------------
 nu_L_nu_avg_on_phase = [0] * N_energy
 for i in range(N_energy):
     sum = 0
@@ -165,3 +178,4 @@ file_name = 'nu_L_nu(nu)_avg' + '.png'
 full_file_name = file_folder + folder + file_name
 fig.savefig(full_file_name, dpi=fig.dpi)
 plt.close()
+# --------------------------- nu_L_nu(nu)_avg --------------------------
