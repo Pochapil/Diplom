@@ -20,7 +20,8 @@ if __name__ == '__main__':
         return func(surface, energy)
 
 
-    def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True):
+    def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True,
+                      is_x_log_scale=False, is_y_log_scale=False):
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot(111)
 
@@ -34,8 +35,12 @@ if __name__ == '__main__':
         else:
             ax.plot(x, y_arr, label=labels_arr)
 
-        ax.set_xlabel(x_axis_label)
-        ax.set_ylabel(y_axis_label)
+        ax.set_xlabel(x_axis_label, fontsize=24)
+        if is_x_log_scale:
+            plt.xscale('log')
+        ax.set_ylabel(y_axis_label, fontsize=24)
+        if is_y_log_scale:
+            plt.yscale('log')
         if not (labels_arr == ''):
             ax.legend()
         fig.suptitle(figure_title, fontsize=14)
@@ -113,7 +118,7 @@ if __name__ == '__main__':
 
     # ----------------------------- график T_eff --------------------------------
     fig = create_figure(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff, x_axis_label='phase',
-                        y_axis_label='T_eff, K', figure_title='T_eff', is_y_2d=False)
+                        y_axis_label=r'$T_{eff}, K$', figure_title=r'$T_{eff}$', is_y_2d=False)
     file_name = 'T_eff.png'
     save_figure(fig, full_file_folder, file_name)
     # ----------------------------- график T_eff --------------------------------
@@ -344,7 +349,7 @@ if __name__ == '__main__':
 
         fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF[energy_i])
         fig = create_figure(phi_for_plot, arr_to_plt, labels_arr=r'$\nu \cdot L_{\nu}(phase)$', x_axis_label='phase',
-                            y_axis_label=r'$Spectrum, erg \cdot s^{-1} \, hz^{-1}$', figure_title=fig_title,
+                            y_axis_label=r'$Spectrum, erg \, s^{-1} \, hz^{-1}$', figure_title=fig_title,
                             is_y_2d=False)
 
         # --------------------- вывод графика светимости ----------------------------
