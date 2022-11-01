@@ -9,78 +9,9 @@ import config
 import accretionColumnService
 from accretionColumn import AccretionColumn
 import vectors
+import main_service
 
 if __name__ == '__main__':
-
-    def create_file_path(file_path):
-        pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
-
-
-    def fill_arr_with_func(func, surface, energy):
-        return func(surface, energy)
-
-
-    def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True,
-                      is_x_log_scale=False, is_y_log_scale=False):
-        fig = plt.figure(figsize=(8, 8))
-        ax = fig.add_subplot(111)
-
-        if is_y_2d:
-            if labels_arr == '':
-                for i in range(len(y_arr)):
-                    ax.plot(x, y_arr[i])
-            else:
-                for i in range(len(y_arr)):
-                    ax.plot(x, y_arr[i], label=labels_arr[i])
-        else:
-            ax.plot(x, y_arr, label=labels_arr)
-
-        ax.set_xlabel(x_axis_label, fontsize=24)
-        if is_x_log_scale:
-            plt.xscale('log')
-        ax.set_ylabel(y_axis_label, fontsize=24)
-        if is_y_log_scale:
-            plt.yscale('log')
-        if not (labels_arr == ''):
-            ax.legend()
-        fig.suptitle(figure_title, fontsize=14)
-        return fig
-
-
-    def save_figure(fig, file_path, file_name):
-        create_file_path(file_path)
-        full_file_name = file_path + file_name
-        fig.savefig(full_file_name, dpi=fig.dpi)
-        plt.close(fig)
-
-
-    def extend_arr_for_phase(arr):
-        append_index = config.t_max_for_plot - config.t_max
-        array_to_plot = np.append(arr, arr[0:append_index])
-        return array_to_plot
-
-
-    def prepare_phase_and_extend_arr_for_phase(combined_arrays):
-        phi_for_plot = list(
-            config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
-
-        append_index = config.t_max_for_plot - config.t_max
-        arr_dimensions = combined_arrays.ndim
-        if arr_dimensions > 1:
-            arrays_to_plot = [0] * len(combined_arrays)
-            for i in range(len(combined_arrays)):
-                arrays_to_plot[i] = np.append(combined_arrays[i], combined_arrays[i][0:append_index])
-                return phi_for_plot, arrays_to_plot
-        else:
-            array_to_plot = np.append(combined_arrays, combined_arrays[0:append_index])
-            return phi_for_plot, array_to_plot
-
-
-    def save_arr_as_txt(arr, file_folder, file_name):
-        create_file_path(file_folder)
-        full_file_name = file_folder + file_name
-        np.savetxt(full_file_name, arr)
-
 
     R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
     R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
@@ -96,7 +27,7 @@ if __name__ == '__main__':
     file_folder = 'figs/'
     file_folder_args = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
     full_file_folder = file_folder + file_folder_args
-    create_file_path(full_file_folder)
+    main_service.create_file_path(full_file_folder)
     # ------------------- создание папки для графиков --------------------------
 
     # ----------------- начало инициализации верхней колонки ------------------------
@@ -117,19 +48,20 @@ if __name__ == '__main__':
     # ----------------- конец инициализации нижней колонки ------------------------
 
     # ----------------------------- график T_eff --------------------------------
-    fig = create_figure(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff, x_axis_label='phase',
-                        y_axis_label=r'$T_{eff}, K$', figure_title=r'$T_{eff}$', is_y_2d=False)
+    fig = main_service.create_figure(top_column.outer_surface.theta_range, top_column.outer_surface.T_eff,
+                                     x_axis_label='phase',
+                                     y_axis_label=r'$T_{eff}, K$', figure_title=r'$T_{eff}$', is_y_2d=False)
     file_name = 'T_eff.png'
-    save_figure(fig, full_file_folder, file_name)
+    main_service.save_figure(fig, full_file_folder, file_name)
     # ----------------------------- график T_eff --------------------------------
 
     file_name = "save_phi_range.txt"
-    save_arr_as_txt(top_column.outer_surface.phi_range, full_file_folder, file_name)
-    save_arr_as_txt(top_column.outer_surface.phi_range, '', file_name)
+    main_service.save_arr_as_txt(top_column.outer_surface.phi_range, full_file_folder, file_name)
+    main_service.save_arr_as_txt(top_column.outer_surface.phi_range, '', file_name)
 
     file_name = "save_theta_range.txt"
-    save_arr_as_txt(top_column.outer_surface.theta_range, full_file_folder, file_name)
-    save_arr_as_txt(top_column.outer_surface.theta_range, '', file_name)
+    main_service.save_arr_as_txt(top_column.outer_surface.theta_range, full_file_folder, file_name)
+    main_service.save_arr_as_txt(top_column.outer_surface.theta_range, '', file_name)
 
     print('phi_theta_range saved')
     # ----------------- углы для нахождения пересечений -------------------------
@@ -178,19 +110,20 @@ if __name__ == '__main__':
     arr_to_plt = [0] * len(combined_arrays)
     # нужно расширить массивы, чтобы покрыть фазу [0,2]
     for i in range(len(combined_arrays)):
-        arr_to_plt[i] = extend_arr_for_phase(combined_arrays[i])
+        arr_to_plt[i] = main_service.extend_arr_for_phase(combined_arrays[i])
 
     labels_arr = ['top outer', 'top inner', 'bot outer', 'bot inner', 'sum']
     fig_title = 'total luminosity of surfaces'
-    fig = create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='phase', y_axis_label='luminosity, erg/s',
-                        figure_title=fig_title)
+    fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='phase',
+                                     y_axis_label='luminosity, erg/s',
+                                     figure_title=fig_title)
     file_name = 'total_luminosity_of_surfaces.png'
-    save_figure(fig, full_file_folder, file_name)
+    main_service.save_figure(fig, full_file_folder, file_name)
 
     # --------------------- вывод графика светимости ----------------------------
 
     file_name = 'total_luminosity_of_surfaces.txt'
-    save_arr_as_txt(arr_to_plt, full_file_folder, file_name)
+    main_service.save_arr_as_txt(arr_to_plt, full_file_folder, file_name)
 
     # --------------------- вывод графика углов наблюдателя ----------------------------
     observer_theta = [0] * config.t_max_for_plot
@@ -207,12 +140,12 @@ if __name__ == '__main__':
     labels_arr = [r'$\theta_{observer}$', r'$\phi_{observer}$']
     fig_title = 'Observer angles'
     combined_arrays_for_plot = np.append([observer_theta], [observer_phi], 0)
-    fig = create_figure(phi_for_plot, combined_arrays_for_plot, labels_arr, x_axis_label='phase',
-                        figure_title=fig_title)
+    fig = main_service.create_figure(phi_for_plot, combined_arrays_for_plot, labels_arr, x_axis_label='phase',
+                                     figure_title=fig_title)
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
     file_name = 'Observer_angles.png'
-    save_figure(fig, full_file_folder, file_name)
+    main_service.save_figure(fig, full_file_folder, file_name)
 
     # ------------------ цикл для диапазона энергий ----------------------
     energy_i = 0
@@ -245,17 +178,18 @@ if __name__ == '__main__':
         phi_for_plot = list(
             config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-        arr_to_plt = extend_arr_for_phase(sum_simps_integrate)
+        arr_to_plt = main_service.extend_arr_for_phase(sum_simps_integrate)
         fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (
             energy_min, energy_max, PF[energy_i])
-        fig = create_figure(phi_for_plot, arr_to_plt, labels_arr='sum', figure_title=fig_title, is_y_2d=False)
+        fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr='sum', figure_title=fig_title,
+                                         is_y_2d=False)
 
         # --------------------- вывод графика светимости ----------------------------
         file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_min, energy_max)
-        save_figure(fig, full_file_folder + folder, file_name)
+        main_service.save_figure(fig, full_file_folder + folder, file_name)
 
         file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
-        save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
+        main_service.save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
 
         energy_i += 1
 
@@ -263,7 +197,7 @@ if __name__ == '__main__':
     file_name = "PF.txt"
     # full_file_name = full_file_folder + folder + file_name
     # np.savetxt(full_file_name, PF)
-    save_arr_as_txt(PF, full_file_folder + folder, file_name)
+    main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
 
     print('Spectral Energy Distribution')
     energy_i = 0
@@ -284,8 +218,9 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = fill_arr_with_func(AccretionColumn.Surface.calculate_nu_L_nu_on_energy, surface,
-                                                          energy)
+            arr_simps_integrate[key] = main_service.fill_arr_with_func(
+                AccretionColumn.Surface.calculate_nu_L_nu_on_energy, surface,
+                energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
@@ -295,24 +230,25 @@ if __name__ == '__main__':
 
         phi_for_plot = list(
             config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
-        arr_to_plt = extend_arr_for_phase(sum_simps_integrate)
+        arr_to_plt = main_service.extend_arr_for_phase(sum_simps_integrate)
         fig_title = 'Spectral Energy Distribution of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF[energy_i])
-        fig = create_figure(phi_for_plot, arr_to_plt, labels_arr=r'$\nu \cdot L_{\nu}(\nu)$', x_axis_label='phase',
-                            y_axis_label='Spectral energy, erg/s', figure_title=fig_title, is_y_2d=False)
+        fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr=r'$\nu \cdot L_{\nu}(\nu)$',
+                                         x_axis_label='phase',
+                                         y_axis_label='Spectral energy, erg/s', figure_title=fig_title, is_y_2d=False)
 
         # --------------------- вывод графика светимости ----------------------------
 
         file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
-        save_figure(fig, full_file_folder + folder, file_name)
+        main_service.save_figure(fig, full_file_folder + folder, file_name)
 
         file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
-        save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
+        main_service.save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
 
         energy_i += 1
         # ------------------ цикл для Spectral Energy Distribution ------------------
 
     file_name = "PF.txt"
-    save_arr_as_txt(PF, full_file_folder + folder, file_name)
+    main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
 
     print('спектр')
     energy_i = 0
@@ -334,8 +270,9 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = fill_arr_with_func(AccretionColumn.Surface.calculate_L_nu_on_energy, surface,
-                                                          energy)
+            arr_simps_integrate[key] = main_service.fill_arr_with_func(AccretionColumn.Surface.calculate_L_nu_on_energy,
+                                                                       surface,
+                                                                       energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
@@ -345,22 +282,23 @@ if __name__ == '__main__':
         phi_for_plot = list(
             config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-        arr_to_plt = extend_arr_for_phase(sum_simps_integrate)
+        arr_to_plt = main_service.extend_arr_for_phase(sum_simps_integrate)
 
         fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy, PF[energy_i])
-        fig = create_figure(phi_for_plot, arr_to_plt, labels_arr=r'$\nu \cdot L_{\nu}(phase)$', x_axis_label='phase',
-                            y_axis_label=r'$Spectrum, erg \, s^{-1} \, hz^{-1}$', figure_title=fig_title,
-                            is_y_2d=False)
+        fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr=r'$\nu \cdot L_{\nu}(phase)$',
+                                         x_axis_label='phase',
+                                         y_axis_label=r'$Spectrum, erg \, s^{-1} \, hz^{-1}$', figure_title=fig_title,
+                                         is_y_2d=False)
 
         # --------------------- вывод графика светимости ----------------------------
         file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy
-        save_figure(fig, full_file_folder + folder, file_name)
+        main_service.save_figure(fig, full_file_folder + folder, file_name)
 
         file_name = "L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
-        save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
+        main_service.save_arr_as_txt(arr_to_plt, full_file_folder + folder + 'txt/', file_name)
 
         energy_i += 1
         # ------------------ цикл для Spectrum Distribution ------------------
 
     file_name = "PF.txt"
-    save_arr_as_txt(PF, full_file_folder + folder, file_name)
+    main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
