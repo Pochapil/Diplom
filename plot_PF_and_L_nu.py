@@ -1,11 +1,14 @@
-import config
 import numpy as np
 import matplotlib.pyplot as plt
 
+import config
+import main_service
+
 file_folder = 'figs/'
 args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
-file_folder = file_folder + args_folder
+full_file_folder = file_folder + args_folder
 
+N_energy = 10
 phase_index = 0  # индекс фазы для nu_L_nu(nu), L_nu(nu)
 # --------------------------- PF --------------------------
 folder = 'luminosity_in_range/'
@@ -13,101 +16,78 @@ folder = 'luminosity_in_range/'
 # folder = 'nu_L_nu/'
 
 file_name = "PF.txt"
-full_file_name = file_folder + folder + file_name
-PF = np.loadtxt(full_file_name)
+PF = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
-N_energy = 10
 energies = [0] * N_energy
-
 for i in range(N_energy):
     if i == 0:
         energies[i] = 1
     else:
         energies[i] = i * 4
 
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
-ax.plot(energies, PF)
+fig = main_service.create_figure(energies, PF, is_y_2d=False)
 
 file_name = "PF.png"
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- PF --------------------------
 
 # --------------------------- L_nu(phase) --------------------------
 folder = 'L_nu/'
 arr = [0] * N_energy
 for i in range(N_energy):
-    file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
-    full_file_name = file_folder + folder + file_name
-    arr[i] = np.loadtxt(full_file_name)
+    file_name = "L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
+    arr[i] = main_service.load_arr_from_txt(full_file_folder + folder + 'txt/', file_name)
 
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
+labels_arr = [''] * N_energy
 for i in range(N_energy):
-    ax.plot(phi_for_plot, arr[i], label='%0.2f KeV' % (energies[i]))
-ax.legend()
+    labels_arr[i] = '%0.2f KeV' % energies[i]
 fig_title = r'$L_{\nu}$'
-fig.suptitle(fig_title, fontsize=14)
+fig = main_service.create_figure(phi_for_plot, arr, labels_arr=labels_arr, figure_title=fig_title)
 
-file_name = folder[:-1] + '.png'
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+file_name = 'L_nu' + '.png'
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- L_nu(phase) --------------------------
 
 # --------------------------- nu_L_nu(phase) --------------------------
 folder = 'nu_L_nu/'
 arr = [0] * N_energy
 for i in range(N_energy):
-    file_name = "txt/nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
-    full_file_name = file_folder + folder + file_name
-    arr[i] = np.loadtxt(full_file_name)
+    file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
+    arr[i] = main_service.load_arr_from_txt(full_file_folder + folder + 'txt/', file_name)
 
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
+labels_arr = [''] * N_energy
 for i in range(N_energy):
-    ax.plot(phi_for_plot, arr[i], label='%0.2f KeV' % (energies[i]))
-ax.legend()
-fig_title = r'$\nu L_{\nu}$'
-fig.suptitle(fig_title, fontsize=14)
+    labels_arr[i] = '%0.2f KeV' % energies[i]
 
-file_name = folder[:-1] + '.png'
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+fig_title = r'$\nu L_{\nu}$'
+fig = main_service.create_figure(phi_for_plot, arr, labels_arr=labels_arr, figure_title=fig_title)
+
+file_name = 'nu_L_nu' + '.png'
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- nu_L_nu(phase) --------------------------
 
 # --------------------------- L_nu(nu) --------------------------
 folder = 'L_nu/'
-
 arr = [0] * N_energy
 for i in range(N_energy):
-    file_name = "txt/L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
-    full_file_name = file_folder + folder + file_name
-    arr[i] = np.loadtxt(full_file_name)
+    file_name = "L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
+    arr[i] = main_service.load_arr_from_txt(full_file_folder + folder + 'txt/', file_name)
 
 L_nu = []
 for i in range(N_energy):
     L_nu.append(arr[i][phase_index])
-energy_i = 0
+
 energy = [1] * N_energy
 for i in range(1, N_energy):
     energy[i] = i * 4
 
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
-ax.plot(energy, L_nu)
 fig_title = r'$L_{\nu}$'
-fig.suptitle(fig_title, fontsize=14)
+fig = main_service.create_figure(energy, L_nu, figure_title=fig_title, is_y_2d=False)
 
 file_name = 'L_nu(nu)' + '.png'
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- L_nu(nu) --------------------------
 
 # --------------------------- L_nu(nu)_avg --------------------------
@@ -119,44 +99,33 @@ for i in range(N_energy):
     avg = sum / config.t_max
     L_nu_avg_on_phase[i] = avg
 
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
-ax.plot(energy, L_nu_avg_on_phase)
 fig_title = r'$L_{\nu}$'
-fig.suptitle(fig_title, fontsize=14)
+fig = main_service.create_figure(energy, L_nu_avg_on_phase, figure_title=fig_title, is_y_2d=False)
 
 file_name = 'L_nu(nu)_avg' + '.png'
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- L_nu(nu)_avg --------------------------
 
 # --------------------------- nu_L_nu(nu) --------------------------
 folder = 'nu_L_nu/'
 arr = [0] * N_energy
 for i in range(N_energy):
-    file_name = "txt/nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
-    full_file_name = file_folder + folder + file_name
-    arr[i] = np.loadtxt(full_file_name)
+    file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energies[i]
+    arr[i] = main_service.load_arr_from_txt(full_file_folder + folder + 'txt/', file_name)
 
 nu_L_nu = []
 for i in range(N_energy):
     nu_L_nu.append(arr[i][phase_index])
-energy_i = 0
+
 energy = [1] * N_energy
 for i in range(1, N_energy):
     energy[i] = i * 4
 
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
-ax.plot(energy, nu_L_nu)
 fig_title = r'$\nu L_{\nu}$'
-fig.suptitle(fig_title, fontsize=14)
+fig = main_service.create_figure(energy, nu_L_nu, figure_title=fig_title, is_y_2d=False)
 
 file_name = 'nu_L_nu(nu)' + '.png'
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- nu_L_nu(nu) --------------------------
 
 # --------------------------- nu_L_nu(nu)_avg --------------------------
@@ -168,14 +137,9 @@ for i in range(N_energy):
     avg = sum / config.t_max
     nu_L_nu_avg_on_phase[i] = avg
 
-fig = plt.figure(figsize=(8, 8))
-ax = fig.add_subplot(111)
-ax.plot(energy, nu_L_nu_avg_on_phase)
 fig_title = r'$\nu L_{\nu}$'
-fig.suptitle(fig_title, fontsize=14)
+fig = main_service.create_figure(energy, nu_L_nu_avg_on_phase, figure_title=fig_title, is_y_2d=False)
 
 file_name = 'nu_L_nu(nu)_avg' + '.png'
-full_file_name = file_folder + folder + file_name
-fig.savefig(full_file_name, dpi=fig.dpi)
-plt.close()
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- nu_L_nu(nu)_avg --------------------------
