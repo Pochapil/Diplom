@@ -75,3 +75,5 @@ def save_arr_as_txt(arr, file_folder, file_name):
     np.savetxt(full_file_name, arr)
 
 
+def load_arr_from_txt(file_folder, file_name):
+    return np.loadtxt(file_folder + file_name)
