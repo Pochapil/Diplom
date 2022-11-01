@@ -75,6 +75,11 @@ if __name__ == '__main__':
 
     # ------------------ начало заполнения матриц косинусов ---------------------------
     # распараллелил
+
+    # for key, surface in surfaces.items():
+    #     surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end, top_column.outer_surface.phi_range,
+    #                                bot_column.outer_surface.phi_range, e_obs)
+
     for key, surface in surfaces.items():
         with mp.Pool(mp.cpu_count()) as pool:
             result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range,
@@ -92,10 +97,16 @@ if __name__ == '__main__':
     # ------------------ начало заполнения массивов светимости -----------------------
     arr_simps_integrate = [0] * 4
     sum_simps_integrate = 0
+    # for key, surface in surfaces.items():
+    #     arr_simps_integrate[key] = surface.calculate_integral_distribution()
+    #     # file_name = "%s %s %d.txt" % (file_name_variables, approx_method, key)
+    #     # np.savetxt(file_name, arr_simps_integrate[key])
+    #     sum_simps_integrate += np.array(arr_simps_integrate[key])
+
+    # распараллелил
     for key, surface in surfaces.items():
-        arr_simps_integrate[key] = surface.calculate_integral_distribution()
-        # file_name = "%s %s %d.txt" % (file_name_variables, approx_method, key)
-        # np.savetxt(file_name, arr_simps_integrate[key])
+        with mp.Pool(mp.cpu_count()) as pool:
+            arr_simps_integrate[key] = pool.map(surface.async_calculate_integral_distribution, range(config.t_max))
         sum_simps_integrate += np.array(arr_simps_integrate[key])
     # ------------------ конец заполнения массивов светимости -----------------------
 
@@ -119,8 +130,9 @@ if __name__ == '__main__':
                                      figure_title=fig_title)
     file_name = 'total_luminosity_of_surfaces.png'
     main_service.save_figure(fig, full_file_folder, file_name)
-
     # --------------------- вывод графика светимости ----------------------------
+
+    print('total_luminosity_of_surfaces.png saved')
 
     file_name = 'total_luminosity_of_surfaces.txt'
     main_service.save_arr_as_txt(arr_to_plt, full_file_folder, file_name)
