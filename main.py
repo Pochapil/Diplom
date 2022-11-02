@@ -315,3 +315,6 @@ if __name__ == '__main__':
 
     file_name = "PF.txt"
     main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
+
+    import plot_fig_kevs
+    import plot_PF_and_L_nu
