@@ -30,13 +30,13 @@ max_phase_angle_for_plot = 720  # сколько точек на графике 
 t_max_for_plot = (max_phase_angle_for_plot // omega_ns) + (1 if max_phase_angle_for_plot % omega_ns > 0 else 0)
 max_phase = 360
 t_max = (max_phase // omega_ns) + (1 if max_phase % omega_ns > 0 else 0)
-# цикл для поворотов, сколько точек на графике интегралов - для фазы от 0 до 1 (полного поворота)
+# цикл для поворотов, сколько точек для фазы от 0 до 1 (полного поворота)
 
 # параметры аккреционного потока
 dRe_div_Re = 0.25  # взял просто число
 # M_accretion_rate = 10 ** 38 * R_ns / G / MSun  # темп аккреции
 ksi_rad = 3 / 2
-a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
+a_portion = 0.25  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
 k = 0.35  # opacity непрозрачность
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
@@ -61,3 +61,7 @@ phi_rotate = 0 * grad_to_rad
 # угол между собственным вращением НЗ и магнитной осью
 betta_mu = 70 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
+
+file_folder = 'figs/'
+file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
+full_file_folder = file_folder + file_folder_args

@@ -7,6 +7,8 @@ import main_service
 file_folder = 'figs/'
 args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
 full_file_folder = file_folder + args_folder
+full_file_folder = config.full_file_folder
+
 
 N_energy = 10
 phase_index = 0  # индекс фазы для nu_L_nu(nu), L_nu(nu)

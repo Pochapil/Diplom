@@ -9,6 +9,7 @@ if approx_type:
     approx_method = "dipole"
 
 
+# формула 2 в статье
 def get_delta_distance(theta, R_e):
     # R=R_e * sin_theta ** 2
     return R_e * np.sin(theta) ** 3 / (1 + 3 * np.cos(theta) ** 2) ** (1 / 2) * config.dRe_div_Re
@@ -20,6 +21,7 @@ def get_A_normal(theta, R_e):
     return 2 * get_delta_distance(theta, R_e) * 2 * np.pi * config.a_portion * R_e * np.sin(theta) ** 3
 
 
+# из усл
 def get_theta_accretion_begin(R_e):
     return np.arcsin((config.R_ns / R_e) ** (1 / 2))
 
@@ -148,7 +150,7 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
                 # для верхнего конуса:
                 intersect_z_correct = 0 < intersect_point[2] < ksi_shock * np.cos(theta_accretion_end)
                 intersect_phi_correct = (top_column_phi_range[0] < intersect_phi < top_column_phi_range[-1]) or (
-                            0 < intersect_phi < top_column_phi_range[-1] - 2 * np.pi)
+                        0 < intersect_phi < top_column_phi_range[-1] - 2 * np.pi)
                 if intersect_z_correct and intersect_phi_correct and intersect_r_correct:
                     return True
 

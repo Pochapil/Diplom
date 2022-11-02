@@ -27,6 +27,7 @@ if __name__ == '__main__':
     file_folder = 'figs/'
     file_folder_args = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
     full_file_folder = file_folder + file_folder_args
+    full_file_folder = config.full_file_folder
     main_service.create_file_path(full_file_folder)
     # ------------------- создание папки для графиков --------------------------
 

@@ -19,6 +19,7 @@ for i in range(1, N_energy):
 file_folder = 'figs/'
 args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
 full_file_folder = file_folder + args_folder
+full_file_folder = config.full_file_folder
 
 folder = 'luminosity_in_range/'
 arr_to_plt = [0] * N_energy
