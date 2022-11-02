@@ -46,7 +46,7 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
             return x - f(x) / df(x)
 
         delta = 0.001  # точность для метода ньютона
-        ksi1 = 4.3
+        ksi1 = 14.3
         ksi2 = nuton(ksi1)
         while np.abs((ksi1 - ksi2)) > delta:
             ksi1 = ksi2
@@ -89,7 +89,7 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
     ksi_bs = ksi1[::-1]
     Tbs = (u(ksi_bs) / config.a_rad_const) ** (1 / 4)  # настоящее аналитическое решение
 
-    e = config.c / (config.k * s * d0)  # формула 18 стр 14
+    e = config.c / (config.k * s * delta_ns)  # формула 18 стр 14
     e = config.c / config.k / (config.M_accretion_rate / A_normal) / delta_ns
 
     # 21 стр конец 2 абзаца
