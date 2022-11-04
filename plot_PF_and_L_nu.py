@@ -4,11 +4,10 @@ import matplotlib.pyplot as plt
 import config
 import main_service
 
-file_folder = 'figs/'
-args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
-full_file_folder = file_folder + args_folder
+# file_folder = 'figs/'
+# args_folder = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
+# full_file_folder = file_folder + args_folder
 full_file_folder = config.full_file_folder
-
 
 N_energy = 10
 phase_index = 0  # индекс фазы для nu_L_nu(nu), L_nu(nu)
@@ -106,6 +105,13 @@ fig = main_service.create_figure(energy, L_nu_avg_on_phase, figure_title=fig_tit
 
 file_name = 'L_nu(nu)_avg' + '.png'
 main_service.save_figure(fig, full_file_folder + folder, file_name)
+
+fig_title = r'$L_{\nu}$'
+fig = main_service.create_figure(energy, L_nu_avg_on_phase, figure_title=fig_title, is_y_2d=False, is_x_log_scale=True,
+                                 is_y_log_scale=True)
+
+file_name = 'L_nu(nu)_avg_log_log' + '.png'
+main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- L_nu(nu)_avg --------------------------
 
 # --------------------------- nu_L_nu(nu) --------------------------
@@ -143,5 +149,12 @@ fig_title = r'$\nu L_{\nu}$'
 fig = main_service.create_figure(energy, nu_L_nu_avg_on_phase, figure_title=fig_title, is_y_2d=False)
 
 file_name = 'nu_L_nu(nu)_avg' + '.png'
+main_service.save_figure(fig, full_file_folder + folder, file_name)
+
+fig_title = r'$\nu L_{\nu}$'
+fig = main_service.create_figure(energy, nu_L_nu_avg_on_phase, figure_title=fig_title, is_y_2d=False,
+                                 is_x_log_scale=True, is_y_log_scale=True)
+
+file_name = 'nu_L_nu(nu)_avg_log_log' + '.png'
 main_service.save_figure(fig, full_file_folder + folder, file_name)
 # --------------------------- nu_L_nu(nu)_avg --------------------------

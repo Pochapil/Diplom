@@ -17,6 +17,7 @@ def fill_arr_with_func(func, surface, energy):
 
 def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True,
                   is_x_log_scale=False, is_y_log_scale=False):
+    #plt.style.use(['science', 'notebook', 'grid'])
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
 
@@ -37,7 +38,7 @@ def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', fig
     if is_y_log_scale:
         plt.yscale('log')
     if not (labels_arr == ''):
-        ax.legend()
+        ax.legend()  # frameon=False - без рамки
     fig.suptitle(figure_title, fontsize=14)
     return fig
 
@@ -50,6 +51,7 @@ def save_figure(fig, file_path, file_name):
 
 
 def extend_arr_for_phase(arr):
+    # нужно расширить массивы, чтобы покрыть фазу [0,2]
     append_index = config.t_max_for_plot - config.t_max
     array_to_plot = np.append(arr, arr[0:append_index])
     return array_to_plot
