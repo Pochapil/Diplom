@@ -32,6 +32,7 @@ arr_to_plt = [0] * len(data_array)
 for i in range(len(data_array)):
     arr_to_plt[i] = main_service.extend_arr_for_phase(data_array[i])
 
+# -------------------------------------------------------------------------------------------
 for energy_i in range(N_energy):
     fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy_arr[energy_i], PF[energy_i])
     fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$\nu \cdot L_{\nu}(phase)$',
