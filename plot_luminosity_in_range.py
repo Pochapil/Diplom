@@ -1,6 +1,7 @@
 import config
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 
 import main_service
 
@@ -62,4 +63,23 @@ file_name = 'sum_of_luminosity_in_range.png'
 main_service.save_figure(fig, full_file_folder + folder, file_name)
 
 # -------------------------------------------------------------------------------------------
-# plt.style.use(['science', 'notebook', 'grid'])
+plt.style.use(['science', 'notebook', 'grid'])
+
+N_column_plot = 6
+fig, axes = plt.subplots(N_column_plot, 1, figsize=(9, 2 * N_column_plot), sharex=True)
+for i in range(N_column_plot):
+    ax = axes[i]
+    label = "%0.1f - %0.1f KeV" % (energy_min[i], energy_max[i])
+    ax.tick_params(axis='both', labelsize=12)
+    ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
+    ax.text(0.98, 0.77, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right')
+    #ax.legend(loc='upper right')
+
+# fig.add_subplot(111, frameon=False)
+# plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+# plt.xlabel('phase')
+# plt.ylabel('luminosity [erg/s]')
+plt.rc('font', size=16)
+fig.text(0.5, 0.07, 'Phase', ha='center')
+fig.text(0.02, 0.5, 'Luminosity(L) [erg/s]', va='center', rotation='vertical')
+plt.show()
