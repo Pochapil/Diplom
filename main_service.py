@@ -11,13 +11,9 @@ def create_file_path(file_path):
     pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
 
 
-def fill_arr_with_func(func, surface, energy):
-    return func(surface, energy)
-
-
 def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True,
                   is_x_log_scale=False, is_y_log_scale=False):
-    #plt.style.use(['science', 'notebook', 'grid'])
+    # plt.style.use(['science', 'notebook', 'grid'])
     fig = plt.figure(figsize=(8, 8))
     ax = fig.add_subplot(111)
 

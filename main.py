@@ -1,6 +1,7 @@
 import numpy as np
 import multiprocessing as mp
 from itertools import repeat
+import time
 
 import geometricTask.matrix as matrix
 import config
@@ -67,6 +68,8 @@ if __name__ == '__main__':
     theta_accretion_end = top_column.outer_surface.theta_range[-1]
     # ----------------- углы для нахождения пересечений -------------------------
 
+    time_start = time.time()
+
     # ------------------ начало заполнения матриц косинусов ---------------------------
     # for key, surface in surfaces.items():
     #     surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end, top_column.outer_surface.phi_range,
@@ -87,21 +90,19 @@ if __name__ == '__main__':
         surface.cos_psi_range = cos_psi_range_final
     # ------------------ конец заполнения матриц косинусов ---------------------------
 
+    time_cos = time.time()
+
     # ------------------ начало заполнения массивов светимости -----------------------
     arr_simps_integrate = [0] * 4
     sum_simps_integrate = 0
-    # for key, surface in surfaces.items():
-    #     arr_simps_integrate[key] = surface.calculate_integral_distribution()
-    #     # file_name = "%s %s %d.txt" % (file_name_variables, approx_method, key)
-    #     # np.savetxt(file_name, arr_simps_integrate[key])
-    #     sum_simps_integrate += np.array(arr_simps_integrate[key])
-
-    # распараллелил
     for key, surface in surfaces.items():
-        with mp.Pool(mp.cpu_count()) as pool:
-            arr_simps_integrate[key] = pool.map(surface.async_calculate_integral_distribution, range(config.t_max))
+        arr_simps_integrate[key] = surface.calculate_integral_distribution()
+        # file_name = "%s %s %d.txt" % (file_name_variables, approx_method, key)
+        # np.savetxt(file_name, arr_simps_integrate[key])
         sum_simps_integrate += np.array(arr_simps_integrate[key])
     # ------------------ конец заполнения массивов светимости -----------------------
+
+    time_integral_distribution = time.time()
 
     print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)
 
@@ -152,7 +153,6 @@ if __name__ == '__main__':
                                                                                         current_energy_max)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов светимости -----------------------
-
         PF[energy_index] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
         file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (
@@ -160,7 +160,9 @@ if __name__ == '__main__':
         main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
 
         data_array[energy_index] = sum_simps_integrate
+
     # ------------------ цикл для диапазона энергий ----------------------
+
     file_name = "PF.txt"
     main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
 
@@ -169,6 +171,8 @@ if __name__ == '__main__':
 
     file_name = "energy.txt"
     main_service.save_arr_as_txt(energy_arr, full_file_folder, file_name)
+
+    time_integral_distribution_in_range = time.time()
 
     # print('спектр')
     print('L_nu')
@@ -182,8 +186,7 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = main_service.fill_arr_with_func(AccretionColumn.Surface.calculate_L_nu_on_energy,
-                                                                       surface, current_energy)
+            arr_simps_integrate[key] = surface.calculate_L_nu_on_energy(current_energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
@@ -193,13 +196,15 @@ if __name__ == '__main__':
         main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
 
         data_array[energy_index] = sum_simps_integrate
-        # ------------------ цикл для Spectrum Distribution ------------------
+    # ------------------ цикл для Spectrum Distribution ------------------
 
     file_name = "PF.txt"
     main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
 
     file_name = "L_nu.txt"
     main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
+
+    time_calculate_L_nu_on_energy = time.time()
 
     # print('Spectral Energy Distribution')
     print('nu_L_nu')
@@ -213,8 +218,7 @@ if __name__ == '__main__':
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = main_service.fill_arr_with_func(
-                AccretionColumn.Surface.calculate_nu_L_nu_on_energy, surface, current_energy)
+            arr_simps_integrate[key] = surface.calculate_nu_L_nu_on_energy(current_energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
@@ -224,15 +228,29 @@ if __name__ == '__main__':
         main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
 
         data_array[energy_index] = sum_simps_integrate
-        # ------------------ цикл для Spectral Energy Distribution ------------------
+    # ------------------ цикл для Spectral Energy Distribution ------------------
+
     file_name = "PF.txt"
     main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
 
     file_name = "nu_L_nu.txt"
     main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
 
-    # import plot_from_main
-    # import plot_luminosity_in_range
-    # import plot_L_nu
-    # import plot_nu_L_nu
+    time_calculate_nu_L_nu_on_energy = time.time()
 
+    print("execution time of program: %f" % (
+            time_calculate_nu_L_nu_on_energy - time_start))
+
+    print("execution time of intersections: %f" % (time_cos - time_start))
+    print("execution time of calculate_integral_distribution: %f" % (time_integral_distribution - time_cos))
+    print("execution time of calculate_integral_distribution_in_range: %f" % (
+            time_integral_distribution_in_range - time_integral_distribution))
+    print("execution time of calculate_L_nu_on_energy: %f" % (
+            time_calculate_L_nu_on_energy - time_integral_distribution_in_range))
+    print("execution time of calculate_nu_L_nu_on_energy: %f" % (
+            time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
+
+    import plot_from_main
+    import plot_luminosity_in_range
+    import plot_L_nu
+    import plot_nu_L_nu
