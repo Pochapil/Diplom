@@ -82,11 +82,12 @@ N_column_plot = 9
 fig, axes = plt.subplots(N_column_plot, 1, figsize=(10, 2 * N_column_plot), sharex=True)
 for i in range(N_column_plot):
     ax = axes[i]
-    label = "%0.1f - %0.1f KeV" % (energy_min[i], energy_max[i])
+    label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (energy_min[i], energy_max[i], PF[i])
     ax.tick_params(axis='both', labelsize=12)
     ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8)
     # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
-    ax.text(0.98, 0.77, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right')
+    ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
+            va='top')
     # ax.legend(loc='upper right')
 
 # fig.add_subplot(111, frameon=False)
