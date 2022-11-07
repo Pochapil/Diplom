@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, TextBox, Button
 
 import config
+import main_service
 import vectors
 
 
@@ -193,7 +194,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
 
 def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
     # fig, ax = plt.subplots()
-    lim_value = 0.2
+    lim_value = 0.2 * config.M_rate_c2_Led/10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -291,11 +292,18 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
 
 if __name__ == "__main__":
+
+    working_folder = config.full_file_folder
+
     file_name = "save_phi_range.txt"
-    phi_range_column = np.loadtxt(file_name)
+    phi_range_column = main_service.load_arr_from_txt(working_folder, file_name)
+
+    # file_name = "save_phi_range.txt"
+    # phi_range_column = np.loadtxt(file_name)
 
     file_name = "save_theta_range.txt"
-    theta_range_column = np.loadtxt(file_name)
+    theta_range_column = main_service.load_arr_from_txt(working_folder, file_name)
+    # theta_range_column = np.loadtxt(file_name)
 
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
     visualise_3d_configuration(phi_range_column, theta_range_column, config.betta_rotate / config.grad_to_rad,
