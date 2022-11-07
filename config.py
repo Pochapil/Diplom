@@ -24,19 +24,11 @@ mu = 0.1 * 10 ** 30  # магнитный момент Гаусс * см3
 H = 2 * mu / R_ns ** 3
 p_spin = 3.62  # период вращения, с
 
-# цикл для поворотов, сколько точек на графике интегралов - для фазы от 0 до 2 - с перекрытием чтобы форму макс
-omega_ns = 8  # скорость вращения НЗ - будет меняться только угол phi_mu!
-max_phase_angle_for_plot = 720  # сколько точек на графике интегралов - для фазы от 0 до 2 - с перекрытием чтобы форму макс
-t_max_for_plot = (max_phase_angle_for_plot // omega_ns) + (1 if max_phase_angle_for_plot % omega_ns > 0 else 0)
-max_phase = 360
-t_max = (max_phase // omega_ns) + (1 if max_phase % omega_ns > 0 else 0)
-# цикл для поворотов, сколько точек для фазы от 0 до 1 (полного поворота)
-
 # параметры аккреционного потока
 dRe_div_Re = 0.25  # взял просто число
 # M_accretion_rate = 10 ** 38 * R_ns / G / MSun  # темп аккреции
 ksi_rad = 3 / 2
-a_portion = 0.25  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
+a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
 k = 0.35  # opacity непрозрачность
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
@@ -48,11 +40,24 @@ ksi_param = 0.5  # между 1 и 2 формулой в статье
 lim_phi_accretion = 2 * pi * a_portion  # верхний предел по phi
 phi_accretion_begin_deg = 0  # нижний предел по phi
 phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad  # нижний предел по phi
+
+# цикл для поворотов, сколько точек на графике интегралов - для фазы от 0 до 2 - с перекрытием чтобы форму макс
+omega_ns = 8  # скорость вращения НЗ - будет меняться только угол phi_mu!
+max_phase_angle_for_plot = 720  # сколько точек на графике интегралов - для фазы от 0 до 2 - с перекрытием чтобы форму макс
+t_max_for_plot = (max_phase_angle_for_plot // omega_ns) + (1 if max_phase_angle_for_plot % omega_ns > 0 else 0)
+max_phase = 360
+t_max = (max_phase // omega_ns) + (1 if max_phase % omega_ns > 0 else 0)
+# цикл для поворотов, сколько точек для фазы от 0 до 1 (полного поворота)
+
 # количество шагов
 N_phi_accretion = 100
 N_theta_accretion = 100
 N_wavelength_range = 10
 N_frequency_range = 100
+N_energy = 10
+
+energy_min = 1  # КэВ
+energy_max = 40  # КэВ
 
 i_angle = 0 * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
 # угол между осью вращения системы и собственным вращением НЗ

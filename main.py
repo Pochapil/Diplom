@@ -133,34 +133,33 @@ if __name__ == '__main__':
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
     # ------------------ цикл для диапазона энергий ----------------------
-    energy_i = 0
-    N_energy = 10
-    PF = [0] * N_energy
-    data_array = [0] * N_energy
-    folder = 'luminosity_in_range/'
-    while energy_i < N_energy:
-        if energy_i == 0:
-            energy_min = 1
-            energy_max = 4
-        else:
-            energy_min = energy_max
-            energy_max = energy_max + 4
 
+    energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
+    energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
+    energy_arr.append(config.energy_max)
+
+    PF = [0] * (config.N_energy - 1)
+    data_array = [0] * (config.N_energy - 1)
+    folder = 'luminosity_in_range/'
+    for energy_index in range(config.N_energy - 1):
+        current_energy_min = energy_arr[energy_index]
+        current_energy_max = energy_arr[energy_index + 1]
         # ------------------ начало заполнения массивов светимости -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
-            arr_simps_integrate[key] = surface.calculate_integral_distribution_in_range(energy_min, energy_max)
+            arr_simps_integrate[key] = surface.calculate_integral_distribution_in_range(current_energy_min,
+                                                                                        current_energy_max)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов светимости -----------------------
 
-        PF[energy_i] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+        PF[energy_index] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
-        file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (energy_min, energy_max)
+        file_name = "sum_of_luminosity_in_range_%0.2f_-_%0.2f_KeV_of_surfaces.txt" % (
+            current_energy_min, current_energy_max)
         main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
 
-        data_array[energy_i] = sum_simps_integrate
-        energy_i += 1
+        data_array[energy_index] = sum_simps_integrate
     # ------------------ цикл для диапазона энергий ----------------------
     file_name = "PF.txt"
     main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
@@ -168,35 +167,32 @@ if __name__ == '__main__':
     file_name = "luminosity_in_range.txt"
     main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
 
+    file_name = "energy.txt"
+    main_service.save_arr_as_txt(energy_arr, full_file_folder, file_name)
+
     # print('спектр')
     print('L_nu')
-    energy_i = 0
-    N_energy = 10
-    PF = [0] * N_energy
-    data_array = [0] * N_energy
+    PF = [0] * config.N_energy
+    data_array = [0] * config.N_energy
     folder = 'L_nu/'
     # ------------------ цикл для Spectrum Distribution ------------------
-    while energy_i < N_energy:
-        if energy_i == 0:
-            energy = 1
-        else:
-            energy = energy_i * 4
+    for energy_index in range(config.N_energy):
+        current_energy = energy_arr[energy_index]
         # ------------------ начало заполнения массивов Spectral Energy -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
             arr_simps_integrate[key] = main_service.fill_arr_with_func(AccretionColumn.Surface.calculate_L_nu_on_energy,
-                                                                       surface, energy)
+                                                                       surface, current_energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
-        PF[energy_i] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+        PF[energy_index] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
-        file_name = "L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
+        file_name = "L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
         main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
 
-        data_array[energy_i] = sum_simps_integrate
-        energy_i += 1
+        data_array[energy_index] = sum_simps_integrate
         # ------------------ цикл для Spectrum Distribution ------------------
 
     file_name = "PF.txt"
@@ -207,34 +203,27 @@ if __name__ == '__main__':
 
     # print('Spectral Energy Distribution')
     print('nu_L_nu')
-    energy_i = 0
-    N_energy = 10
-    PF = [0] * N_energy
-    data_array = [0] * N_energy
+    PF = [0] * config.N_energy
+    data_array = [0] * config.N_energy
     folder = 'nu_L_nu/'
     # ------------------ цикл для Spectral Energy Distribution ------------------
-    while energy_i < N_energy:
-        if energy_i == 0:
-            energy = 1
-        else:
-            energy = energy_i * 4
+    for energy_index in range(config.N_energy):
+        current_energy = energy_arr[energy_index]
         # ------------------ начало заполнения массивов Spectral Energy -----------------------
         arr_simps_integrate = [0] * 4
         sum_simps_integrate = 0
         for key, surface in surfaces.items():
             arr_simps_integrate[key] = main_service.fill_arr_with_func(
-                AccretionColumn.Surface.calculate_nu_L_nu_on_energy, surface,
-                energy)
+                AccretionColumn.Surface.calculate_nu_L_nu_on_energy, surface, current_energy)
             sum_simps_integrate += np.array(arr_simps_integrate[key])
         # ------------------ конец заполнения массивов Spectral Energy -----------------------
 
-        PF[energy_i] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
+        PF[energy_index] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
 
-        file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % energy
+        file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
         main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
 
-        data_array[energy_i] = sum_simps_integrate
-        energy_i += 1
+        data_array[energy_index] = sum_simps_integrate
         # ------------------ цикл для Spectral Energy Distribution ------------------
     file_name = "PF.txt"
     main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
@@ -242,7 +231,8 @@ if __name__ == '__main__':
     file_name = "nu_L_nu.txt"
     main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
 
-    import plot_from_main
-    import plot_luminosity_in_range
-    import plot_L_nu
-    import plot_nu_L_nu
+    # import plot_from_main
+    # import plot_luminosity_in_range
+    # import plot_L_nu
+    # import plot_nu_L_nu
+
