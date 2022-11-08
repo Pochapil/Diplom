@@ -194,7 +194,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
 
 def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
     # fig, ax = plt.subplots()
-    lim_value = 0.2 * config.M_rate_c2_Led/10
+    lim_value = 0.2 * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -237,6 +237,12 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     mu_vector = [0, 0, 1]
     add_vector(ax, origin, mu_vector, 'red', lim_value)
 
+    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0),
+    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0),
+    #                 np.cos(betta_mu * grad_to_rad)]
+    #
+    # add_vector(ax, origin, omega_vector, 'black', lim_value)
+
     axSlider1 = fig.add_axes([0.25, 0.1, 0.65, 0.05])
     slider1 = Slider(axSlider1, 'phase', valmin=0, valmax=2, valinit=0)
 
@@ -252,11 +258,20 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
 
+    # observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
+    #                       np.sin(elevation) * np.sin(azimuth),
+    #                       np.cos(elevation)]
+    #
+    # add_vector(ax, origin, observer_mu_vector, 'purple', lim_value)
+
     # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
     #                 -np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
     #                 np.cos(betta_mu * grad_to_rad)]
     #
     # add_vector(ax, origin, omega_vector, 'blue', lim_value)
+    # config.betta_rotate / grad_to_rad + config.betta_mu / grad_to_rad
+
+    # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
     ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     def rotate(val):
@@ -269,12 +284,14 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
         azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
 
-        # observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
-        #                       np.sin(elevation) * np.sin(azimuth),
-        #                       np.cos(elevation)]
+        # if val == 0.5:
+        #     observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
+        #                           np.sin(elevation) * np.sin(azimuth),
+        #                           np.cos(elevation)]
         #
-        # add_vector(ax, origin, observer_mu_vector, 'black', lim_value)
+        #     add_vector(ax, origin, observer_mu_vector, 'black', lim_value)
 
+        # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
         ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
     slider1.on_changed(rotate)
@@ -292,7 +309,6 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
 
 if __name__ == "__main__":
-
     working_folder = config.full_file_folder
 
     file_name = "save_phi_range.txt"

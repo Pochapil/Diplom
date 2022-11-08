@@ -27,7 +27,7 @@ N_energy = config.N_energy
 
 # fig = main_service.create_figure(energy_arr, PF, is_y_2d=False)
 
-fig = main_service.create_figure(energy_arr[:-1], PF, is_y_2d=False)
+fig = main_service.create_figure(energy_arr[:-1], PF, x_axis_label=r'$h \nu$ [KeV]', y_axis_label='PF', is_y_2d=False)
 
 file_name = "PF.png"
 main_service.save_figure(fig, working_folder, file_name)
@@ -88,6 +88,7 @@ for i in range(N_column_plot):
     # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
     ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
             va='top')
+    # plt.subplots_adjust(hspace=0.15)
     # ax.legend(loc='upper right')
 
 # fig.add_subplot(111, frameon=False)
@@ -96,6 +97,12 @@ for i in range(N_column_plot):
 # plt.ylabel('luminosity [erg/s]')
 plt.rc('font', size=24)
 fig.text(0.5, 0.09, 'Phase', ha='center')
-fig.text(0.07, 0.5, 'Luminosity(L) [erg/s]', va='center', rotation='vertical')
+fig.text(0.06, 0.5, 'Luminosity(L) [erg/s]', va='center', rotation='vertical')
 file_name = 'pretty_fig.png'
+main_service.save_figure(fig, working_folder, file_name)
+
+fig = plt.figure(figsize=(12, 4))
+ax = fig.add_subplot(111)
+ax.step(phi_for_plot, arr_to_plt[16], color='black', lw=0.9)
+file_name = 'step.png'
 main_service.save_figure(fig, working_folder, file_name)

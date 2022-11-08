@@ -14,7 +14,7 @@ def create_file_path(file_path):
 def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', figure_title='', is_y_2d=True,
                   is_x_log_scale=False, is_y_log_scale=False):
     # plt.style.use(['science', 'notebook', 'grid'])
-    fig = plt.figure(figsize=(8, 8))
+    fig = plt.figure(figsize=(12, 6))
     ax = fig.add_subplot(111)
 
     if is_y_2d:
@@ -25,7 +25,7 @@ def create_figure(x, y_arr, labels_arr='', x_axis_label='', y_axis_label='', fig
             for i in range(len(y_arr)):
                 ax.plot(x, y_arr[i], label=labels_arr[i])
     else:
-        ax.plot(x, y_arr, label=labels_arr)
+        ax.plot(x, y_arr, label=labels_arr, color='black')
 
     ax.set_xlabel(x_axis_label, fontsize=24)
     if is_x_log_scale:
