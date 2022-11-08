@@ -89,4 +89,27 @@ file_name = 'nu_L_nu(nu)_avg_log_log' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
 # -------------------------------------------------------------------------------------------
-# plt.style.use(['science', 'notebook', 'grid'])
+plt.style.use(['science', 'notebook', 'grid'])
+
+N_column_plot = 10
+fig, axes = plt.subplots(N_column_plot, 1, figsize=(10, 2 * N_column_plot), sharex=True)
+for i in range(N_column_plot):
+    ax = axes[i]
+    label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[2*i], PF[2*i])
+    ax.tick_params(axis='both', labelsize=12)
+    ax.plot(phi_for_plot, arr_to_plt[2*i], color='black', lw=0.8)
+    # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
+    ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
+            va='top')
+    # ax.legend(loc='upper right')
+
+# fig.add_subplot(111, frameon=False)
+# plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+# plt.xlabel('phase')
+# plt.ylabel('luminosity [erg/s]')
+plt.rc('font', size=24)
+fig.text(0.5, 0.08, 'Phase', ha='center')
+fig.text(0.04, 0.5, r'$\nu \cdot L_{\nu} \, [erg/s]$', va='center', rotation='vertical')
+file_name = 'pretty_fig.png'
+main_service.save_figure(fig, working_folder, file_name)
+

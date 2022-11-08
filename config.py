@@ -54,7 +54,7 @@ N_phi_accretion = 100
 N_theta_accretion = 100
 N_wavelength_range = 10
 N_frequency_range = 100
-N_energy = 10
+N_energy = 20
 
 energy_min = 1  # КэВ
 energy_max = 40  # КэВ
@@ -67,6 +67,6 @@ phi_rotate = 0 * grad_to_rad
 betta_mu = 70 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
-file_folder = 'figs/'
+file_folder = 'figs/new_energy/'
 file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
 full_file_folder = file_folder + file_folder_args

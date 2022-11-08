@@ -35,7 +35,7 @@ for i in range(len(data_array)):
 # -------------------------------------------------------------------------------------------
 for energy_i in range(N_energy):
     fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy_arr[energy_i], PF[energy_i])
-    fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$\nu \cdot L_{\nu}(phase)$',
+    fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$L_{\nu}(phase)$',
                                      x_axis_label='phase', y_axis_label=r'$Spectrum, erg \, s^{-1} \, hz^{-1}$',
                                      figure_title=fig_title, is_y_2d=False)
 
@@ -89,4 +89,26 @@ file_name = 'L_nu(nu)_avg_log_log' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
 # -------------------------------------------------------------------------------------------
-# plt.style.use(['science', 'notebook', 'grid'])
+plt.style.use(['science', 'notebook', 'grid'])
+
+N_column_plot = 10
+fig, axes = plt.subplots(N_column_plot, 1, figsize=(10, 2 * N_column_plot), sharex=True)
+for i in range(N_column_plot):
+    ax = axes[i]
+    label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[2*i], PF[2*i])
+    ax.tick_params(axis='both', labelsize=12)
+    ax.plot(phi_for_plot, arr_to_plt[2*i], color='black', lw=0.8)
+    # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
+    ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
+            va='top')
+    # ax.legend(loc='upper right')
+
+# fig.add_subplot(111, frameon=False)
+# plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
+# plt.xlabel('phase')
+# plt.ylabel('luminosity [erg/s]')
+plt.rc('font', size=24)
+fig.text(0.5, 0.08, 'Phase', ha='center')
+fig.text(0.06, 0.5, r'$L_{\nu} \, [erg \cdot s^{-1} \cdot hz^{-1}]$', va='center', rotation='vertical')
+file_name = 'pretty_fig.png'
+main_service.save_figure(fig, working_folder, file_name)

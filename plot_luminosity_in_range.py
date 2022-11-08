@@ -79,7 +79,7 @@ main_service.save_figure(fig, working_folder, file_name)
 plt.style.use(['science', 'notebook', 'grid'])
 
 N_column_plot = 9
-fig, axes = plt.subplots(N_column_plot, 1, figsize=(10, 2 * N_column_plot), sharex=True)
+fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
 for i in range(N_column_plot):
     ax = axes[i]
     label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (energy_min[i], energy_max[i], PF[i])
@@ -94,8 +94,8 @@ for i in range(N_column_plot):
 # plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
 # plt.xlabel('phase')
 # plt.ylabel('luminosity [erg/s]')
-plt.rc('font', size=16)
-fig.text(0.5, 0.07, 'Phase', ha='center')
-fig.text(0.04, 0.5, 'Luminosity(L) [erg/s]', va='center', rotation='vertical')
+plt.rc('font', size=24)
+fig.text(0.5, 0.09, 'Phase', ha='center')
+fig.text(0.07, 0.5, 'Luminosity(L) [erg/s]', va='center', rotation='vertical')
 file_name = 'pretty_fig.png'
 main_service.save_figure(fig, working_folder, file_name)
