@@ -10,12 +10,15 @@ if approx_type:
 
 
 # формула 2 в статье
+# the distance between the field lines δ
+# ширина аккреции на поверхности м
 def get_delta_distance(theta, R_e):
     # R=R_e * sin_theta ** 2
     return R_e * np.sin(theta) ** 3 / (1 + 3 * np.cos(theta) ** 2) ** (1 / 2) * config.dRe_div_Re
 
 
 # формула 3 в статье
+# a cross-section
 def get_A_normal(theta, R_e):
     # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
     return 2 * get_delta_distance(theta, R_e) * 2 * np.pi * config.a_portion * R_e * np.sin(theta) ** 3

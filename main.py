@@ -92,6 +92,15 @@ if __name__ == '__main__':
     f.write('calculated total L_x of single surface = %f * 10**%d \n' % (number, power_index))
     f.close()
 
+    d0 = accretionColumnService.get_delta_distance(top_column.inner_surface.theta_range[0],
+                                                   top_column.inner_surface.R_e)
+    l0 = accretionColumnService.get_A_normal(top_column.inner_surface.theta_range[0], top_column.inner_surface.R_e) / d0
+
+    file_name = 'save_values.txt'
+    f = open(full_file_folder + file_name, 'a')
+
+    f.write('width / length = %f \n' % (d0 / l0))
+    f.close()
 
     time_start = time.time()
 
@@ -281,16 +290,16 @@ if __name__ == '__main__':
 
     time_calculate_nu_L_nu_on_energy = time.time()
 
-    print("execution time of program: %f" % (
+    print("execution time of program: %f s" % (
             time_calculate_nu_L_nu_on_energy - time_start))
 
-    print("execution time of intersections: %f" % (time_cos - time_start))
-    print("execution time of calculate_integral_distribution: %f" % (time_integral_distribution - time_cos))
-    print("execution time of calculate_integral_distribution_in_range: %f" % (
+    print("execution time of intersections: %f s" % (time_cos - time_start))
+    print("execution time of calculate_integral_distribution: %f s" % (time_integral_distribution - time_cos))
+    print("execution time of calculate_integral_distribution_in_range: %f s" % (
             time_integral_distribution_in_range - time_integral_distribution))
-    print("execution time of calculate_L_nu_on_energy: %f" % (
+    print("execution time of calculate_L_nu_on_energy: %f s" % (
             time_calculate_L_nu_on_energy - time_integral_distribution_in_range))
-    print("execution time of calculate_nu_L_nu_on_energy: %f" % (
+    print("execution time of calculate_nu_L_nu_on_energy: %f s" % (
             time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
 
     import plot_from_main

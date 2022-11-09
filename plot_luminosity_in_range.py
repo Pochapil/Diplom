@@ -5,10 +5,10 @@ import matplotlib.ticker as ticker
 
 import main_service
 
+plt.style.use(['science', 'notebook', 'grid'])
+
 folder = 'luminosity_in_range/'
 working_folder = config.full_file_folder + folder
-
-plt.style.use(['science', 'notebook', 'grid'])
 
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 # N_energy = 10
@@ -71,7 +71,8 @@ labels_arr = [''] * N_energy
 for i in range(N_energy):
     labels_arr[i] = "%0.2f - %0.2f KeV" % (energy_min[i], energy_max[i])
 
-fig = main_service.create_figure(phi_for_plot, arr_to_plt[:N_energy], labels_arr=labels_arr)
+fig = main_service.create_figure(phi_for_plot, arr_to_plt[:N_energy], labels_arr=labels_arr, x_axis_label='Phase',
+                                 y_axis_label='Luminosity [erg/s]')
 
 file_name = 'sum_of_luminosity_in_range.png'
 main_service.save_figure(fig, working_folder, file_name)
@@ -105,5 +106,7 @@ main_service.save_figure(fig, working_folder, file_name)
 fig = plt.figure(figsize=(12, 4))
 ax = fig.add_subplot(111)
 ax.step(phi_for_plot, arr_to_plt[16], color='black', lw=0.9)
+ax.set_xlabel('Phase', fontsize=24)
+ax.set_ylabel('Luminosity(L) [erg/s]', fontsize=24)
 file_name = 'step.png'
 main_service.save_figure(fig, working_folder, file_name)
