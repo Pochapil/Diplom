@@ -81,6 +81,18 @@ if __name__ == '__main__':
     f.write('total L_x = %f * 10**%d \n' % (number, power_index))
     f.close()
 
+    file_name = 'save_values.txt'
+    f = open(full_file_folder + file_name, 'a')
+
+    power_index = 0
+    number = top_column.inner_surface.calculate_total_luminosity()
+    while number > 10:
+        number = number / 10
+        power_index += 1
+    f.write('calculated total L_x of single surface = %f * 10**%d \n' % (number, power_index))
+    f.close()
+
+
     time_start = time.time()
 
     # ------------------ начало заполнения матриц косинусов ---------------------------
