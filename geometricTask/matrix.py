@@ -21,6 +21,11 @@ def newRz(f):
 # R_y(betta_mu) @ R_z(phi_mu) @ R_y(betta_rotate) @ A_z(phi_rotate)
 # A_matrix_calc = matrix.newRy(betta_mu) @ matrix.newRz(fi_mu) @ matrix.newRy(betta_rotate) \
 #                 @ matrix.newRz(fi_rotate)
+
+def A_matrix(fi_rotate, betta_rotate, fi_mu, betta_mu):
+    return newRy(betta_mu) @ newRz(fi_mu) @ newRy(betta_rotate) @ newRz(fi_rotate)
+
+
 def newMatrixAnalytic(fi_rotate, betta_rotate, fi_mu, betta_mu):
     a_11 = np.cos(fi_rotate) * (
             np.cos(betta_rotate) * np.cos(betta_mu) * np.cos(fi_mu) - np.sin(betta_rotate) * np.sin(betta_mu)) \

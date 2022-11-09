@@ -58,7 +58,8 @@ for i in range(N_energy - 1):
 for energy_i in range(N_energy - 1):
     fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (
         energy_min[energy_i], energy_max[energy_i], PF[energy_i])
-    fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], figure_title=fig_title, is_y_2d=False)
+    fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], x_axis_label='Phase',
+                                     y_axis_label='Luminosity [erg/s]', figure_title=fig_title, is_y_2d=False)
 
     file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (energy_min[energy_i], energy_max[energy_i])
     main_service.save_figure(fig, working_folder, file_name)

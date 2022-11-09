@@ -16,8 +16,8 @@ if __name__ == '__main__':
     R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
     print('R_e = %f' % (R_e / config.R_ns))
     R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
-    # вектор на наблюдателя в системе координат двойной системы
-    e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
+    # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
+    e_obs = np.array([np.sin(config.i_angle), 0, np.cos(config.i_angle)])
     file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
                           % (config.betta_rotate, config.betta_mu, config.a_portion, config.M_rate_c2_Led)
     approx_method = accretionColumnService.approx_method
@@ -68,6 +68,19 @@ if __name__ == '__main__':
     theta_accretion_end = top_column.outer_surface.theta_range[-1]
     # ----------------- углы для нахождения пересечений -------------------------
 
+    file_name = 'save_values.txt'
+    f = open(full_file_folder + file_name, 'w')
+
+    power_index = 0
+    number = top_column.inner_surface.L_x
+    while number > 10:
+        number = number / 10
+        power_index += 1
+    print('total L_x = %f * 10**%d' % (number, power_index))
+
+    f.write('total L_x = %f * 10**%d \n' % (number, power_index))
+    f.close()
+
     time_start = time.time()
 
     # ------------------ начало заполнения матриц косинусов ---------------------------
@@ -102,6 +115,24 @@ if __name__ == '__main__':
         sum_simps_integrate += np.array(arr_simps_integrate[key])
     # ------------------ конец заполнения массивов светимости -----------------------
 
+    file_name = 'save_values.txt'
+    f = open(full_file_folder + file_name, 'a')
+
+    sum_L_on_phase = 0
+    for L in sum_simps_integrate:
+        sum_L_on_phase += L
+    avg_L_on_phase = sum_L_on_phase / len(sum_simps_integrate)
+
+    power_index = 0
+    number = avg_L_on_phase
+    while number > 10:
+        number = number / 10
+        power_index += 1
+
+    print('avg_L_on_phase = %f * 10**%d' % (number, power_index))
+
+    f.write('avg_L_on_phase = %f * 10**%d' % (number, power_index))
+    f.close()
     time_integral_distribution = time.time()
 
     print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)

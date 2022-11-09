@@ -258,14 +258,14 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
 
-    # observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
-    #                       np.sin(elevation) * np.sin(azimuth),
-    #                       np.cos(elevation)]
-    #
-    # add_vector(ax, origin, observer_mu_vector, 'purple', lim_value)
+    observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
+                          np.sin(elevation) * np.sin(azimuth),
+                          np.cos(elevation)]
+
+    add_vector(ax, origin, observer_mu_vector, 'purple', lim_value)
 
     # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
-    #                 -np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
+    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
     #                 np.cos(betta_mu * grad_to_rad)]
     #
     # add_vector(ax, origin, omega_vector, 'blue', lim_value)
