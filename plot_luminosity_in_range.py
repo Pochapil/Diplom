@@ -80,13 +80,13 @@ main_service.save_figure(fig, working_folder, file_name)
 # -------------------------------------------------------------------------------------------
 plt.style.use(['science', 'notebook', 'grid'])
 
-N_column_plot = 9
+N_column_plot = 10
 fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
 for i in range(N_column_plot):
     ax = axes[i]
-    label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (energy_min[i], energy_max[i], PF[i])
+    label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (energy_min[2 * i], energy_max[2 * i], PF[2 * i])
     ax.tick_params(axis='both', labelsize=12)
-    ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8)
+    ax.plot(phi_for_plot, arr_to_plt[2 * i], color='black', lw=0.8)
     # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
     ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
             va='top')
@@ -110,4 +110,4 @@ ax.set_xlabel('Phase', fontsize=24)
 ax.set_ylabel('Luminosity(L) [erg/s]', fontsize=24)
 file_name = 'step.png'
 main_service.save_figure(fig, working_folder, file_name)
-plt.rc('font', size=8)
+plt.rc('font', size=10)

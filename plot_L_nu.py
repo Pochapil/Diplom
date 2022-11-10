@@ -98,7 +98,7 @@ main_service.save_figure(fig, working_folder, file_name)
 plt.style.use(['science', 'notebook', 'grid'])
 
 N_column_plot = 10
-fig, axes = plt.subplots(N_column_plot, 1, figsize=(10, 2 * N_column_plot), sharex=True)
+fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
 for i in range(N_column_plot):
     ax = axes[i]
     label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[2 * i], PF[2 * i])
@@ -118,4 +118,4 @@ fig.text(0.5, 0.08, 'Phase', ha='center')
 fig.text(0.06, 0.5, r'$L_{\nu} \, [erg \cdot s^{-1} \cdot hz^{-1}]$', va='center', rotation='vertical')
 file_name = 'pretty_fig.png'
 main_service.save_figure(fig, working_folder, file_name)
-plt.rc('font', size=8)
+plt.rc('font', size=10)

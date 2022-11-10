@@ -54,8 +54,8 @@ N_phi_accretion = 100
 N_theta_accretion = 100
 N_wavelength_range = 10
 N_frequency_range = 100
-N_energy = 20
 
+N_energy = 20
 energy_min = 1  # КэВ
 energy_max = 40  # КэВ
 

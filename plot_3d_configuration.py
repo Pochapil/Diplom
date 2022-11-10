@@ -192,7 +192,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
         plt.pause(.001)
 
 
-def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
+def visualise_3d_configuration(phi_range_column, theta_range_column):
     # fig, ax = plt.subplots()
     lim_value = 0.2 * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
@@ -252,8 +252,8 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     phase = 0
     e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
-    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
-                                                 betta_mu * grad_to_rad)
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
+                                                 config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
     azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
@@ -278,8 +278,8 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
         phase = slider1.val  # slider1.val
         phase = phase * 360
         e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
-        A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
-                                                     betta_mu * grad_to_rad)
+        A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
+                                                     config.betta_mu)
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
         azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
@@ -307,7 +307,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     plt.show()
 
 
-def visualise_3d_configuration_angles(betta_rotate, betta_mu):
+def visualise_3d_configuration_angles():
     # fig, ax = plt.subplots()
     lim_value = 0.2 * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
@@ -332,13 +332,13 @@ def visualise_3d_configuration_angles(betta_rotate, betta_mu):
     mu_vector = [0, 0, 1]
     add_vector(ax, origin, mu_vector, 'red', lim_value)
 
-    omega_vector = [np.sin(-betta_mu * grad_to_rad) * np.cos(0),
-                    np.sin(-betta_mu * grad_to_rad) * np.sin(0),
-                    np.cos(-betta_mu * grad_to_rad)]
+    omega_vector = [np.sin(-config.betta_mu) * np.cos(0),
+                    np.sin(-config.betta_mu) * np.sin(0),
+                    np.cos(-config.betta_mu)]
     add_vector(ax, origin, omega_vector, 'black', lim_value)
-    omega_vector = [np.sin(np.pi - betta_mu * grad_to_rad) * np.cos(0),
-                    np.sin(np.pi - betta_mu * grad_to_rad) * np.sin(0),
-                    np.cos(np.pi - betta_mu * grad_to_rad)]
+    omega_vector = [np.sin(np.pi - config.betta_mu) * np.cos(0),
+                    np.sin(np.pi - config.betta_mu) * np.sin(0),
+                    np.cos(np.pi - config.betta_mu)]
     add_vector(ax, origin, omega_vector, 'black', lim_value)
 
     # if not (config.betta_rotate + config.betta_mu < np.pi or config.betta_rotate + config.betta_mu > 2 * np.pi):
@@ -353,8 +353,8 @@ def visualise_3d_configuration_angles(betta_rotate, betta_mu):
 
     phase = 0
     e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
-    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
-                                                 betta_mu * grad_to_rad)
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
+                                                 config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
     azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
@@ -366,7 +366,7 @@ def visualise_3d_configuration_angles(betta_rotate, betta_mu):
     add_vector(ax, origin, observer_mu_vector, 'purple', lim_value)
 
     # рисуем arc
-    theta_range = np.arange(0, -betta_mu * grad_to_rad, -betta_mu * grad_to_rad / config.N_theta_accretion)
+    theta_range = np.arange(0, -config.betta_mu, -config.betta_mu / config.N_theta_accretion)
 
     y = [0] * config.N_theta_accretion
     x = lim_value * np.sin(theta_range) * 0.9
@@ -378,7 +378,7 @@ def visualise_3d_configuration_angles(betta_rotate, betta_mu):
     #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
 
     theta_range = np.array(
-        [-betta_mu * grad_to_rad + -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1) * i for i in
+        [-config.betta_mu + -(config.betta_rotate) / (config.N_theta_accretion - 1) * i for i in
          range(config.N_theta_accretion)])
 
     y = [0] * config.N_theta_accretion
@@ -419,8 +419,7 @@ if __name__ == "__main__":
     # theta_range_column = np.loadtxt(file_name)
 
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
-    visualise_3d_configuration(phi_range_column, theta_range_column, config.betta_rotate / config.grad_to_rad,
-                               config.betta_mu / config.grad_to_rad)
+    visualise_3d_configuration(phi_range_column, theta_range_column)
 
-    visualise_3d_configuration_angles(config.betta_rotate / config.grad_to_rad, config.betta_mu / config.grad_to_rad)
+    visualise_3d_configuration_angles()
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
