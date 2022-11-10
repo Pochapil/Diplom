@@ -118,3 +118,4 @@ fig.text(0.5, 0.08, 'Phase', ha='center')
 fig.text(0.06, 0.5, r'$L_{\nu} \, [erg \cdot s^{-1} \cdot hz^{-1}]$', va='center', rotation='vertical')
 file_name = 'pretty_fig.png'
 main_service.save_figure(fig, working_folder, file_name)
+plt.rc('font', size=8)

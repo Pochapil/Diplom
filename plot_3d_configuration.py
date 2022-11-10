@@ -264,9 +264,9 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
 
     add_vector(ax, origin, observer_mu_vector, 'purple', lim_value)
 
-    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
-    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
-    #                 np.cos(betta_mu * grad_to_rad)]
+    # omega_vector = [np.sin(-betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
+    #                 np.sin(-betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
+    #                 np.cos(-betta_mu * grad_to_rad)]
     #
     # add_vector(ax, origin, omega_vector, 'blue', lim_value)
     # config.betta_rotate / grad_to_rad + config.betta_mu / grad_to_rad
@@ -283,7 +283,6 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
         azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
-
         # if val == 0.5:
         #     observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
         #                           np.sin(elevation) * np.sin(azimuth),
@@ -308,6 +307,104 @@ def visualise_3d_configuration(phi_range_column, theta_range_column, betta_rotat
     plt.show()
 
 
+def visualise_3d_configuration_angles(betta_rotate, betta_mu):
+    # fig, ax = plt.subplots()
+    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    grad_to_rad = np.pi / 180
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    # рисуем звезду
+    theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
+
+    u, v = np.meshgrid(phi_range, theta_range)
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(v) * np.cos(u)
+    y = r1 * np.sin(v) * np.sin(u)
+    z = r1 * np.cos(v)
+
+    ax.plot_surface(x, y, z, color='b', alpha=1)
+
+    # вектора
+    origin = [0, 0, 0]
+    mu_vector = [0, 0, 1]
+    add_vector(ax, origin, mu_vector, 'red', lim_value)
+
+    omega_vector = [np.sin(-betta_mu * grad_to_rad) * np.cos(0),
+                    np.sin(-betta_mu * grad_to_rad) * np.sin(0),
+                    np.cos(-betta_mu * grad_to_rad)]
+    add_vector(ax, origin, omega_vector, 'black', lim_value)
+    omega_vector = [np.sin(np.pi - betta_mu * grad_to_rad) * np.cos(0),
+                    np.sin(np.pi - betta_mu * grad_to_rad) * np.sin(0),
+                    np.cos(np.pi - betta_mu * grad_to_rad)]
+    add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+    # if not (config.betta_rotate + config.betta_mu < np.pi or config.betta_rotate + config.betta_mu > 2 * np.pi):
+    #     omega_vector = [np.sin(np.pi - betta_mu * grad_to_rad) * np.cos(0),
+    #                     np.sin(np.pi - betta_mu * grad_to_rad) * np.sin(0),
+    #                     np.cos(np.pi - betta_mu * grad_to_rad)]
+    # add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+    ax.set_xlim([-lim_value, lim_value])
+    ax.set_ylim([-lim_value, lim_value])
+    ax.set_zlim([-lim_value, lim_value])
+
+    phase = 0
+    e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
+                                                 betta_mu * grad_to_rad)
+    e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+    azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
+
+    observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
+                          np.sin(elevation) * np.sin(azimuth),
+                          np.cos(elevation)]
+
+    add_vector(ax, origin, observer_mu_vector, 'purple', lim_value)
+
+    # рисуем arc
+    theta_range = np.arange(0, -betta_mu * grad_to_rad, -betta_mu * grad_to_rad / config.N_theta_accretion)
+
+    y = [0] * config.N_theta_accretion
+    x = lim_value * np.sin(theta_range) * 0.9
+    z = lim_value * np.cos(theta_range) * 0.9
+
+    ax.plot(x, y, z, color='black', alpha=1, label=r'$ \beta_mu $')
+
+    # theta_range = np.arange(-betta_mu * grad_to_rad, -(betta_mu + betta_rotate) * grad_to_rad,
+    #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
+
+    theta_range = np.array(
+        [-betta_mu * grad_to_rad + -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1) * i for i in
+         range(config.N_theta_accretion)])
+
+    y = [0] * config.N_theta_accretion
+    x = lim_value * np.sin(theta_range) * 0.8
+    z = lim_value * np.cos(theta_range) * 0.8
+
+    ax.plot(x, y, z, color='green', alpha=1, label=r'$ \beta_* $')
+
+    y = [0] * config.N_theta_accretion
+    x = lim_value * np.sin(theta_range) * 0.7
+    z = lim_value * np.cos(theta_range) * 0.7
+
+    ax.plot(x, y, z, color='green', alpha=1)
+    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
+    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
+    #                 np.cos(betta_mu * grad_to_rad)]
+    #
+    # add_vector(ax, origin, omega_vector, 'blue', lim_value)
+    # config.betta_rotate / grad_to_rad + config.betta_mu / grad_to_rad
+
+    # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
+    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+    ax.legend()
+    plt.show()
+
+
 if __name__ == "__main__":
     working_folder = config.full_file_folder
 
@@ -324,4 +421,6 @@ if __name__ == "__main__":
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
     visualise_3d_configuration(phi_range_column, theta_range_column, config.betta_rotate / config.grad_to_rad,
                                config.betta_mu / config.grad_to_rad)
+
+    visualise_3d_configuration_angles(config.betta_rotate / config.grad_to_rad, config.betta_mu / config.grad_to_rad)
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
