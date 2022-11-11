@@ -446,13 +446,14 @@ def visualise_3d_angles():
                         np.cos(np.pi + config.betta_rotate)]
         add_vector(ax, origin, omega_vector, 'black', lim_value)
 
+        # переходим из СК НЗ в OZ так как углы mu в СК НЗ !!!
         A_matrix_analytic = matrix.newMatrixAnalytic(0, -config.betta_rotate, 0, 0)
 
         mu_vector = [np.sin(config.betta_mu) * np.cos(config.phi_mu_0 + phase),
                      np.sin(config.betta_mu) * np.sin(config.phi_mu_0 + phase),
                      np.cos(config.betta_mu)]
 
-        mu_vector = np.dot(A_matrix_analytic, mu_vector)  # переход в магнитную СК
+        mu_vector = np.dot(A_matrix_analytic, mu_vector)  # переходим из СК НЗ в OZ так как углы mu в СК НЗ !!!
 
         azimuth, elevation = vectors.get_angles_from_vector(mu_vector)
 
@@ -478,8 +479,8 @@ def visualise_3d_angles():
             [+elevation - (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
              range(config.N_theta_accretion)])
 
-        phase_range = np.array([0 + (phase) / (config.N_theta_accretion - 1) * i for i in
-                                range(config.N_theta_accretion)])
+        # phase_range = np.array([0 +(azimuth) / (config.N_theta_accretion - 1) * i for i in
+        #                         range(config.N_theta_accretion)])
 
         x = lim_value * np.sin(theta_range) * np.cos(azimuth) * 0.8
         y = lim_value * np.sin(theta_range) * np.sin(azimuth) * 0.8
@@ -492,6 +493,8 @@ def visualise_3d_angles():
         z = lim_value * np.cos(theta_range) * 0.7
 
         ax.plot(x, y, z, color='green', alpha=1)
+
+        ax.legend()
 
     # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
 
