@@ -457,7 +457,7 @@ def visualise_3d_angles():
 
         azimuth, elevation = vectors.get_angles_from_vector(mu_vector)
 
-        mu_vector = [mu_vector[0,0], mu_vector[0,1], mu_vector[0,2]]
+        mu_vector = [mu_vector[0, 0], mu_vector[0, 1], mu_vector[0, 2]]
         add_vector(ax, origin, mu_vector, 'red', lim_value)
 
         e_obs = config.e_obs
@@ -475,12 +475,17 @@ def visualise_3d_angles():
         # theta_range = np.arange(-betta_mu * grad_to_rad, -(betta_mu + betta_rotate) * grad_to_rad,
         #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
 
-        theta_range = np.array(
-            [+elevation - (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
-             range(config.N_theta_accretion)])
+        if config.betta_mu + config.betta_rotate < np.pi:
+            theta_range = np.array(
+                [elevation - (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
+                 range(config.N_theta_accretion)])
+        else:
+            theta_range = np.array(
+                [elevation + (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
+                 range(config.N_theta_accretion)])
 
-        # phase_range = np.array([0 +(azimuth) / (config.N_theta_accretion - 1) * i for i in
-        #                         range(config.N_theta_accretion)])
+        phase_range = np.array([azimuth - (0) / (config.N_theta_accretion - 1) * i for i in
+                                range(config.N_theta_accretion)])
 
         x = lim_value * np.sin(theta_range) * np.cos(azimuth) * 0.8
         y = lim_value * np.sin(theta_range) * np.sin(azimuth) * 0.8
