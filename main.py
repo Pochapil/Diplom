@@ -17,7 +17,7 @@ if __name__ == '__main__':
     print('R_e = %f' % (R_e / config.R_ns))
     R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
     # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
-    e_obs = np.array([np.sin(config.i_angle), 0, np.cos(config.i_angle)])
+    e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
     file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
                           % (config.betta_rotate, config.betta_mu, config.a_portion, config.M_rate_c2_Led)
     approx_method = accretionColumnService.approx_method

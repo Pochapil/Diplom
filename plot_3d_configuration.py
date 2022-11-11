@@ -24,8 +24,9 @@ def get_angles_from_vector(vector):
 
 
 def add_vector(ax, origin, vector, color, lim_value):
-    vector = np.array(vector) * lim_value / np.linalg.norm(vector)
-    ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2], color=color)
+    # if sum(vector) != 0:
+    # vector = np.array(vector) * lim_value / np.linalg.norm(vector)
+    ax.quiver(origin[0], origin[1], origin[2], vector[0], vector[1], vector[2], length=lim_value, color=color)
 
 
 def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu, phase):
@@ -251,7 +252,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     ax.set_zlim([-lim_value, lim_value])
 
     phase = 0
-    e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
+    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                  config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -277,7 +278,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     def rotate(val):
         phase = slider1.val  # slider1.val
         phase = phase * 360
-        e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
+        e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
         A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                      config.betta_mu)
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -352,7 +353,7 @@ def visualise_3d_configuration_angles():
     ax.set_zlim([-lim_value, lim_value])
 
     phase = 0
-    e_obs = np.array([0, np.sin(config.i_angle), np.cos(config.i_angle)])
+    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                  config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -405,6 +406,128 @@ def visualise_3d_configuration_angles():
     plt.show()
 
 
+def visualise_3d_angles():
+    # fig, ax = plt.subplots()
+    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    grad_to_rad = np.pi / 180
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    ax.set_xlim([-lim_value, lim_value])
+    ax.set_ylim([-lim_value, lim_value])
+    ax.set_zlim([-lim_value, lim_value])
+
+    def plot_all(phase):
+        # рисуем звезду
+        theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
+        phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
+
+        u, v = np.meshgrid(phi_range, theta_range)
+        r1 = np.sin(theta_range_column[0]) ** 2
+        x = r1 * np.sin(v) * np.cos(u)
+        y = r1 * np.sin(v) * np.sin(u)
+        z = r1 * np.cos(v)
+
+        ax.plot_surface(x, y, z, color='b', alpha=1)
+
+        # вектора
+        origin = [0, 0, 0]
+        z_vector = [0, 0, 1]
+        add_vector(ax, origin, z_vector, 'blue', lim_value)
+
+        omega_vector = [np.sin(config.betta_rotate) * np.cos(0),
+                        np.sin(config.betta_rotate) * np.sin(0),
+                        np.cos(config.betta_rotate)]
+        add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+        omega_vector = [np.sin(np.pi + config.betta_rotate) * np.cos(0),
+                        np.sin(np.pi + config.betta_rotate) * np.sin(0),
+                        np.cos(np.pi + config.betta_rotate)]
+        add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+        A_matrix_analytic = matrix.newMatrixAnalytic(0, -config.betta_rotate, 0, 0)
+
+        mu_vector = [np.sin(config.betta_mu) * np.cos(config.phi_mu_0 + phase),
+                     np.sin(config.betta_mu) * np.sin(config.phi_mu_0 + phase),
+                     np.cos(config.betta_mu)]
+
+        mu_vector = np.dot(A_matrix_analytic, mu_vector)  # переход в магнитную СК
+
+        azimuth, elevation = vectors.get_angles_from_vector(mu_vector)
+
+        mu_vector = [mu_vector[0,0], mu_vector[0,1], mu_vector[0,2]]
+        add_vector(ax, origin, mu_vector, 'red', lim_value)
+
+        e_obs = config.e_obs
+        add_vector(ax, origin, e_obs, 'purple', lim_value)
+
+        # рисуем arc
+        theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
+
+        x = lim_value * np.sin(theta_range) * 0.9
+        y = [0] * config.N_theta_accretion
+        z = lim_value * np.cos(theta_range) * 0.9
+
+        ax.plot(x, y, z, color='black', alpha=1, label=r'$ \beta_* $')
+
+        # theta_range = np.arange(-betta_mu * grad_to_rad, -(betta_mu + betta_rotate) * grad_to_rad,
+        #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
+
+        theta_range = np.array(
+            [+elevation - (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
+             range(config.N_theta_accretion)])
+
+        phase_range = np.array([0 + (phase) / (config.N_theta_accretion - 1) * i for i in
+                                range(config.N_theta_accretion)])
+
+        x = lim_value * np.sin(theta_range) * np.cos(azimuth) * 0.8
+        y = lim_value * np.sin(theta_range) * np.sin(azimuth) * 0.8
+        z = lim_value * np.cos(theta_range) * 0.8
+
+        ax.plot(x, y, z, color='green', alpha=1, label=r'$ \beta_mu $')
+
+        x = lim_value * np.sin(theta_range) * np.cos(azimuth) * 0.7
+        y = lim_value * np.sin(theta_range) * np.sin(azimuth) * 0.7
+        z = lim_value * np.cos(theta_range) * 0.7
+
+        ax.plot(x, y, z, color='green', alpha=1)
+
+    # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
+
+    plot_all(0)
+
+    axSlider1 = fig.add_axes([0.25, 0.1, 0.65, 0.05])
+    slider1 = Slider(axSlider1, 'phase', valmin=0, valmax=2, valinit=0)
+
+    def rotate(val):
+        ax.cla()
+
+        ax.set_xlim([-lim_value, lim_value])
+        ax.set_ylim([-lim_value, lim_value])
+        ax.set_zlim([-lim_value, lim_value])
+
+        phase = slider1.val * 2 * np.pi  # slider1.val
+
+        plot_all(phase)
+
+        # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
+        # ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+
+    slider1.on_changed(rotate)
+
+    ax_box = fig.add_axes([0.25, 0.03, 0.05, 0.05])
+    text_box = TextBox(ax_box, 'phase to set')
+
+    def func_for_text_box(text):
+        phase1 = float(text)
+        slider1.set_val(phase1)
+
+    text_box.on_submit(func_for_text_box)
+
+    plt.show()
+
+
 if __name__ == "__main__":
     working_folder = config.full_file_folder
 
@@ -421,5 +544,5 @@ if __name__ == "__main__":
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
     visualise_3d_configuration(phi_range_column, theta_range_column)
 
-    visualise_3d_configuration_angles()
+    visualise_3d_angles()
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
