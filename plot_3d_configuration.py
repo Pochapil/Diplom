@@ -475,11 +475,12 @@ def visualise_3d_angles():
         # theta_range = np.arange(-betta_mu * grad_to_rad, -(betta_mu + betta_rotate) * grad_to_rad,
         #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
 
-        if config.betta_mu + config.betta_rotate < np.pi:
-            # elevation - (config.betta_mu)
-            theta_range = np.array(
-                [config.betta_rotate + (elevation - config.betta_rotate) / (config.N_theta_accretion - 1) * i for i in
-                 range(config.N_theta_accretion)])
+        # if config.betta_mu + config.betta_rotate < np.pi:
+        # elevation - (config.betta_mu)
+        # elevation - theta mu в СК OZ, betta_rotate - theta om в СК OZ, рисуем от om до mu в 0Z поэтому:
+        theta_range = np.array(
+            [config.betta_rotate + (elevation - config.betta_rotate) / (config.N_theta_accretion - 1) * i for i in
+             range(config.N_theta_accretion)])
         # else:
         #     theta_range = np.array(
         #         [elevation + (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
