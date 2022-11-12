@@ -476,25 +476,26 @@ def visualise_3d_angles():
         #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
 
         if config.betta_mu + config.betta_rotate < np.pi:
+            # elevation - (config.betta_mu)
             theta_range = np.array(
-                [elevation - (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
+                [config.betta_rotate + (elevation - config.betta_rotate) / (config.N_theta_accretion - 1) * i for i in
                  range(config.N_theta_accretion)])
-        else:
-            theta_range = np.array(
-                [elevation + (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
-                 range(config.N_theta_accretion)])
+        # else:
+        #     theta_range = np.array(
+        #         [elevation + (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
+        #          range(config.N_theta_accretion)])
 
-        phase_range = np.array([azimuth - (0) / (config.N_theta_accretion - 1) * i for i in
+        phase_range = np.array([0 + (azimuth) / (config.N_theta_accretion - 1) * i for i in
                                 range(config.N_theta_accretion)])
 
-        x = lim_value * np.sin(theta_range) * np.cos(azimuth) * 0.8
-        y = lim_value * np.sin(theta_range) * np.sin(azimuth) * 0.8
+        x = lim_value * np.sin(theta_range) * np.cos(phase_range) * 0.8
+        y = lim_value * np.sin(theta_range) * np.sin(phase_range) * 0.8
         z = lim_value * np.cos(theta_range) * 0.8
 
         ax.plot(x, y, z, color='green', alpha=1, label=r'$ \beta_mu $')
 
-        x = lim_value * np.sin(theta_range) * np.cos(azimuth) * 0.7
-        y = lim_value * np.sin(theta_range) * np.sin(azimuth) * 0.7
+        x = lim_value * np.sin(theta_range) * np.cos(phase_range) * 0.7
+        y = lim_value * np.sin(theta_range) * np.sin(phase_range) * 0.7
         z = lim_value * np.cos(theta_range) * 0.7
 
         ax.plot(x, y, z, color='green', alpha=1)
