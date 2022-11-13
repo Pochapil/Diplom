@@ -12,9 +12,10 @@ working_folder = config.full_file_folder + folder
 
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-x_axis_label = 'Phase'
 y_axis_label = r'$Spectrum \: L_{\nu} \: [erg \cdot s^{-1} \cdot hz^{-1}]$'
 # -------------------------------------------------------------------------------------------
+x_axis_label = r'$h \nu$' + ' [KeV]'
+
 file_name = "PF.txt"
 PF = main_service.load_arr_from_txt(working_folder, file_name)
 
@@ -22,12 +23,14 @@ file_name = "energy.txt"
 energy_arr = main_service.load_arr_from_txt(config.full_file_folder, file_name)
 N_energy = config.N_energy
 
-fig = main_service.create_figure(energy_arr, PF, x_axis_label='Phase', y_axis_label='PF', is_y_2d=False)
+fig = main_service.create_figure(energy_arr, PF, x_axis_label=x_axis_label, y_axis_label='PF', is_y_2d=False)
 
 file_name = "PF.png"
 main_service.save_figure(fig, working_folder, file_name)
 
 # -------------------------------------------------------------------------------------------
+x_axis_label = 'Phase'
+
 file_name = "L_nu.txt"
 data_array = main_service.load_arr_from_txt(working_folder, file_name)
 

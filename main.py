@@ -70,6 +70,11 @@ if __name__ == '__main__':
 
     file_name = 'save_values.txt'
     f = open(full_file_folder + file_name, 'w')
+    f.write('R_e = %f \nksi_shock = %f\n' % (R_e / config.R_ns, top_column.outer_surface.ksi_shock))
+    f.close()
+
+    file_name = 'save_values.txt'
+    f = open(full_file_folder + file_name, 'a')
 
     power_index = 0
     number = top_column.inner_surface.L_x
@@ -90,6 +95,10 @@ if __name__ == '__main__':
         number = number / 10
         power_index += 1
     f.write('calculated total L_x of single surface = %f * 10**%d \n' % (number, power_index))
+
+    f.write('difference L_x / L_calc - 1 : %f ' % abs((top_column.inner_surface.L_x / (
+            4 * top_column.inner_surface.calculate_total_luminosity()) - 1) * 100) + '% \n')
+
     f.close()
 
     d0 = accretionColumnService.get_delta_distance(top_column.inner_surface.theta_range[0],
@@ -99,7 +108,7 @@ if __name__ == '__main__':
     file_name = 'save_values.txt'
     f = open(full_file_folder + file_name, 'a')
 
-    # f.write('width / length = %f \n' % (d0 / l0))
+    f.write('width / length = %f \n' % (d0 / l0))
     f.write('A_perp / 2 d0**2 = %f \n' % (l0 / (2 * d0)))
     f.close()
 
