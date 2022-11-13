@@ -58,6 +58,7 @@ file_name = 'L_nu' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
 # -------------------------------------------------------------------------------------------
+x_axis_label = r'$ h \nu $ [KeV]'
 phase_index = 0  # индекс фазы для L_nu(nu)
 
 L_nu = [0] * N_energy
@@ -80,12 +81,12 @@ for i in range(N_energy):
     avg = sum / config.t_max
     L_nu_avg_on_phase[i] = avg
 
-fig_title = r'$L_{\nu}$'
-fig = main_service.create_figure(energy_arr, L_nu_avg_on_phase, x_axis_label=x_axis_label,
-                                 y_axis_label=y_axis_label, figure_title=fig_title, is_y_2d=False)
-
-file_name = 'L_nu(nu)_avg' + '.png'
-main_service.save_figure(fig, working_folder, file_name)
+# fig_title = r'$L_{\nu}$'
+# fig = main_service.create_figure(energy_arr, L_nu_avg_on_phase, x_axis_label=x_axis_label,
+#                                  y_axis_label=y_axis_label, figure_title=fig_title, is_y_2d=False)
+#
+# file_name = 'L_nu(nu)_avg' + '.png'
+# main_service.save_figure(fig, working_folder, file_name)
 
 fig_title = r'$L_{\nu}$'
 fig = main_service.create_figure(energy_arr, L_nu_avg_on_phase, figure_title=fig_title, x_axis_label=x_axis_label,
@@ -94,6 +95,32 @@ fig = main_service.create_figure(energy_arr, L_nu_avg_on_phase, figure_title=fig
 file_name = 'L_nu(nu)_avg_log_log' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
+# ------------------------ phases and avg ------------------------------
+
+N_phases = 3
+# phase_indexes = [0 + i * 7 for i in range(N_phases)]  # индекс фазы для L_nu(nu)
+phase_indexes = [4, 15, 33]
+L_nu_phases = [0] * N_phases
+L_nu = [0] * N_energy
+
+for j in range(N_phases):
+    for i in range(N_energy):
+        L_nu[i] = arr_to_plt[i][phase_indexes[j]]
+    L_nu_phases[j] = L_nu.copy()
+
+plt.style.use(['science', 'notebook', 'grid'])
+fig = plt.figure(figsize=(12, 4))
+ax = fig.add_subplot(111)
+for i in range(N_phases):
+    ax.plot(energy_arr, L_nu_phases[i], label=r'$L_{\nu}$' + ' on phase %0.2f' % phi_for_plot[phase_indexes[i]])
+ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$')
+plt.xscale('log')
+plt.yscale('log')
+ax.legend()
+plt.show()
+
+file_name = 'L_nu(nu)_avg_and_phases' + '.png'
+main_service.save_figure(fig, working_folder, file_name)
 # -------------------------------------------------------------------------------------------
 plt.style.use(['science', 'notebook', 'grid'])
 

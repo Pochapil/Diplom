@@ -99,7 +99,8 @@ if __name__ == '__main__':
     file_name = 'save_values.txt'
     f = open(full_file_folder + file_name, 'a')
 
-    f.write('width / length = %f \n' % (d0 / l0))
+    # f.write('width / length = %f \n' % (d0 / l0))
+    f.write('A_perp / 2 d0**2 = %f \n' % (l0 / (2 * d0)))
     f.close()
 
     time_start = time.time()
