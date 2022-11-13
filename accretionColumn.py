@@ -29,6 +29,7 @@ class AccretionColumn:
                                                                                    accretionColumnService.get_A_normal(
                                                                                        theta_accretion_begin, self.R_e))
             phi_delta = 0
+            # из усл силовой линии МП : r = R_e sin**2; end: ksi_shock = R_e sin**2
             theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
             if not column_type:  # column_type: True - top, False - bot
                 # для нижней сместить углы

@@ -444,7 +444,9 @@ def visualise_3d_angles():
         omega_vector = [np.sin(np.pi + config.betta_rotate) * np.cos(0),
                         np.sin(np.pi + config.betta_rotate) * np.sin(0),
                         np.cos(np.pi + config.betta_rotate)]
-        add_vector(ax, origin, omega_vector, 'black', lim_value)
+        # add_vector(ax, origin, omega_vector, 'black', lim_value)
+        ax.quiver(omega_vector[0] * lim_value, omega_vector[1] * lim_value, omega_vector[2] * lim_value,
+                  -omega_vector[0], -omega_vector[1], -omega_vector[2], length=lim_value, color='black')
 
         # переходим из СК НЗ в OZ так как углы mu в СК НЗ !!!
         A_matrix_analytic = matrix.newMatrixAnalytic(0, -config.betta_rotate, 0, 0)
@@ -482,13 +484,15 @@ def visualise_3d_angles():
             [config.betta_rotate + (elevation - config.betta_rotate) / (config.N_theta_accretion - 1) * i for i in
              range(config.N_theta_accretion)])
         # else:
-        #     theta_range = np.array(
+        # theta_range = np.array(
         #         [elevation + (config.betta_mu) / (config.N_theta_accretion - 1) * i for i in
         #          range(config.N_theta_accretion)])
 
         phase_range = np.array([0 + (azimuth) / (config.N_theta_accretion - 1) * i for i in
                                 range(config.N_theta_accretion)])
-
+        if config.betta_mu + config.betta_rotate > np.pi:
+            phase_range = np.array([0 + (azimuth - np.pi) / (config.N_theta_accretion - 1) * i for i in
+                                    range(config.N_theta_accretion)])
         x = lim_value * np.sin(theta_range) * np.cos(phase_range) * 0.8
         y = lim_value * np.sin(theta_range) * np.sin(phase_range) * 0.8
         z = lim_value * np.cos(theta_range) * 0.8

@@ -24,7 +24,7 @@ def get_A_normal(theta, R_e):
     return 2 * get_delta_distance(theta, R_e) * 2 * np.pi * config.a_portion * R_e * np.sin(theta) ** 3
 
 
-# из усл
+# из усл силовой линии МП : r = R_e sin**2
 def get_theta_accretion_begin(R_e):
     return np.arcsin((config.R_ns / R_e) ** (1 / 2))
 
