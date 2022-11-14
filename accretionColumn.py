@@ -250,7 +250,7 @@ class AccretionColumn:
             frequency = accretionColumnService.get_frequency_from_energy(energy)
             return np.array(self.calculate_L_nu_on_energy(energy)) * frequency
 
-        def get_black_body_approximation(self, energy, T_eff):
+        def calculate_black_body_approximation(self, energy, T_eff):
             # T_eff = np.mean(self.T_eff)
             frequency = accretionColumnService.get_frequency_from_energy(energy)
 

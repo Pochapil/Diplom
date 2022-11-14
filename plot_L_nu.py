@@ -153,10 +153,17 @@ freq_arr = accretionColumnService.get_frequency_from_energy(energy_arr)
 black_body = accretionColumnService.plank_energy_on_frequency(freq_arr, 3 * 10 ** 7)
 # тут засунуть функцию get_black_body_approximation(self, energy, T_eff)
 
+file_name = "Black_body.txt"
+black_body_arr = main_service.load_arr_from_txt(working_folder, file_name)
+
+black_body_avg = [0] * N_energy
+for i in range(N_energy):
+    black_body_avg[i] = np.mean(black_body_arr[i])
+
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
 
-ax.plot(energy_arr, black_body, label='black body')
+ax.plot(energy_arr, black_body_avg, label='black body')
 ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$')
 
 plt.xscale('log')
