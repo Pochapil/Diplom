@@ -76,3 +76,8 @@ phi_mu_0 = 0 * grad_to_rad
 file_folder = 'figs/new_energy/'
 file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
 full_file_folder = file_folder + file_folder_args
+
+N_column_plot = 5
+energy_indexes = [0, 12, 15, 17, 19]
+energy_indexes_luminosity = [0, 12, 14, 16, 18]
+

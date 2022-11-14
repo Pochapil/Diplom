@@ -61,7 +61,7 @@ file_name = 'L_nu' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
 # -------------------------------------------------------------------------------------------
-x_axis_label = r'$ h \nu $ [KeV]'
+x_axis_label = r'$h \nu$' + ' [KeV]'
 phase_index = 0  # индекс фазы для L_nu(nu)
 
 L_nu = [0] * N_energy
@@ -78,11 +78,7 @@ main_service.save_figure(fig, working_folder, file_name)
 # ----------------------------------- L_nu(nu)_avg ----------------------------------------
 L_nu_avg_on_phase = [0] * N_energy
 for i in range(N_energy):
-    sum = 0
-    for j in range(config.t_max):
-        sum += arr_to_plt[i][j]
-    avg = sum / config.t_max
-    L_nu_avg_on_phase[i] = avg
+    L_nu_avg_on_phase[i] = np.mean(arr_to_plt[i])
 
 # fig_title = r'$L_{\nu}$'
 # fig = main_service.create_figure(energy_arr, L_nu_avg_on_phase, x_axis_label=x_axis_label,
@@ -100,7 +96,7 @@ main_service.save_figure(fig, working_folder, file_name)
 
 # ------------------------ phases and avg ------------------------------
 
-N_phases = 3
+N_phases = 2
 # phase_indexes = [0 + i * 7 for i in range(N_phases)]  # индекс фазы для L_nu(nu)
 phase_indexes = [4, 15, 33]
 L_nu_phases = [0] * N_phases
@@ -112,7 +108,7 @@ for j in range(N_phases):
     L_nu_phases[j] = L_nu.copy()
 
 plt.style.use(['science', 'notebook', 'grid'])
-fig = plt.figure(figsize=(12, 4))
+fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
 for i in range(N_phases):
     ax.plot(energy_arr, L_nu_phases[i], label=r'$L_{\nu}$' + ' on phase %0.2f' % phi_for_plot[phase_indexes[i]])
@@ -120,20 +116,22 @@ ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$')
 plt.xscale('log')
 plt.yscale('log')
 ax.legend()
-plt.show()
+ax.set_xlabel(x_axis_label, fontsize=24)
+ax.set_ylabel(y_axis_label, fontsize=24)
 
 file_name = 'L_nu(nu)_avg_and_phases' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 # -------------------------------------------------------------------------------------------
 plt.style.use(['science', 'notebook', 'grid'])
 
-N_column_plot = 10
+N_column_plot = config.N_column_plot
+energy_indexes = config.energy_indexes
 fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
 for i in range(N_column_plot):
     ax = axes[i]
-    label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[2 * i], PF[2 * i])
+    label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[energy_indexes[i]], PF[energy_indexes[i]])
     ax.tick_params(axis='both', labelsize=12)
-    ax.plot(phi_for_plot, arr_to_plt[2 * i], color='black', lw=0.8)
+    ax.plot(phi_for_plot, arr_to_plt[energy_indexes[i]], color='black', lw=0.8)
     # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
     ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
             va='top')

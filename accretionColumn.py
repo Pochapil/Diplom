@@ -165,16 +165,6 @@ class AccretionColumn:
 
             return sum_simps_integrate
 
-        def calculate_total_luminosity(self):
-            dS_simps = self.create_ds_for_integral()
-
-            total_luminosity_step = [0] * config.N_phi_accretion
-            for i in range(config.N_phi_accretion):
-                total_luminosity_step[i] = config.sigmStfBolc * scipy.integrate.simps(self.T_eff ** 4 * dS_simps,
-                                                                                      self.theta_range)
-            total_luminosity = scipy.integrate.simps(total_luminosity_step, self.phi_range)
-            return total_luminosity
-
         def async_calculate_integral_distribution(self, t_index):
             # luminosity
             # для интеграла по simpson
@@ -189,6 +179,16 @@ class AccretionColumn:
             sum_simps_integrate = scipy.integrate.simps(simps_integrate_step, self.phi_range)
 
             return sum_simps_integrate
+
+        def calculate_total_luminosity(self):
+            dS_simps = self.create_ds_for_integral()
+
+            total_luminosity_step = [0] * config.N_phi_accretion
+            for i in range(config.N_phi_accretion):
+                total_luminosity_step[i] = config.sigmStfBolc * scipy.integrate.simps(self.T_eff ** 4 * dS_simps,
+                                                                                      self.theta_range)
+            total_luminosity = scipy.integrate.simps(total_luminosity_step, self.phi_range)
+            return total_luminosity
 
         def calculate_integral_distribution_in_range(self, energy_bot, energy_top):
             # КэВ

@@ -80,13 +80,15 @@ main_service.save_figure(fig, working_folder, file_name)
 # -------------------------------------------------------------------------------------------
 plt.style.use(['science', 'notebook', 'grid'])
 
-N_column_plot = 10
+N_column_plot = config.N_column_plot
+energy_indexes = config.energy_indexes_luminosity
 fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
 for i in range(N_column_plot):
     ax = axes[i]
-    label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (energy_min[2 * i], energy_max[2 * i], PF[2 * i])
+    label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (
+    energy_min[energy_indexes[i]], energy_max[energy_indexes[i]], PF[energy_indexes[i]])
     ax.tick_params(axis='both', labelsize=12)
-    ax.plot(phi_for_plot, arr_to_plt[2 * i], color='black', lw=0.8)
+    ax.plot(phi_for_plot, arr_to_plt[energy_indexes[i]], color='black', lw=0.8)
     # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
     ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
             va='top')

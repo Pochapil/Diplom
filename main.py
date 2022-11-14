@@ -91,14 +91,14 @@ if __name__ == '__main__':
 
     power_index = 0
     number = top_column.inner_surface.calculate_total_luminosity()
+
+    f.write('difference L_x / L_calc - 1 : %f ' % abs((top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '% \n')
+
     while number > 10:
         number = number / 10
         power_index += 1
+
     f.write('calculated total L_x of single surface = %f * 10**%d \n' % (number, power_index))
-
-    f.write('difference L_x / L_calc - 1 : %f ' % abs((top_column.inner_surface.L_x / (
-            4 * top_column.inner_surface.calculate_total_luminosity()) - 1) * 100) + '% \n')
-
     f.close()
 
     d0 = accretionColumnService.get_delta_distance(top_column.inner_surface.theta_range[0],
@@ -149,10 +149,7 @@ if __name__ == '__main__':
     file_name = 'save_values.txt'
     f = open(full_file_folder + file_name, 'a')
 
-    sum_L_on_phase = 0
-    for L in sum_simps_integrate:
-        sum_L_on_phase += L
-    avg_L_on_phase = sum_L_on_phase / len(sum_simps_integrate)
+    avg_L_on_phase = np.mean(sum_simps_integrate)
 
     power_index = 0
     number = avg_L_on_phase
@@ -196,12 +193,13 @@ if __name__ == '__main__':
     # --------------------- вывод графика углов наблюдателя ----------------------------
 
     # ------------------ цикл для диапазона энергий ----------------------
-
+    # лог сетка по энергии: en+1 = en * const
     energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
     energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
+    # чтобы убрать погрешности и закрыть массив точным числом
     energy_arr.append(config.energy_max)
 
-    PF = [0] * (config.N_energy - 1)
+    PF = [0] * (config.N_energy - 1)  # -1 т.к. берем в диапазоне энергий, следовательно, на 1 меньше чем точек
     data_array = [0] * (config.N_energy - 1)
     folder = 'luminosity_in_range/'
     for energy_index in range(config.N_energy - 1):
