@@ -473,6 +473,9 @@ def visualise_3d_angles():
         z = lim_value * np.cos(theta_range) * 0.9
 
         ax.plot(x, y, z, color='black', alpha=1, label=r'$ \beta_* $')
+        direction = (1, 1, 1)
+        ax.text(x[config.N_theta_accretion // 2], y[config.N_theta_accretion // 2],
+                z[config.N_theta_accretion // 2] * 1.1, s=r'$ \beta_* $', fontsize=14)
 
         # theta_range = np.arange(-betta_mu * grad_to_rad, -(betta_mu + betta_rotate) * grad_to_rad,
         #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
@@ -493,17 +496,21 @@ def visualise_3d_angles():
         if config.betta_mu + config.betta_rotate > np.pi:
             phase_range = np.array([0 + (azimuth - np.pi) / (config.N_theta_accretion - 1) * i for i in
                                     range(config.N_theta_accretion)])
-        x = lim_value * np.sin(theta_range) * np.cos(phase_range) * 0.8
-        y = lim_value * np.sin(theta_range) * np.sin(phase_range) * 0.8
-        z = lim_value * np.cos(theta_range) * 0.8
-
-        ax.plot(x, y, z, color='green', alpha=1, label=r'$ \beta_mu $')
 
         x = lim_value * np.sin(theta_range) * np.cos(phase_range) * 0.7
         y = lim_value * np.sin(theta_range) * np.sin(phase_range) * 0.7
         z = lim_value * np.cos(theta_range) * 0.7
 
         ax.plot(x, y, z, color='green', alpha=1)
+
+        x = lim_value * np.sin(theta_range) * np.cos(phase_range) * 0.8
+        y = lim_value * np.sin(theta_range) * np.sin(phase_range) * 0.8
+        z = lim_value * np.cos(theta_range) * 0.8
+
+        ax.plot(x, y, z, color='green', alpha=1, label=r'$ \beta_\mu $')
+
+        ax.text(x[config.N_theta_accretion // 2], y[config.N_theta_accretion // 2],
+                z[config.N_theta_accretion // 2] * 1.2, s=r'$ \beta_\mu $', color='green', fontsize=14)
 
         ax.legend()
 

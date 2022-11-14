@@ -249,3 +249,21 @@ class AccretionColumn:
             # КэВ
             frequency = accretionColumnService.get_frequency_from_energy(energy)
             return np.array(self.calculate_L_nu_on_energy(energy)) * frequency
+
+        def get_black_body_approximation(self, energy, T_eff):
+            # T_eff = np.mean(self.T_eff)
+            frequency = accretionColumnService.get_frequency_from_energy(energy)
+
+            dS_simps = self.create_ds_for_integral()
+            plank_func = accretionColumnService.plank_energy_on_frequency(frequency, T_eff)
+
+            integrate_step = [0] * config.N_phi_accretion
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                for phi_index in range(config.N_phi_accretion):
+                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                        plank_func * np.array(dS_simps) * np.array(
+                            self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
+                integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
+
+            return integrate_sum

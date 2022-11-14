@@ -151,6 +151,7 @@ plt.rc('font', size=10)
 
 freq_arr = accretionColumnService.get_frequency_from_energy(energy_arr)
 black_body = accretionColumnService.plank_energy_on_frequency(freq_arr, 3 * 10 ** 7)
+# тут засунуть функцию get_black_body_approximation(self, energy, T_eff)
 
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
@@ -164,4 +165,6 @@ ax.legend()
 
 ax.set_xlabel(x_axis_label, fontsize=24)
 ax.set_ylabel(y_axis_label, fontsize=24)
-plt.show()
+
+file_name = 'L_nu(nu)_avg_and_black_body' + '.png'
+main_service.save_figure(fig, working_folder, file_name)
