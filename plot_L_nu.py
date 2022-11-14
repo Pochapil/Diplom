@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+import accretionColumnService
 import config
 import main_service
 
@@ -95,7 +96,7 @@ file_name = 'L_nu(nu)_avg_log_log' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
 # ------------------------ phases and avg ------------------------------
-
+# plt.style.use(['science', 'notebook', 'grid'])
 N_phases = 2
 # phase_indexes = [0 + i * 7 for i in range(N_phases)]  # индекс фазы для L_nu(nu)
 phase_indexes = [4, 15, 33]
@@ -107,7 +108,6 @@ for j in range(N_phases):
         L_nu[i] = arr_to_plt[i][phase_indexes[j]]
     L_nu_phases[j] = L_nu.copy()
 
-plt.style.use(['science', 'notebook', 'grid'])
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
 for i in range(N_phases):
@@ -121,9 +121,8 @@ ax.set_ylabel(y_axis_label, fontsize=24)
 
 file_name = 'L_nu(nu)_avg_and_phases' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
-# -------------------------------------------------------------------------------------------
-plt.style.use(['science', 'notebook', 'grid'])
 
+# -------------------------------------------------------------------------------------------
 N_column_plot = config.N_column_plot
 energy_indexes = config.energy_indexes
 fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
@@ -147,3 +146,22 @@ fig.text(0.06, 0.5, r'$L_{\nu} \, [erg \cdot s^{-1} \cdot hz^{-1}]$', va='center
 file_name = 'pretty_fig.png'
 main_service.save_figure(fig, working_folder, file_name)
 plt.rc('font', size=10)
+
+# -------------------------------------------------------------------------------------------
+
+freq_arr = accretionColumnService.get_frequency_from_energy(energy_arr)
+black_body = accretionColumnService.plank_energy_on_frequency(freq_arr, 3 * 10 ** 7)
+
+fig = plt.figure(figsize=(12, 5))
+ax = fig.add_subplot(111)
+
+ax.plot(energy_arr, black_body, label='black body')
+ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$')
+
+plt.xscale('log')
+plt.yscale('log')
+ax.legend()
+
+ax.set_xlabel(x_axis_label, fontsize=24)
+ax.set_ylabel(y_axis_label, fontsize=24)
+plt.show()

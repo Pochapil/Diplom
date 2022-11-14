@@ -79,5 +79,5 @@ full_file_folder = file_folder + file_folder_args
 
 N_column_plot = 5
 energy_indexes = [0, 12, 15, 17, 19]
+# меньше на 1 т.к. в диапазоне энергий => меньше на 1 чем точек разбиения
 energy_indexes_luminosity = [0, 12, 14, 16, 18]
-

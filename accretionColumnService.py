@@ -178,3 +178,21 @@ def get_pulsed_fraction(arr):
     min_value = min(arr)
     max_value = max(arr)
     return (max_value - min_value) / (max_value + min_value)
+
+
+# нужно ли на пи?
+def plank_energy_on_wavelength(wavelength, T):
+    return 2 * config.h_plank_ergs * config.c ** 2 / wavelength ** 5 \
+           * 1 / (np.e ** (config.h_plank_ergs * config.c / (wavelength * config.k_bolc * T)) - 1)
+
+
+def plank_energy_on_frequency(frequency, T):
+    # erg / s / sr / cm**2 / hz
+    return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
+           * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
+
+
+def get_frequency_from_energy(energy):
+    coefficient = 1000  # КэВ а не эВ
+    frequency = coefficient * energy / config.h_plank_evs  # E = h f
+    return frequency

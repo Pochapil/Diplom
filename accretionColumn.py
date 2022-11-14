@@ -202,30 +202,18 @@ class AccretionColumn:
             внутри - идем в цикле по углам тета
             '''
 
-            # нужно ли на пи?
-            def plank_energy_on_wavelength(wavelength, T):
-                return 2 * config.h_plank_ergs * config.c ** 2 / wavelength ** 5 \
-                       * 1 / (np.e ** (config.h_plank_ergs * config.c / (wavelength * config.k_bolc * T)) - 1)
-
-            def plank_energy_on_frequency(frequency, T):
-                # erg / s / sr / cm**2 / hz
-                return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
-                       * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
-
-            coefficient = 1000  # КэВ а не эВ
-            frequency_top = coefficient * energy_top / config.h_plank_evs  # E = h f
-            frequency_bot = coefficient * energy_bot / config.h_plank_evs  # E = h f
-            frequency_step = (frequency_top - frequency_bot) / config.N_frequency_range
-            frequency_range = [frequency_bot + frequency_step * i for i in range(config.N_frequency_range)]
-
+            frequency_top = accretionColumnService.get_frequency_from_energy(energy_top)
+            frequency_bot = accretionColumnService.get_frequency_from_energy(energy_bot)
+            frequency_range = np.linspace(frequency_bot, frequency_top, config.N_frequency_range)
             dS_simps = self.create_ds_for_integral()
 
             plank_func = [0] * config.N_theta_accretion
             plank_func_step = [0] * config.N_frequency_range
             for theta_index in range(config.N_theta_accretion):
                 for frequency_index in range(config.N_frequency_range):
-                    plank_func_step[frequency_index] = plank_energy_on_frequency(frequency_range[frequency_index],
-                                                                                 self.T_eff[theta_index])
+                    plank_func_step[frequency_index] = accretionColumnService.plank_energy_on_frequency(
+                        frequency_range[frequency_index],
+                        self.T_eff[theta_index])
                 plank_func[theta_index] = scipy.integrate.simps(plank_func_step, frequency_range)
 
             integrate_step = [0] * config.N_phi_accretion
@@ -241,16 +229,10 @@ class AccretionColumn:
 
         def calculate_L_nu_on_energy(self, energy):
             # КэВ
-            def plank_energy_on_frequency(frequency, T):
-                return 2 * config.h_plank_ergs * frequency ** 3 / config.c ** 2 \
-                       * 1 / (np.e ** (config.h_plank_ergs * frequency / (config.k_bolc * T)) - 1)
-
-            coefficient = 1000  # КэВ а не эВ
-            frequency = coefficient * energy / config.h_plank_evs  # E = h f
+            frequency = accretionColumnService.get_frequency_from_energy(energy)
 
             dS_simps = self.create_ds_for_integral()
-
-            plank_func = plank_energy_on_frequency(frequency, self.T_eff)
+            plank_func = accretionColumnService.plank_energy_on_frequency(frequency, self.T_eff)
 
             integrate_step = [0] * config.N_phi_accretion
             integrate_sum = [0] * config.t_max
@@ -265,6 +247,5 @@ class AccretionColumn:
 
         def calculate_nu_L_nu_on_energy(self, energy):
             # КэВ
-            coefficient = 1000  # КэВ а не эВ
-            frequency = coefficient * energy / config.h_plank_evs  # E = h f
+            frequency = accretionColumnService.get_frequency_from_energy(energy)
             return np.array(self.calculate_L_nu_on_energy(energy)) * frequency
