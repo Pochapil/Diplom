@@ -110,9 +110,9 @@ for j in range(N_phases):
 
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
+ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$', color='red')
 for i in range(N_phases):
     ax.plot(energy_arr, L_nu_phases[i], label=r'$L_{\nu}$' + ' on phase %0.2f' % phi_for_plot[phase_indexes[i]])
-ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$')
 plt.xscale('log')
 plt.yscale('log')
 ax.legend()
@@ -141,7 +141,7 @@ for i in range(N_column_plot):
 # plt.xlabel('phase')
 # plt.ylabel('luminosity [erg/s]')
 plt.rc('font', size=24)
-fig.text(0.5, 0.08, 'Phase', ha='center')
+fig.text(0.5, 0.07, 'Phase', ha='center')
 fig.text(0.06, 0.5, r'$L_{\nu} \, [erg \cdot s^{-1} \cdot hz^{-1}]$', va='center', rotation='vertical')
 file_name = 'pretty_fig.png'
 main_service.save_figure(fig, working_folder, file_name)
@@ -163,8 +163,8 @@ for i in range(N_energy):
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
 
-ax.plot(energy_arr, black_body_avg, label='black body')
-ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$')
+ax.plot(energy_arr, black_body_avg, label='black body', color='black')
+ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$', color='red')
 
 plt.xscale('log')
 plt.yscale('log')

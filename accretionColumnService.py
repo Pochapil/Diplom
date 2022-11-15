@@ -195,4 +195,4 @@ def plank_energy_on_frequency(frequency, T):
 def get_frequency_from_energy(energy):
     coefficient = 1000  # КэВ а не эВ
     frequency = coefficient * energy / config.h_plank_evs  # E = h f
-    return frequency
+    return frequency  # гц!
