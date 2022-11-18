@@ -298,33 +298,6 @@ if __name__ == '__main__':
 
     time_calculate_nu_L_nu_on_energy = time.time()
 
-    print('black_body')
-    PF = [0] * config.N_energy
-    data_array = [0] * config.N_energy
-    folder = 'L_nu/'
-    # ------------------ цикл для Black body ------------------
-    for energy_index in range(config.N_energy):
-        current_energy = energy_arr[energy_index]
-        # ------------------ начало заполнения массивов Black body -----------------------
-        arr_simps_integrate = [0] * 4
-        sum_simps_integrate = 0
-        T_eff = 3 * 10**7
-        for key, surface in surfaces.items():
-            arr_simps_integrate[key] = surface.calculate_black_body_approximation(current_energy, T_eff)
-            sum_simps_integrate += np.array(arr_simps_integrate[key])
-        # ------------------ конец заполнения массивов Black body -----------------------
-
-        PF[energy_index] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
-
-        file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
-        main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/', file_name)
-
-        data_array[energy_index] = sum_simps_integrate
-    # ------------------ цикл для Black body ------------------
-
-    file_name = "Black_body.txt"
-    main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
-
     print("execution time of program: %f s" % (
             time_calculate_nu_L_nu_on_energy - time_start))
 

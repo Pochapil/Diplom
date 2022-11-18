@@ -493,6 +493,9 @@ def visualise_3d_angles():
 
         phase_range = np.array([0 + (azimuth) / (config.N_theta_accretion - 1) * i for i in
                                 range(config.N_theta_accretion)])
+        # if azimuth > np.pi:
+        #     phase_range = np.array([azimuth + (2 * np.pi - azimuth) / (config.N_theta_accretion - 1) * i for i in
+        #                             range(config.N_theta_accretion)])
         if config.betta_mu + config.betta_rotate > np.pi:
             phase_range = np.array([0 + (azimuth - np.pi) / (config.N_theta_accretion - 1) * i for i in
                                     range(config.N_theta_accretion)])

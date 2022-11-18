@@ -97,9 +97,9 @@ main_service.save_figure(fig, working_folder, file_name)
 
 # ------------------------ phases and avg ------------------------------
 # plt.style.use(['science', 'notebook', 'grid'])
-N_phases = 2
+N_phases = 3
 # phase_indexes = [0 + i * 7 for i in range(N_phases)]  # индекс фазы для L_nu(nu)
-phase_indexes = [4, 15, 33]
+phase_indexes = [4, 27, 33]
 L_nu_phases = [0] * N_phases
 L_nu = [0] * N_energy
 
@@ -118,6 +118,8 @@ plt.yscale('log')
 ax.legend()
 ax.set_xlabel(x_axis_label, fontsize=24)
 ax.set_ylabel(y_axis_label, fontsize=24)
+
+# plt.ylim(1e17)
 
 file_name = 'L_nu(nu)_avg_and_phases' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
@@ -150,21 +152,30 @@ plt.rc('font', size=10)
 # -------------------------------------------------------------------------------------------
 
 freq_arr = accretionColumnService.get_frequency_from_energy(energy_arr)
-black_body = accretionColumnService.plank_energy_on_frequency(freq_arr, 3 * 10 ** 7)
+
+file_name = "surfaces_T_eff.txt"
+T_eff = main_service.load_arr_from_txt(config.full_file_folder, file_name)
+
+black_body_max = accretionColumnService.plank_energy_on_frequency(freq_arr, max(T_eff[0]))
+black_body_min = accretionColumnService.plank_energy_on_frequency(freq_arr, min(T_eff[0]))
 # тут засунуть функцию get_black_body_approximation(self, energy, T_eff)
 
 file_name = "Black_body.txt"
 black_body_arr = main_service.load_arr_from_txt(working_folder, file_name)
 
-black_body_avg = [0] * N_energy
-for i in range(N_energy):
-    black_body_avg[i] = np.mean(black_body_arr[i])
+# black_body_avg = [0] * N_energy
+# for i in range(N_energy):
+#     black_body_avg[i] = np.mean(black_body_arr[i])
+
+coeff_max = max(L_nu_avg_on_phase) / max(black_body_max)
+coeff_min = max(L_nu_avg_on_phase) / max(black_body_min)
 
 fig = plt.figure(figsize=(12, 5))
 ax = fig.add_subplot(111)
 
-ax.plot(energy_arr, black_body_avg, label='black body', color='black')
-ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$', color='red')
+ax.plot(energy_arr, coeff_max * np.array(black_body_max), label='black body max T=%0.1f' % max(T_eff[0]))
+ax.plot(energy_arr, coeff_min * np.array(black_body_min), label='black body min T=%0.1f' % min(T_eff[0]))
+ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$', color='black')
 
 plt.xscale('log')
 plt.yscale('log')
@@ -172,6 +183,8 @@ ax.legend()
 
 ax.set_xlabel(x_axis_label, fontsize=24)
 ax.set_ylabel(y_axis_label, fontsize=24)
+
+# plt.ylim(1e16)
 
 file_name = 'L_nu(nu)_avg_and_black_body' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
