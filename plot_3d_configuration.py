@@ -512,10 +512,15 @@ def visualise_3d_angles():
 
         ax.plot(x, y, z, color='green', alpha=1, label=r'$ \beta_\mu $')
 
-        ax.text(x[config.N_theta_accretion // 2], y[config.N_theta_accretion // 2],
+        ax.text(x[config.N_theta_accretion // 2] * 1.2, y[config.N_theta_accretion // 2] * 1.2,
                 z[config.N_theta_accretion // 2] * 1.2, s=r'$ \beta_\mu $', color='green', fontsize=14)
 
         ax.legend()
+
+        # Hide axes ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
 
     # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
 
@@ -552,6 +557,33 @@ def visualise_3d_angles():
     plt.show()
 
 
+def plot_sphere():
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    theta_range = np.arange(0, 2 * np.pi, 2 * np.pi / (2 * config.N_theta_accretion))
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
+
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(theta_range) * np.cos(0)
+    y = r1 * np.sin(theta_range) * np.sin(0)
+    z = r1 * np.cos(theta_range)
+
+    ax.plot(x, y, z, color='b', alpha=1)
+
+    theta_range = np.arange(0, np.pi, np.pi / (2 * config.N_theta_accretion))
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
+
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(theta_range) * 1
+    y = r1 * np.sin(theta_range) * 0 + 0.1
+    z = r1 * np.cos(theta_range)
+
+    ax.plot(x, y, z, color='b', alpha=1)
+
+    plt.show()
+
+
 if __name__ == "__main__":
     working_folder = config.full_file_folder
 
@@ -570,3 +602,5 @@ if __name__ == "__main__":
 
     visualise_3d_angles()
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
+
+    # plot_sphere()
