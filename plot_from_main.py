@@ -20,8 +20,30 @@ for i in range(len(data_array)):
 
 labels_arr = ['top outer', 'top inner', 'bot outer', 'bot inner', 'sum']
 fig_title = 'total luminosity of surfaces'
-fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='Phase',
-                                 y_axis_label=r'$Luminosity \: [erg/s]$', figure_title=fig_title)
+# fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='Phase',
+#                                  y_axis_label=r'$Luminosity \: [erg/s]$', figure_title=fig_title)
+
+fig = plt.figure(figsize=(21, 10))
+ax = fig.add_subplot(111)
+line = [0] * 5
+i = 0
+ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='red', marker='.', linestyle=':')
+i += 1
+ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='red', marker='*')
+i += 1
+ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker='+', linestyle=':')
+i += 1
+ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker='^')
+i += 1
+ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='black')
+
+# for i in range(len(data_array)):
+#     line[i], = ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i])
+# ax.set_xlabel('Phase', fontsize=24)
+# ax.set_ylabel('L [erg/s]', fontsize=24)
+
+ax.legend()
+
 file_name = 'total_luminosity_of_surfaces.png'
 main_service.save_figure(fig, working_folder, file_name)
 

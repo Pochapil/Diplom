@@ -7,6 +7,8 @@ import config
 import BS_distribution_T_eff as get_T_eff
 import geometricTask.matrix as matrix
 
+coefficient = 1
+
 
 class AccretionColumn:
 
@@ -163,6 +165,7 @@ class AccretionColumn:
                         self.T_eff ** 4 * np.array(self.cos_psi_range[t][i][:]) * np.array(dS_simps), self.theta_range))
                 sum_simps_integrate[t] = scipy.integrate.simps(simps_integrate_step, self.phi_range)
 
+            sum_simps_integrate = coefficient * np.array(sum_simps_integrate)
             return sum_simps_integrate
 
         def async_calculate_integral_distribution(self, t_index):
@@ -178,6 +181,7 @@ class AccretionColumn:
                     self.theta_range))
             sum_simps_integrate = scipy.integrate.simps(simps_integrate_step, self.phi_range)
 
+            sum_simps_integrate = coefficient * np.array(sum_simps_integrate)
             return sum_simps_integrate
 
         def calculate_total_luminosity(self):
@@ -188,6 +192,8 @@ class AccretionColumn:
                 total_luminosity_step[i] = config.sigmStfBolc * scipy.integrate.simps(self.T_eff ** 4 * dS_simps,
                                                                                       self.theta_range)
             total_luminosity = scipy.integrate.simps(total_luminosity_step, self.phi_range)
+
+            total_luminosity = coefficient * np.array(total_luminosity)
             return total_luminosity
 
         def calculate_integral_distribution_in_range(self, energy_bot, energy_top):
@@ -225,6 +231,7 @@ class AccretionColumn:
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
+            integrate_sum = coefficient * np.array(integrate_sum)
             return integrate_sum
 
         def calculate_L_nu_on_energy(self, energy):
@@ -243,6 +250,7 @@ class AccretionColumn:
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
+            integrate_sum = coefficient * np.array(integrate_sum)
             return integrate_sum
 
         def calculate_nu_L_nu_on_energy(self, energy):
@@ -266,4 +274,5 @@ class AccretionColumn:
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
+            integrate_sum = coefficient * np.array(integrate_sum)
             return integrate_sum

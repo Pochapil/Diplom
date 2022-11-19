@@ -92,7 +92,7 @@ if __name__ == '__main__':
     power_index = 0
     number = top_column.inner_surface.calculate_total_luminosity()
 
-    f.write('difference L_x / L_calc - 1 : %f ' % abs((top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '% \n')
+    f.write('difference L_x / L_calc - 1 : %f ' % ((top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '% \n')
 
     while number > 10:
         number = number / 10
