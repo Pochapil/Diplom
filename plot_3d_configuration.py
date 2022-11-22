@@ -418,6 +418,10 @@ def visualise_3d_angles():
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
 
+    def add_text_to_vector(ax, vector, label):
+        vector = np.array(vector) / np.linalg.norm(vector) * lim_value
+        ax.text(vector[0] * 1.1, vector[1] * 1.1, vector[2] * 1.1, s=label, fontsize=14)
+
     def plot_all(phase):
         # рисуем звезду
         theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
@@ -441,6 +445,8 @@ def visualise_3d_angles():
                         np.cos(config.betta_rotate)]
         add_vector(ax, origin, omega_vector, 'black', lim_value)
 
+        add_text_to_vector(ax, omega_vector, r'$ \omega $')
+
         omega_vector = [np.sin(np.pi + config.betta_rotate) * np.cos(0),
                         np.sin(np.pi + config.betta_rotate) * np.sin(0),
                         np.cos(np.pi + config.betta_rotate)]
@@ -462,8 +468,29 @@ def visualise_3d_angles():
         mu_vector = [mu_vector[0, 0], mu_vector[0, 1], mu_vector[0, 2]]
         add_vector(ax, origin, mu_vector, 'red', lim_value)
 
+        add_text_to_vector(ax, mu_vector, r'$ \mu $')
+
         e_obs = config.e_obs
         add_vector(ax, origin, e_obs, 'purple', lim_value)
+
+        # add_text_to_vector(ax, e_obs, 'observer')
+
+        theta_range = np.linspace(-2 * np.pi / 7, 2 * np.pi / 7, config.N_theta_accretion)
+
+        x = lim_value * np.sin(theta_range) * 0.1
+        y = [0] * config.N_theta_accretion
+        z = -lim_value * np.cos(theta_range) * 0.1 + lim_value * 1.5
+
+        ax.plot(x, y, z, color='black')
+
+
+
+        x = [x[0], 0, x[-1]]
+        y =[0] * 3
+        z = [z[15], lim_value * 1.7, z[-16]]
+
+        ax.plot(x, y, z, color='black')
+
 
         # рисуем arc
         theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
