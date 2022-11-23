@@ -188,3 +188,18 @@ ax.set_ylabel(y_axis_label, fontsize=24)
 
 file_name = 'L_nu(nu)_avg_and_black_body' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
+
+# -------------------------------------------------------------------------------------------
+
+phase = np.linspace(0, 1, config.t_max)
+fig, ax = plt.subplots()
+im = ax.pcolormesh(phase, energy_arr, data_array)
+
+x_axis_label = 'Phase'
+y_axis_label = r'$h \nu$' + ' [KeV]'
+
+ax.set_xlabel(x_axis_label, fontsize=24)
+ax.set_ylabel(y_axis_label, fontsize=24)
+plt.colorbar(im)
+file_name = 'L_nu_colormesh' + '.png'
+main_service.save_figure(fig, working_folder, file_name)

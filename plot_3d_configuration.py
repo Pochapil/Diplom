@@ -468,6 +468,9 @@ def visualise_3d_angles():
         mu_vector = [mu_vector[0, 0], mu_vector[0, 1], mu_vector[0, 2]]
         add_vector(ax, origin, mu_vector, 'red', lim_value)
 
+        ax.quiver(-mu_vector[0] * lim_value, -mu_vector[1] * lim_value, -mu_vector[2] * lim_value,
+                  mu_vector[0], mu_vector[1], mu_vector[2], length=lim_value, color='red')
+
         add_text_to_vector(ax, mu_vector, r'$ \mu $')
 
         e_obs = config.e_obs
