@@ -161,7 +161,8 @@ class AccretionColumn:
             for t in range(config.t_max):
                 for i in range(config.N_phi_accretion):
                     # /pi т.к считаем мощность, которая приходит на наблюдателя, а не всю светимость (пи входит в сигма)
-                    simps_integrate_step[i] = np.abs(config.sigmStfBolc / np.pi * scipy.integrate.simps(
+                    # 4 * - для L_iso
+                    simps_integrate_step[i] = 4 * np.abs(config.sigmStfBolc * scipy.integrate.simps(
                         self.T_eff ** 4 * np.array(self.cos_psi_range[t][i][:]) * np.array(dS_simps), self.theta_range))
                 sum_simps_integrate[t] = scipy.integrate.simps(simps_integrate_step, self.phi_range)
 
@@ -176,7 +177,8 @@ class AccretionColumn:
 
             for i in range(config.N_phi_accretion):
                 # /pi т.к считаем мощность, которая приходит на наблюдателя, а не всю светимость (пи входит в сигма)
-                simps_integrate_step[i] = np.abs(config.sigmStfBolc / np.pi * scipy.integrate.simps(
+                # 4 * - для L_iso
+                simps_integrate_step[i] = 4 * np.abs(config.sigmStfBolc * scipy.integrate.simps(
                     self.T_eff ** 4 * np.array(self.cos_psi_range[t_index][i][:]) * np.array(dS_simps),
                     self.theta_range))
             sum_simps_integrate = scipy.integrate.simps(simps_integrate_step, self.phi_range)
@@ -226,7 +228,8 @@ class AccretionColumn:
             integrate_sum = [0] * config.t_max
             for rotation_index in range(config.t_max):
                 for phi_index in range(config.N_phi_accretion):
-                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                    # 4 * np.pi для L_iso
+                    integrate_step[phi_index] = 4 * np.pi * np.abs(scipy.integrate.simps(
                         plank_func * np.array(dS_simps) * np.array(
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
@@ -245,7 +248,7 @@ class AccretionColumn:
             integrate_sum = [0] * config.t_max
             for rotation_index in range(config.t_max):
                 for phi_index in range(config.N_phi_accretion):
-                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                    integrate_step[phi_index] = 4 * np.pi * np.abs(scipy.integrate.simps(
                         plank_func * np.array(dS_simps) * np.array(
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
@@ -269,7 +272,7 @@ class AccretionColumn:
             integrate_sum = [0] * config.t_max
             for rotation_index in range(config.t_max):
                 for phi_index in range(config.N_phi_accretion):
-                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                    integrate_step[phi_index] = 4 * np.pi * np.abs(scipy.integrate.simps(
                         plank_func * np.array(dS_simps) * np.array(
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))

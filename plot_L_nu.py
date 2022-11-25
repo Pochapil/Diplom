@@ -184,7 +184,7 @@ ax.legend()
 ax.set_xlabel(x_axis_label, fontsize=24)
 ax.set_ylabel(y_axis_label, fontsize=24)
 
-# plt.ylim(1e16)
+plt.ylim(1e17)
 
 file_name = 'L_nu(nu)_avg_and_black_body' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
@@ -193,7 +193,13 @@ main_service.save_figure(fig, working_folder, file_name)
 
 phase = np.linspace(0, 1, config.t_max)
 fig, ax = plt.subplots()
-im = ax.pcolormesh(phase, energy_arr, data_array)
+
+# нормировка на L_nu_avg
+data_to_plot = []
+for arr in data_array:
+    data_to_plot.append(arr * max(L_nu_avg_on_phase) / max(arr))
+
+im = ax.pcolormesh(phase, energy_arr, data_to_plot)
 
 x_axis_label = 'Phase'
 y_axis_label = r'$h \nu$' + ' [KeV]'
