@@ -189,6 +189,35 @@ plt.ylim(1e17)
 file_name = 'L_nu(nu)_avg_and_black_body' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
+# ------------------------ with phases and avg ------------------------------
+# plt.style.use(['science', 'notebook', 'grid'])
+N_phases = len(data_array)
+L_nu_phases = [0] * N_phases
+L_nu = [0] * N_energy
+
+for j in range(N_phases):
+    for i in range(N_energy):
+        L_nu[i] = data_array[i][j]
+    L_nu_phases[j] = L_nu.copy()
+
+fig = plt.figure(figsize=(12, 5))
+ax = fig.add_subplot(111)
+ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$', color='red', alpha=1)
+for i in range(N_phases - 1):
+    ax.plot(energy_arr, L_nu_phases[i], color='black', alpha=0.3)
+    # label=r'$L_{\nu}$' + ' on phase %0.2f' % phi_for_plot[phase_indexes[i]])
+ax.plot(energy_arr, L_nu_phases[i], label=r'$L_{\nu}$' + 'on different phases', color='black', alpha=0.3)
+plt.xscale('log')
+plt.yscale('log')
+ax.legend()
+ax.set_xlabel(x_axis_label, fontsize=24)
+ax.set_ylabel(y_axis_label, fontsize=24)
+
+# plt.ylim(1e17)
+
+file_name = 'L_nu(nu)_avg_with_phases' + '.png'
+main_service.save_figure(fig, working_folder, file_name)
+
 # -------------------------------------------------------------------------------------------
 
 phase = np.linspace(0, 1, config.t_max)
