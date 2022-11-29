@@ -18,7 +18,7 @@ arr_to_plt = [0] * len(data_array)
 for i in range(len(data_array)):
     arr_to_plt[i] = main_service.extend_arr_for_phase(data_array[i])
 
-labels_arr = ['top outer', 'top inner', 'bot outer', 'bot inner', 'sum']
+labels_arr = [r'$top_{pol}$', r'$top_{eq}$', r'$bottom_{pol}$', r'$bottom_{eq}$', 'sum']
 fig_title = 'total luminosity of surfaces'
 # fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='Phase',
 #                                  y_axis_label=r'$Luminosity \: [erg/s]$', figure_title=fig_title)

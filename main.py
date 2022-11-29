@@ -101,17 +101,6 @@ if __name__ == '__main__':
     f.write('calculated total L_x of single surface = %f * 10**%d \n' % (number, power_index))
     f.close()
 
-    d0 = accretionColumnService.get_delta_distance(top_column.inner_surface.theta_range[0],
-                                                   top_column.inner_surface.R_e)
-    l0 = accretionColumnService.get_A_normal(top_column.inner_surface.theta_range[0], top_column.inner_surface.R_e) / d0
-
-    file_name = 'save_values.txt'
-    f = open(full_file_folder + file_name, 'a')
-
-    f.write('width / length = %f \n' % (d0 / l0))
-    f.write('A_perp / 2 d0**2 = %f \n' % (l0 / (2 * d0)))
-    f.close()
-
     time_start = time.time()
 
     # ------------------ начало заполнения матриц косинусов ---------------------------
@@ -159,8 +148,23 @@ if __name__ == '__main__':
 
     print('avg_L_on_phase = %f * 10**%d' % (number, power_index))
 
-    f.write('avg_L_on_phase = %f * 10**%d' % (number, power_index))
+    f.write('avg_L_on_phase = %f * 10**%d\n' % (number, power_index))
+
+    f.write('avg_L_on_phase / L_x = %.3f\n' % (avg_L_on_phase / top_column.inner_surface.L_x))
+
     f.close()
+
+    d0 = accretionColumnService.get_delta_distance(top_column.inner_surface.theta_range[0],
+                                                   top_column.inner_surface.R_e)
+    l0 = accretionColumnService.get_A_normal(top_column.inner_surface.theta_range[0], top_column.inner_surface.R_e) / d0
+
+    file_name = 'save_values.txt'
+    f = open(full_file_folder + file_name, 'a')
+
+    f.write('width / length = %f \n' % (d0 / l0))
+    f.write('A_perp / 2 d0**2 = %f \n' % (l0 / (2 * d0)))
+    f.close()
+
     time_integral_distribution = time.time()
 
     print('ksi_shock = %f' % bot_column.outer_surface.ksi_shock)

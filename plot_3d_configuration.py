@@ -275,6 +275,11 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
     ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
+    # Hide axes ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+
     def rotate(val):
         phase = slider1.val  # slider1.val
         phase = phase * 360
@@ -293,6 +298,11 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
 
         # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
         ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+
+        # Hide axes ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
 
     slider1.on_changed(rotate)
 
