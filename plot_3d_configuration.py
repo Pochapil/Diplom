@@ -2,6 +2,8 @@ import geometricTask.matrix as matrix
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, TextBox, Button
+from matplotlib.animation import PillowWriter
+from matplotlib import animation
 
 import config
 import main_service
@@ -193,6 +195,109 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
         plt.pause(.001)
 
 
+def create_gif(phi_range_column, theta_range_column):
+    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    grad_to_rad = np.pi / 180
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    N_phi_accretion = len(phi_range_column)
+    N_theta_accretion = len(theta_range_column)
+
+    # рисуем звезду
+    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / N_phi_accretion)
+
+    u, v = np.meshgrid(phi_range, theta_range)
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(v) * np.cos(u)
+    y = r1 * np.sin(v) * np.sin(u)
+    z = r1 * np.cos(v)
+
+    ax.plot_surface(x, y, z, color='b', alpha=1)
+
+    # рисуем силовые линии
+    # верх
+    theta_range = theta_range_column
+    phi_range = phi_range_column
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color="r", alpha=0.2)
+    # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
+
+    # низ
+    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="green", alpha=0.2)
+
+    # вектора
+    origin = [0, 0, 0]
+    mu_vector = [0, 0, 1]
+    add_vector(ax, origin, mu_vector, 'red', lim_value)
+
+    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0),
+    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0),
+    #                 np.cos(betta_mu * grad_to_rad)]
+    #
+    # add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+    ax.set_xlim([-lim_value, lim_value])
+    ax.set_ylim([-lim_value, lim_value])
+    ax.set_zlim([-lim_value, lim_value])
+
+    phase = 0
+    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
+                                                 config.betta_mu)
+    e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+    azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
+
+    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+
+    # Hide axes ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+
+    figure_title = ''
+    fig.suptitle(figure_title, fontsize=14)
+
+    def animate(i):
+        phase = i / 60 * 360
+        e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+        A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
+                                                     config.betta_mu)
+        e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+        azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
+        # if val == 0.5:
+        #     observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
+        #                           np.sin(elevation) * np.sin(azimuth),
+        #                           np.cos(elevation)]
+        #
+        #     add_vector(ax, origin, observer_mu_vector, 'black', lim_value)
+
+        # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
+        ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+
+        figure_title = 'phase = %f' % (phase / 360)
+        fig.suptitle(figure_title, fontsize=14)
+
+        # Hide axes ticks
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_zticks([])
+
+    ani = animation.FuncAnimation(fig, animate, frames=120, interval=60)
+    ani.save('figs/gifs/ani.gif', writer='pillow', fps=60, dpi=100)
+    # plt.show()
+
+
 def visualise_3d_configuration(phi_range_column, theta_range_column):
     # fig, ax = plt.subplots()
     lim_value = 0.2 * config.M_rate_c2_Led / 10
@@ -316,6 +421,86 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     text_box.on_submit(func_for_text_box)
 
     plt.show()
+
+
+def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase):
+    # fig, ax = plt.subplots()
+    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    grad_to_rad = np.pi / 180
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    N_phi_accretion = len(phi_range_column)
+    N_theta_accretion = len(theta_range_column)
+
+    # рисуем звезду
+    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / N_phi_accretion)
+
+    u, v = np.meshgrid(phi_range, theta_range)
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(v) * np.cos(u)
+    y = r1 * np.sin(v) * np.sin(u)
+    z = r1 * np.cos(v)
+
+    ax.plot_surface(x, y, z, color='b', alpha=1)
+
+    # рисуем силовые линии
+    # верх
+    theta_range = theta_range_column
+    phi_range = phi_range_column
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color="r", alpha=0.2)
+    # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
+
+    # низ
+    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="green", alpha=0.2)
+
+    # вектора
+    origin = [0, 0, 0]
+    mu_vector = [0, 0, 1]
+    add_vector(ax, origin, mu_vector, 'red', lim_value)
+
+    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0),
+    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0),
+    #                 np.cos(betta_mu * grad_to_rad)]
+    #
+    # add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+    ax.set_xlim([-lim_value, lim_value])
+    ax.set_ylim([-lim_value, lim_value])
+    ax.set_zlim([-lim_value, lim_value])
+
+    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+    A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * 2 * np.pi, config.betta_mu)
+    e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+
+    azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
+
+    # omega_vector = [np.sin(-betta_mu * grad_to_rad) * np.cos(0 * grad_to_rad),
+    #                 np.sin(-betta_mu * grad_to_rad) * np.sin(0 * grad_to_rad),
+    #                 np.cos(-betta_mu * grad_to_rad)]
+    #
+    # add_vector(ax, origin, omega_vector, 'blue', lim_value)
+    # config.betta_rotate / grad_to_rad + config.betta_mu / grad_to_rad
+
+    # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
+    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+
+    # Hide axes ticks
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_zticks([])
+
+    # plt.show()
+    return fig
 
 
 def visualise_3d_configuration_angles():
@@ -496,14 +681,11 @@ def visualise_3d_angles():
 
         ax.plot(x, y, z, color='black')
 
-
-
         x = [x[0], 0, x[-1]]
-        y =[0] * 3
+        y = [0] * 3
         z = [z[15], lim_value * 1.7, z[-16]]
 
         ax.plot(x, y, z, color='black')
-
 
         # рисуем arc
         theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
@@ -637,10 +819,20 @@ if __name__ == "__main__":
     theta_range_column = main_service.load_arr_from_txt(working_folder, file_name)
     # theta_range_column = np.loadtxt(file_name)
 
+    # create_gif(phi_range_column, theta_range_column)
+
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
     visualise_3d_configuration(phi_range_column, theta_range_column)
 
+    save_folder = 'phases/'
+
+    phase = 1
+    fig = visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase)
+    file_name = "phase = %f.png" % phase
+    main_service.save_figure(fig, working_folder + save_folder, file_name)
+
     visualise_3d_angles()
+
     # animate_3d_configuration(phi_range_column, theta_range_column, 40, 30)
 
     # plot_sphere()

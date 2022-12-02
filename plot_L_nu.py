@@ -13,7 +13,7 @@ working_folder = config.full_file_folder + folder
 
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-y_axis_label = r'$Spectrum \: L_{\nu} \: [erg \cdot s^{-1} \cdot hz^{-1}]$'
+y_axis_label = r'$L_{\nu} \: [erg \cdot s^{-1} \cdot hz^{-1}]$'
 # -------------------------------------------------------------------------------------------
 x_axis_label = r'$h \nu$' + ' [KeV]'
 

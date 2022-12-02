@@ -37,6 +37,11 @@ ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker=
 i += 1
 ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='black')
 
+x_axis_label = 'Phase'
+y_axis_label = 'L [erg/s]'
+ax.set_xlabel(x_axis_label, fontsize=24)
+ax.set_ylabel(y_axis_label, fontsize=24)
+
 # for i in range(len(data_array)):
 #     line[i], = ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i])
 # ax.set_xlabel('Phase', fontsize=24)

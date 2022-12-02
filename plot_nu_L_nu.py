@@ -13,7 +13,7 @@ working_folder = config.full_file_folder + folder
 phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
 x_axis_label = 'Phase'
-y_axis_label = r'$Spectral \: energy \: \nu \cdot L_{\nu} \: [erg/s]$'
+y_axis_label = r'$\nu \cdot L_{\nu} \: [erg/s]$'
 # -------------------------------------------------------------------------------------------
 file_name = "PF.txt"
 PF = main_service.load_arr_from_txt(working_folder, file_name)
