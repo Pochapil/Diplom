@@ -285,7 +285,7 @@ def create_gif(phi_range_column, theta_range_column):
         # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
         ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
-        figure_title = 'phase = %f' % (phase / 360)
+        figure_title = 'phase = %.2f' % (phase / 360)
         fig.suptitle(figure_title, fontsize=14)
 
         # Hide axes ticks
@@ -293,8 +293,8 @@ def create_gif(phi_range_column, theta_range_column):
         ax.set_yticks([])
         ax.set_zticks([])
 
-    ani = animation.FuncAnimation(fig, animate, frames=120, interval=60)
-    ani.save('figs/gifs/ani.gif', writer='pillow', fps=60, dpi=100)
+    ani = animation.FuncAnimation(fig, animate, frames=60, interval=10)
+    ani.save('figs/gifs/ani.gif', writer='pillow', fps=50, dpi=180)
     # plt.show()
 
 
