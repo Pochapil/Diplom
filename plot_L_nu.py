@@ -124,7 +124,7 @@ ax.set_ylabel(y_axis_label, fontsize=24)
 file_name = 'L_nu(nu)_avg_and_phases' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
-# -------------------------------------------------------------------------------------------
+# --------------------------------------- pretty fig ----------------------------------------------------
 N_column_plot = config.N_column_plot
 energy_indexes = config.energy_indexes
 fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
@@ -149,7 +149,7 @@ file_name = 'pretty_fig.png'
 main_service.save_figure(fig, working_folder, file_name)
 plt.rc('font', size=10)
 
-# -------------------------------------------------------------------------------------------
+# ------------------------------log with black body Tmin Tmax--------------------------------------------------
 
 freq_arr = accretionColumnService.get_frequency_from_energy(energy_arr)
 
@@ -191,7 +191,7 @@ main_service.save_figure(fig, working_folder, file_name)
 
 # ------------------------ with phases and avg ------------------------------
 # plt.style.use(['science', 'notebook', 'grid'])
-N_phases = len(data_array)
+N_phases = len(data_array[0])
 L_nu_phases = [0] * N_phases
 L_nu = [0] * N_energy
 
@@ -218,7 +218,7 @@ ax.set_ylabel(y_axis_label, fontsize=24)
 file_name = 'L_nu(nu)_avg_with_phases' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
-# -------------------------------------------------------------------------------------------
+# ------------------------------colormesh----------------------------------------------
 
 phase = np.linspace(0, 1, config.t_max)
 fig, ax = plt.subplots()

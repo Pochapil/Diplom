@@ -233,6 +233,7 @@ class AccretionColumn:
 
         def calculate_L_nu_on_energy(self, energy):
             # КэВ
+            ''' распределение L_nu от фазы на какой-то энергии излучения '''
             frequency = accretionColumnService.get_frequency_from_energy(energy)
 
             dS_simps = self.create_ds_for_integral()
