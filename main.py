@@ -76,6 +76,8 @@ if __name__ == '__main__':
     file_name = 'save_values.txt'
     f = open(full_file_folder + file_name, 'a')
 
+    f.write('beta = %f\n' % top_column.outer_surface.beta)
+
     power_index = 0
     number = top_column.inner_surface.L_x
     while number > 10:
@@ -84,10 +86,6 @@ if __name__ == '__main__':
     print('total L_x = %f * 10**%d' % (number, power_index))
 
     f.write('total L_x = %f * 10**%d \n' % (number, power_index))
-    f.close()
-
-    file_name = 'save_values.txt'
-    f = open(full_file_folder + file_name, 'a')
 
     power_index = 0
     number = top_column.inner_surface.calculate_total_luminosity()

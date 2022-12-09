@@ -67,6 +67,24 @@ e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
                   np.sin(obs_i_angle) * np.sin(obs_phi_angle),
                   np.cos(obs_i_angle)])
 
+
+def update():
+    global file_folder, file_folder_args, full_file_folder
+    file_folder = 'figs/new_energy/'
+    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
+    full_file_folder = file_folder + file_folder_args
+
+
+def set_e_obs(i_angle, phi_angle):
+    global obs_i_angle, obs_phi_angle, e_obs
+    obs_i_angle = i_angle * grad_to_rad
+    obs_phi_angle = phi_angle * grad_to_rad
+    e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
+                      np.sin(obs_i_angle) * np.sin(obs_phi_angle),
+                      np.cos(obs_i_angle)])
+    update()
+
+
 # угол между осью вращения системы и собственным вращением НЗ
 betta_rotate = 30 * grad_to_rad
 phi_rotate = 0 * grad_to_rad

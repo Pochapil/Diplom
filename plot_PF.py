@@ -81,4 +81,7 @@ y_axis_label = 'PF'
 ax.set_xlabel(x_axis_label, fontsize=24)
 ax.set_ylabel(y_axis_label, fontsize=24)
 ax.legend()
-plt.show()
+# plt.show()
+
+file_name = 'all.png'
+main_service.save_figure(fig, save_folder, file_name)

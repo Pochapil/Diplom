@@ -5,7 +5,7 @@ import scipy.special as special
 import config  # const
 
 
-def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
+def get_Teff_distribution(R_e, delta_ns, A_normal):
     # решение зависит от n размера пространства !!! взял n=3 везде
     l0 = A_normal / (2 * delta_ns)  # длина аккреции на поверхности, м. взял как в статье
     u0 = 3 * config.H ** 2 / 8 / np.pi  # значение плотности излучения на поверхности
@@ -72,15 +72,15 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
 
     # analytic solve bs
     # 35 формула
-    betta = 1 - gamma * np.exp(gamma) * (special.expn(1, gamma) - special.expn(1, gamma * ksiShock))
+    beta = 1 - gamma * np.exp(gamma) * (special.expn(1, gamma) - special.expn(1, gamma * ksiShock))
 
     # 32 формула - аналитическое решение
     def u(ksi):
-        return u0 * (1 - np.exp(gamma) / betta * (special.expn(2, gamma) - special.expn(2, gamma * ksi) / ksi)) ** 4
+        return u0 * (1 - np.exp(gamma) / beta * (special.expn(2, gamma) - special.expn(2, gamma * ksi) / ksi)) ** 4
 
     def v(ksi):
         return (3 / 4 * s * config.G * config.M_ns / config.R_ns * np.exp(gamma * ksi) / (ksi ** 3) * (
-                1 / ksi * special.expn(2, gamma * ksi) + betta * np.exp(-gamma) - special.expn(2, gamma))) / -u(ksi)
+                1 / ksi * special.expn(2, gamma * ksi) + beta * np.exp(-gamma) - special.expn(2, gamma))) / -u(ksi)
 
     # переворачиваю массив потому что считал с крайней точки к 1. за границей считать нет смысла - нефизично
     u_numerical_solution = solution_before_ksi[::-1, 0]
@@ -125,9 +125,9 @@ def get_Teff_distribution(number_of_steps, R_e, delta_ns, A_normal):
     Teffbs = (fThetabs(ksi_bs) / config.sigmStfBolc) ** (1 / 4)
 
     # формула 37, 1 - полная светимость
-    L_x = (1 - betta) * config.M_accretion_rate * config.G * config.M_ns / config.R_ns
+    L_x = (1 - beta) * config.M_accretion_rate * config.G * config.M_ns / config.R_ns
 
     #print("bettaBS = %f" % betta)
     #print("e = %.5f" % e)
 
-    return Teff, ksiShock, L_x
+    return Teff, ksiShock, L_x, beta
