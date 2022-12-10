@@ -93,7 +93,7 @@ def set_e_obs(i_angle, phi_angle):
     e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
                       np.sin(obs_i_angle) * np.sin(obs_phi_angle),
                       np.cos(obs_i_angle)])
-    update()
+    # update()
 
 
 # угол между осью вращения системы и собственным вращением НЗ
