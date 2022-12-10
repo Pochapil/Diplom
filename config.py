@@ -69,10 +69,21 @@ e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
 
 
 def update():
+
+    global M_accretion_rate
+    M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
+
+    global lim_phi_accretion
+    lim_phi_accretion = 2 * pi * a_portion
+
+    global phi_accretion_begin
+    phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad
+
     global file_folder, file_folder_args, full_file_folder
-    file_folder = 'figs/new_energy/'
     file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
     full_file_folder = file_folder + file_folder_args
+
+
 
 
 def set_e_obs(i_angle, phi_angle):
@@ -92,7 +103,7 @@ phi_rotate = 0 * grad_to_rad
 betta_mu = 70 * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
-file_folder = 'figs/new_energy/'
+file_folder = 'figs/loop/'
 file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
 full_file_folder = file_folder + file_folder_args
 

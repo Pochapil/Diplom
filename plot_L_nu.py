@@ -29,7 +29,7 @@ fig = main_service.create_figure(energy_arr, PF, x_axis_label=x_axis_label, y_ax
 file_name = "PF.png"
 main_service.save_figure(fig, working_folder, file_name)
 
-# -------------------------------------------------------------------------------------------
+# -------------------------------read L_nu data----------------------------------------------------
 x_axis_label = 'Phase'
 
 file_name = "L_nu.txt"
@@ -39,7 +39,7 @@ arr_to_plt = [0] * len(data_array)
 for i in range(len(data_array)):
     arr_to_plt[i] = main_service.extend_arr_for_phase(data_array[i])
 
-# -------------------------------------------------------------------------------------------
+# --------------------------------L_nu on dif energy------------------------------------------------
 for energy_i in range(N_energy):
     fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy_arr[energy_i], PF[energy_i])
     fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$L_{\nu}(phase)$',
@@ -49,7 +49,7 @@ for energy_i in range(N_energy):
     file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy_arr[energy_i]
     main_service.save_figure(fig, working_folder, file_name)
 
-# -------------------------------------------------------------------------------------------
+# -----------------------------------L_nu all energy in one---------------------------------------------
 # по идее переписать!!
 labels_arr = [''] * N_energy
 for i in range(N_energy):
@@ -61,7 +61,7 @@ fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr=labels_arr
 file_name = 'L_nu' + '.png'
 main_service.save_figure(fig, working_folder, file_name)
 
-# -------------------------------------------------------------------------------------------
+# ------------------------------------L_nu(nu) on phase--------------------------------------------------
 x_axis_label = r'$h \nu$' + ' [KeV]'
 phase_index = 0  # индекс фазы для L_nu(nu)
 
