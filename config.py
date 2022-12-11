@@ -61,7 +61,7 @@ N_energy = 20
 energy_min = 1  # [КэВ]
 energy_max = 40  # [КэВ]
 
-obs_i_angle = 0 * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
+obs_i_angle = 30 * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
 obs_phi_angle = 0 * grad_to_rad
 e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
                   np.sin(obs_i_angle) * np.sin(obs_phi_angle),
@@ -94,7 +94,7 @@ def set_e_obs(i_angle, phi_angle):
 
 
 # угол между осью вращения системы и собственным вращением НЗ
-betta_rotate = 30 * grad_to_rad
+betta_rotate = 0 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 # угол между собственным вращением НЗ и магнитной осью
 betta_mu = 70 * grad_to_rad

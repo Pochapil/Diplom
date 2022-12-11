@@ -689,6 +689,7 @@ def visualise_3d_angles():
 
         # рисуем arc
         theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
+        # theta_range = np.arange(0, config.obs_i_angle, config.obs_i_angle / config.N_theta_accretion)
 
         x = lim_value * np.sin(theta_range) * 0.9
         y = [0] * config.N_theta_accretion

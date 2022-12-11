@@ -10,10 +10,21 @@ from accretionColumn import AccretionColumn
 import vectors
 import main_service
 
+import plot_funcs.plot_from_main
+import plot_funcs.plot_luminosity_in_range
+import plot_funcs.plot_L_nu
+import plot_funcs.plot_nu_L_nu
+
 if __name__ == '__main__':
-    mc2 = [10, 20, 40, 50]
+    def plot_all():
+        plot_funcs.plot_from_main.plot_figs()
+        plot_funcs.plot_luminosity_in_range.plot_figs()
+        plot_funcs.plot_L_nu.plot_figs()
+        plot_funcs.plot_nu_L_nu.plot_figs()
+
+    mc2 = [10, 20, 40]
     a_portion = [0.25, 0.65, 1]
-    fi_0 = [0, 70, 140]
+    fi_0 = [10, 20, 70, 140]
 
     for i in range(len(mc2)):
         for j in range(len(a_portion)):
@@ -25,11 +36,11 @@ if __name__ == '__main__':
 
                 config.update()
 
+                print('calculate for mc=%f a=%f di_0=%f' % (mc2[i], a_portion[j], fi_0[k]))
                 R_alfven = (config.mu ** 2 / (
-                        2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (
-                                   2 / 7)
+                        2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
                 R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
-                print('R_e = %f' % (R_e / config.R_ns))
+                # print('R_e = %f' % (R_e / config.R_ns))
                 R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
                 # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
                 e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
@@ -325,17 +336,17 @@ if __name__ == '__main__':
                 print("execution time of program: %f s" % (
                         time_calculate_nu_L_nu_on_energy - time_start))
 
-                print("execution time of intersections: %f s" % (time_cos - time_start))
-                print(
-                    "execution time of calculate_integral_distribution: %f s" % (time_integral_distribution - time_cos))
-                print("execution time of calculate_integral_distribution_in_range: %f s" % (
-                        time_integral_distribution_in_range - time_integral_distribution))
-                print("execution time of calculate_L_nu_on_energy: %f s" % (
-                        time_calculate_L_nu_on_energy - time_integral_distribution_in_range))
-                print("execution time of calculate_nu_L_nu_on_energy: %f s" % (
-                        time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
+                # print("execution time of intersections: %f s" % (time_cos - time_start))
+                # print(
+                #     "execution time of calculate_integral_distribution: %f s" % (time_integral_distribution - time_cos))
+                # print("execution time of calculate_integral_distribution_in_range: %f s" % (
+                #         time_integral_distribution_in_range - time_integral_distribution))
+                # print("execution time of calculate_L_nu_on_energy: %f s" % (
+                #         time_calculate_L_nu_on_energy - time_integral_distribution_in_range))
+                # print("execution time of calculate_nu_L_nu_on_energy: %f s" % (
+                #         time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
 
-                import plot_from_main
-                import plot_luminosity_in_range
-                import plot_L_nu
-                import plot_nu_L_nu
+                plot_all()
+
+                if (a_portion[j] == 1):
+                    break
