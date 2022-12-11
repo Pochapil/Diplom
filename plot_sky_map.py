@@ -18,7 +18,11 @@ def plot_save_sky_map(obs_i_angle_arr):
         data_array[i] = main_service.load_arr_from_txt(config.full_file_folder, file_name)
 
     phase = np.linspace(0, 1, config.t_max)
-    fig, ax = plt.subplots()
+
+    # fig, ax = plt.subplots()
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
 
     # нормировка на L_nu_avg
     data_to_plot = []

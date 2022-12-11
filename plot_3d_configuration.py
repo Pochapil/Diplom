@@ -37,7 +37,7 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
     lim_value = 0.2
     grad_to_rad = np.pi / 180
     i_angle = 0 * grad_to_rad
-    e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+    e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, betta_rotate * grad_to_rad, phase * grad_to_rad,
                                                  betta_mu * grad_to_rad)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -169,7 +169,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
     # ax.view_init(90 - betta_rotate - betta_mu, phase)
 
     i_angle = 0 * grad_to_rad
-    e_obs = np.array([0, np.sin(i_angle), np.cos(i_angle)])
+    e_obs = config.e_obs
 
     for phase in range(0, 720):
 
@@ -250,7 +250,7 @@ def create_gif(phi_range_column, theta_range_column):
     ax.set_zlim([-lim_value, lim_value])
 
     phase = 0
-    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+    e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                  config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -269,7 +269,7 @@ def create_gif(phi_range_column, theta_range_column):
 
     def animate(i):
         phase = i / 60 * 360
-        e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+        e_obs = config.e_obs
         A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                      config.betta_mu)
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -357,7 +357,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     ax.set_zlim([-lim_value, lim_value])
 
     phase = 0
-    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+    e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                  config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -388,7 +388,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     def rotate(val):
         phase = slider1.val  # slider1.val
         phase = phase * 360
-        e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+        e_obs = config.e_obs
         A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                      config.betta_mu)
         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
@@ -478,7 +478,7 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
 
-    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+    e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * 2 * np.pi, config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
 
@@ -548,7 +548,7 @@ def visualise_3d_configuration_angles():
     ax.set_zlim([-lim_value, lim_value])
 
     phase = 0
-    e_obs = np.array([0, np.sin(config.obs_i_angle), np.cos(config.obs_i_angle)])
+    e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
                                                  config.betta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК

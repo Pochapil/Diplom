@@ -77,7 +77,7 @@ data_array = main_service.load_arr_from_txt(working_folder, file_name)
 file_name = "save_theta_range.txt"
 theta_range = main_service.load_arr_from_txt(working_folder, file_name)
 
-fig = main_service.create_figure(theta_range, data_array[0], x_axis_label='Phase', y_axis_label=r'$T_{eff} \: [K]$',
+fig = main_service.create_figure(theta_range, data_array[0], x_axis_label=r'$\theta$', y_axis_label=r'$T_{eff} \: [K]$',
                                  figure_title=r'$T_{eff}$', is_y_2d=False)
 file_name = 'T_eff.png'
 main_service.save_figure(fig, working_folder, file_name)
