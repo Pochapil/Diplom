@@ -107,10 +107,12 @@ def plot_figs():
         ax.tick_params(axis='both', labelsize=12)
         ax.plot(phi_for_plot, arr_to_plt[energy_indexes[i]], color='black', lw=0.8)
         # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
-        ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'), ha='right',
-                va='top')
+        ax.text(0.98, 0.87, label, transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black', alpha=0.1),
+                ha='right', va='top')
         ax.tick_params(axis='both', which='major', labelsize=16)
         ax.tick_params(axis='both', which='minor', labelsize=8)
+        # ax.set_xlabel('10 kev PF=0.3', fontsize=16)
+        # ax.set_title('10 kev PF=0.3', fontsize=22)
         # ax.legend(loc='upper right')
 
     # fig.add_subplot(111, frameon=False)

@@ -22,6 +22,7 @@ if __name__ == '__main__':
         plot_L_nu.plot_figs()
         plot_nu_L_nu.plot_figs()
 
+
     mc2 = [30]
     a_portion = [0.65]
     fi_0 = [0]
@@ -331,11 +332,6 @@ if __name__ == '__main__':
                 file_name = "nu_L_nu.txt"
                 main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
 
-                time_calculate_nu_L_nu_on_energy = time.time()
-
-                print("execution time of program: %f s" % (
-                        time_calculate_nu_L_nu_on_energy - time_start))
-
                 # print("execution time of intersections: %f s" % (time_cos - time_start))
                 # print(
                 #     "execution time of calculate_integral_distribution: %f s" % (time_integral_distribution - time_cos))
@@ -347,6 +343,10 @@ if __name__ == '__main__':
                 #         time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
 
                 plot_all()
+
+                time_calculate_nu_L_nu_on_energy = time.time()
+                print("execution time of program: %f s" % (
+                        time_calculate_nu_L_nu_on_energy - time_start))
 
                 if (a_portion[j] == 1):
                     break
