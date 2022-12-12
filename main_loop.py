@@ -10,21 +10,21 @@ from accretionColumn import AccretionColumn
 import vectors
 import main_service
 
-import plot_funcs.plot_from_main
-import plot_funcs.plot_luminosity_in_range
-import plot_funcs.plot_L_nu
-import plot_funcs.plot_nu_L_nu
+import plot_from_main
+import plot_luminosity_in_range
+import plot_L_nu
+import plot_nu_L_nu
 
 if __name__ == '__main__':
     def plot_all():
-        plot_funcs.plot_from_main.plot_figs()
-        plot_funcs.plot_luminosity_in_range.plot_figs()
-        plot_funcs.plot_L_nu.plot_figs()
-        plot_funcs.plot_nu_L_nu.plot_figs()
+        plot_from_main.plot_figs()
+        plot_luminosity_in_range.plot_figs()
+        plot_L_nu.plot_figs()
+        plot_nu_L_nu.plot_figs()
 
-    mc2 = [10, 20, 40]
-    a_portion = [0.25, 0.65, 1]
-    fi_0 = [10, 20, 70, 140]
+    mc2 = [30]
+    a_portion = [0.65]
+    fi_0 = [0]
 
     for i in range(len(mc2)):
         for j in range(len(a_portion)):

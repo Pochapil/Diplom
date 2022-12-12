@@ -25,7 +25,8 @@ if __name__ == '__main__':
                 2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (
                            2 / 7)
         R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
-        print('R_e = %f' % (R_e / config.R_ns))
+        # print('R_e = %f' % (R_e / config.R_ns))
+        print('%f' % obs_i_angle[i])
         R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
         # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
         e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
