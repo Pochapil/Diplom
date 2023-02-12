@@ -9,6 +9,22 @@ import config
 import main_service
 import vectors
 
+lim_coeff_for_axis = 0.15
+
+
+def plot_NS(ax):
+    # рисуем звезду
+    theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
+    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
+
+    u, v = np.meshgrid(phi_range, theta_range)
+    r1 = np.sin(theta_range_column[0]) ** 2
+    x = r1 * np.sin(v) * np.cos(u)
+    y = r1 * np.sin(v) * np.sin(u)
+    z = r1 * np.cos(v)
+
+    ax.plot_surface(x, y, z, color='b', alpha=1)
+
 
 def get_angles_from_vector(vector):
     x = vector[0, 0]
@@ -34,7 +50,7 @@ def add_vector(ax, origin, vector, color, lim_value):
 def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu, phase):
     phase = phase * 360
 
-    lim_value = 0.2
+    lim_value = lim_coeff_for_axis
     grad_to_rad = np.pi / 180
     i_angle = 0 * grad_to_rad
     e_obs = config.e_obs
@@ -50,17 +66,7 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
     N_phi_accretion = len(phi_range_column)
     N_theta_accretion = len(theta_range_column)
 
-    # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi, 2 * np.pi / N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_range_column[0]) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    plot_NS(ax)
 
     # рисуем силовые линии
     # верх
@@ -114,7 +120,7 @@ def plot_3d_configuration(phi_range_column, theta_range_column, betta_rotate, be
 
 
 def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate, betta_mu):
-    lim_value = 0.2
+    lim_value = lim_coeff_for_axis
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -123,17 +129,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
     N_phi_accretion = len(phi_range_column)
     N_theta_accretion = len(theta_range_column)
 
-    # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi, 2 * np.pi / N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_range_column[0]) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    plot_NS(ax)
 
     # рисуем силовые линии
     # верх
@@ -196,7 +192,7 @@ def animate_3d_configuration(phi_range_column, theta_range_column, betta_rotate,
 
 
 def create_gif(phi_range_column, theta_range_column):
-    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -206,16 +202,7 @@ def create_gif(phi_range_column, theta_range_column):
     N_theta_accretion = len(theta_range_column)
 
     # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_range_column[0]) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    plot_NS(ax)
 
     # рисуем силовые линии
     # верх
@@ -300,7 +287,7 @@ def create_gif(phi_range_column, theta_range_column):
 
 def visualise_3d_configuration(phi_range_column, theta_range_column):
     # fig, ax = plt.subplots()
-    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -310,16 +297,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     N_theta_accretion = len(theta_range_column)
 
     # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_range_column[0]) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    plot_NS(ax)
 
     # рисуем силовые линии
     # верх
@@ -425,7 +403,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
 
 def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase):
     # fig, ax = plt.subplots()
-    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -435,16 +413,7 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
     N_theta_accretion = len(theta_range_column)
 
     # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_range_column[0]) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    plot_NS(ax)
 
     # рисуем силовые линии
     # верх
@@ -505,23 +474,14 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
 
 def visualise_3d_configuration_angles():
     # fig, ax = plt.subplots()
-    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
     ax = plt.axes(projection='3d')
 
     # рисуем звезду
-    theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
-    phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
-
-    u, v = np.meshgrid(phi_range, theta_range)
-    r1 = np.sin(theta_range_column[0]) ** 2
-    x = r1 * np.sin(v) * np.cos(u)
-    y = r1 * np.sin(v) * np.sin(u)
-    z = r1 * np.cos(v)
-
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    plot_NS(ax)
 
     # вектора
     origin = [0, 0, 0]
@@ -603,7 +563,7 @@ def visualise_3d_configuration_angles():
 
 def visualise_3d_angles():
     # fig, ax = plt.subplots()
-    lim_value = 0.2 * config.M_rate_c2_Led / 10
+    lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
     fig = plt.figure(figsize=(8, 8))
@@ -619,16 +579,7 @@ def visualise_3d_angles():
 
     def plot_all(phase):
         # рисуем звезду
-        theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
-        phi_range = np.arange(0, 2 * np.pi * 1.01, 2 * np.pi * 1.01 / config.N_phi_accretion)
-
-        u, v = np.meshgrid(phi_range, theta_range)
-        r1 = np.sin(theta_range_column[0]) ** 2
-        x = r1 * np.sin(v) * np.cos(u)
-        y = r1 * np.sin(v) * np.sin(u)
-        z = r1 * np.cos(v)
-
-        ax.plot_surface(x, y, z, color='b', alpha=1)
+        plot_NS(ax)
 
         # вектора
         origin = [0, 0, 0]
@@ -675,17 +626,17 @@ def visualise_3d_angles():
 
         theta_range = np.linspace(-2 * np.pi / 7, 2 * np.pi / 7, config.N_theta_accretion)
 
-        x = lim_value * np.sin(theta_range) * 0.1
-        y = [0] * config.N_theta_accretion
-        z = -lim_value * np.cos(theta_range) * 0.1 + lim_value * 1.5
-
-        ax.plot(x, y, z, color='black')
-
-        x = [x[0], 0, x[-1]]
-        y = [0] * 3
-        z = [z[15], lim_value * 1.7, z[-16]]
-
-        ax.plot(x, y, z, color='black')
+        # x = lim_value * np.sin(theta_range) * 0.1
+        # y = [0] * config.N_theta_accretion
+        # z = -lim_value * np.cos(theta_range) * 0.1 + lim_value * 1.5
+        #
+        # ax.plot(x, y, z, color='black')
+        #
+        # x = [x[0], 0, x[-1]]
+        # y = [0] * 3
+        # z = [z[15], lim_value * 1.7, z[-16]]
+        #
+        # ax.plot(x, y, z, color='black')
 
         # рисуем arc
         theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
@@ -695,10 +646,10 @@ def visualise_3d_angles():
         y = [0] * config.N_theta_accretion
         z = lim_value * np.cos(theta_range) * 0.9
 
-        ax.plot(x, y, z, color='black', alpha=1, label=r'$ \beta_* $')
+        ax.plot(x, y, z, color='black', alpha=1, label=r'$ i_{obs} $')
         direction = (1, 1, 1)
         ax.text(x[config.N_theta_accretion // 2], y[config.N_theta_accretion // 2],
-                z[config.N_theta_accretion // 2] * 1.1, s=r'$ \beta_* $', fontsize=14)
+                z[config.N_theta_accretion // 2] * 1.1, s=r'$ i_{obs} $', fontsize=14)
 
         # theta_range = np.arange(-betta_mu * grad_to_rad, -(betta_mu + betta_rotate) * grad_to_rad,
         #                         -(betta_rotate) * grad_to_rad / (config.N_theta_accretion - 1))
@@ -738,7 +689,7 @@ def visualise_3d_angles():
         ax.text(x[config.N_theta_accretion // 2] * 1.2, y[config.N_theta_accretion // 2] * 1.2,
                 z[config.N_theta_accretion // 2] * 1.2, s=r'$ \beta_\mu $', color='green', fontsize=14)
 
-        ax.legend()
+        # ax.legend()
 
         # Hide axes ticks
         ax.set_xticks([])
@@ -827,7 +778,7 @@ if __name__ == "__main__":
 
     save_folder = 'phases/'
 
-    phase = 1
+    phase = 0.75
     fig = visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase)
     file_name = "phase = %f.png" % phase
     main_service.save_figure(fig, working_folder + save_folder, file_name)
