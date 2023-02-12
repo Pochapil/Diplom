@@ -29,13 +29,13 @@ def plot_figs():
     ax = fig.add_subplot(111)
     line = [0] * 5
     i = 0
-    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='red', marker='.', linestyle=':')
+    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='red', marker='.', linestyle=':', markersize=12)
     i += 1
-    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='red', marker='*')
+    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='red', marker='*', markersize=12)
     i += 1
-    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker='+', linestyle=':')
+    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker='+', linestyle=':', markersize=12)
     i += 1
-    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker='^')
+    ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='green', marker='^', markersize=12)
     i += 1
     ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='black')
 
