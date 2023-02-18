@@ -24,17 +24,26 @@ class AccretionColumn:
             self.surface_type = surface_type  # True - внешняя поверхность, False - внутренняя
 
             self.T_eff, self.ksi_shock, self.L_x, self.beta = get_T_eff.get_Teff_distribution(R_e,
-                                                                                   accretionColumnService.get_delta_distance(
-                                                                                       theta_accretion_begin, self.R_e),
-                                                                                   accretionColumnService.get_A_normal(
-                                                                                       theta_accretion_begin, self.R_e))
+                                                                                              accretionColumnService.get_delta_distance(
+                                                                                                  theta_accretion_begin,
+                                                                                                  self.R_e),
+                                                                                              accretionColumnService.get_A_normal(
+                                                                                                  theta_accretion_begin,
+                                                                                                  self.R_e))
             phi_delta = 0
-            # из усл силовой линии МП : r = R_e sin**2; end: ksi_shock = R_e sin**2
-            theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
+
+            if (config.R_ns * self.ksi_shock / R_e) > 1:
+                # есть набор параметров при которых модель не работает и ударная волна дальше магнитосферы, берем 90
+                theta_accretion_end = np.pi / 2
+            else:
+                # из усл силовой линии МП : r = R_e sin**2; end: ksi_shock = R_e sin**2
+                theta_accretion_end = np.arcsin((config.R_ns * self.ksi_shock / R_e) ** (1 / 2))
+
             if not column_type:  # column_type: True - top, False - bot
                 # для нижней сместить углы
                 theta_accretion_end = np.pi - theta_accretion_end
                 phi_delta = np.pi
+
             step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
             step_theta_accretion = (theta_accretion_end - theta_accretion_begin) / (config.N_theta_accretion - 1)
 
@@ -110,6 +119,7 @@ class AccretionColumn:
                         # умножать на N_theta
                         cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
                         if cos_psi_range[i, j] > 0:
+                            # проверка на пересечения
                             if accretionColumnService.check_if_intersect(self.phi_range[i], self.theta_range[j],
                                                                          e_obs_mu, self.ksi_shock,
                                                                          theta_accretion_begin, theta_accretion_end,
@@ -137,6 +147,7 @@ class AccretionColumn:
                     # умножать на N_theta
                     cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
                     if cos_psi_range[i, j] > 0:
+                        # проверка на пересечения
                         if accretionColumnService.check_if_intersect(self.phi_range[i], self.theta_range[j],
                                                                      e_obs_mu, self.ksi_shock,
                                                                      theta_accretion_begin, theta_accretion_end,
