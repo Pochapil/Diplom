@@ -2,6 +2,7 @@ import numpy as np
 import multiprocessing as mp
 from itertools import repeat
 import time
+import matplotlib.pyplot as plt
 
 import geometricTask.matrix as matrix
 import config
@@ -21,14 +22,15 @@ if __name__ == '__main__':
         plot_luminosity_in_range.plot_figs()
         plot_L_nu.plot_figs()
         plot_nu_L_nu.plot_figs()
+        plt.close('all')
 
 
-    mc2 = [10, 30, 100]
-    a_portion = [0.1, 0.25, 0.65, 1.]
+    mc2 = [30]
+    a_portion = [0.1]
     fi_0 = [20 * i for i in range(18)]
-
-    i_angle = [30, 60, 90]
-    betta_mu = [0, 30, 60, 90]
+    # fi_0 = [0, 20]
+    i_angle = [30]
+    betta_mu = [0, 30]
 
     for i_angle_index in range(len(i_angle)):
         for betta_mu_index in range(len(betta_mu)):
@@ -45,14 +47,17 @@ if __name__ == '__main__':
 
                         config.update()
 
-                        print('calculate for mc=%0.2f a=%0.2f fi_0=%0.2f' % (mc2[i], a_portion[j], fi_0[k]))
+                        print('calculate for i=%d beta_mu=%d mc=%0.2f a=%0.2f fi_0=%0.2f' % (
+                            i_angle[i_angle_index], betta_mu[betta_mu_index], mc2[i], a_portion[j], fi_0[k]))
+
                         R_alfven = (config.mu ** 2 / (
                                 2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
                         R_e = config.ksi_param * R_alfven  # между 1 и 2 формулой в статье
                         # print('R_e = %f' % (R_e / config.R_ns))
                         R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
                         # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
-                        e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
+                        # e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
+                        e_obs = config.e_obs
                         file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
                                               % (config.betta_rotate, config.betta_mu, config.a_portion,
                                                  config.M_rate_c2_Led)
@@ -86,8 +91,7 @@ if __name__ == '__main__':
 
                         # словарь для того чтобы можно было в цикле ходить по поверхностям
                         surfaces = {0: top_column.outer_surface, 1: top_column.inner_surface,
-                                    2: bot_column.outer_surface,
-                                    3: bot_column.inner_surface}
+                                    2: bot_column.outer_surface, 3: bot_column.inner_surface}
 
                         # ----------------------------- график T_eff --------------------------------
                         arr_T_eff = []
@@ -109,9 +113,10 @@ if __name__ == '__main__':
                         theta_accretion_end = top_column.outer_surface.theta_range[-1]
                         # ----------------- углы для нахождения пересечений -------------------------
 
+                        # файл для значений параметров
                         file_name = 'save_values.txt'
                         f = open(full_file_folder + file_name, 'w')
-                        f.write('R_e = %f \nksi_shock = %f\n' % (R_e / config.R_ns, top_column.outer_surface.ksi_shock))
+                        f.write('R_e = %f\nksi_shock = %f\n' % (R_e / config.R_ns, top_column.outer_surface.ksi_shock))
                         f.close()
 
                         file_name = 'save_values.txt'
@@ -126,20 +131,20 @@ if __name__ == '__main__':
                             power_index += 1
                         print('total L_x = %f * 10**%d' % (number, power_index))
 
-                        f.write('total L_x = %f * 10**%d \n' % (number, power_index))
+                        f.write('total L_x = %f * 10**%d\n' % (number, power_index))
 
                         power_index = 0
                         number = top_column.inner_surface.calculate_total_luminosity()
 
                         f.write(
                             'difference L_x / L_calc - 1 : %f ' % (
-                                    (top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '% \n')
+                                    (top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '%\n')
 
                         while number > 10:
                             number = number / 10
                             power_index += 1
 
-                        f.write('calculated total L_x of single surface = %f * 10**%d \n' % (number, power_index))
+                        f.write('calculated total L_x of single surface = %f * 10**%d\n' % (number, power_index))
                         f.close()
 
                         time_start = time.time()
@@ -167,6 +172,17 @@ if __name__ == '__main__':
                         # ------------------ конец заполнения матриц косинусов ---------------------------
 
                         time_cos = time.time()
+
+
+                        # попытка сохранять массив косинусов, но там 3 мерный массив из за фазы
+                        # file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
+                        #                                  2: 'bot_outer', 3: 'bot_inner'}
+                        #
+                        # for key, surface_name in file_name_for_cos_of_surfaces.items():
+                        #     file_name = 'save_cos_' + surface_name + '.txt'
+                        #     for i in range(config.t_max):
+                        #         main_service.save_arr_as_txt(surfaces[key].cos_psi_range[i], full_file_folder,
+                        #                                      file_name)
 
                         # ------------------ начало заполнения массивов светимости -----------------------
                         arr_simps_integrate = [0] * 4
