@@ -29,12 +29,12 @@ H = 2 * mu / R_ns ** 3
 dRe_div_Re = 0.25  # взял просто число
 # M_accretion_rate = 10 ** 38 * R_ns / G / MSun  # темп аккреции
 ksi_rad = 3 / 2
-a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
+a_portion = 1  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
 k = 0.35  # opacity непрозрачность
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
 
-M_rate_c2_Led = 10
+M_rate_c2_Led = 100
 M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
 
 ksi_param = 0.5  # между 1 и 2 формулой в статье
@@ -61,7 +61,8 @@ N_energy = 20
 energy_min = 1  # [КэВ]
 energy_max = 40  # [КэВ]
 
-obs_i_angle = 30 * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
+obs_i_angle_deg = 30
+obs_i_angle = obs_i_angle_deg * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
 obs_phi_angle = 0 * grad_to_rad
 e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
                   np.sin(obs_i_angle) * np.sin(obs_phi_angle),
@@ -78,34 +79,48 @@ def update():
     global phi_accretion_begin
     phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad
 
-    global file_folder, file_folder_args, full_file_folder
+    global file_folder, file_folder_args, file_folder_angle, full_file_folder
+    file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
     file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
-    full_file_folder = file_folder + file_folder_args
+    full_file_folder = file_folder + file_folder_angle + file_folder_args
 
 
 def set_e_obs(i_angle, phi_angle):
-    global obs_i_angle, obs_phi_angle, e_obs
-    obs_i_angle = i_angle * grad_to_rad
+    global obs_i_angle_deg, obs_i_angle, obs_phi_angle, e_obs
+    obs_i_angle_deg = i_angle
+    obs_i_angle = obs_i_angle_deg * grad_to_rad
     obs_phi_angle = phi_angle * grad_to_rad
     e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
                       np.sin(obs_i_angle) * np.sin(obs_phi_angle),
                       np.cos(obs_i_angle)])
-    # update()
 
+    update()
+
+
+def set_betta_mu(betta_mu_deg_arg):
+    global betta_mu, betta_mu_deg
+    betta_mu_deg = betta_mu_deg_arg
+    betta_mu = betta_mu_deg * grad_to_rad
+
+    update()
 
 # угол между осью вращения системы и собственным вращением НЗ
 betta_rotate = 0 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
 # угол между собственным вращением НЗ и магнитной осью
-betta_mu = 70 * grad_to_rad
+betta_mu_deg = 0
+betta_mu = betta_mu_deg * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
 file_folder = 'figs/loop/'
+file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
 file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
-full_file_folder = file_folder + file_folder_args
+full_file_folder = file_folder + file_folder_angle + file_folder_args
 
 # для pretty графиков - индекс по энергии и сколько subfigures
 N_column_plot = 5
 energy_indexes = [0, 12, 15, 17, 19]
 # меньше на 1 т.к. в диапазоне энергий => меньше на 1 чем точек разбиения
 energy_indexes_luminosity = [0, 12, 14, 16, 18]
+
+# print(H/10**11)
