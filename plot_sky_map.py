@@ -5,17 +5,19 @@ import matplotlib.pyplot as plt
 import main_service
 
 
+
+
 def plot_save_sky_map(obs_i_angle_arr):
-    file_folder = 'figs/sky_map/'
-    config.full_file_folder = file_folder + config.file_folder_args
+    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+    working_folder = file_folder + config.file_folder_args
 
     file_name = "L_x.txt"
-    L_x = main_service.load_arr_from_txt(config.full_file_folder, file_name)
+    L_x = main_service.load_arr_from_txt(working_folder, file_name)
 
     data_array = [0] * len(obs_i_angle_arr)
     for i in range(len(obs_i_angle_arr)):
         file_name = "i=%d.txt" % obs_i_angle_arr[i]
-        data_array[i] = main_service.load_arr_from_txt(config.full_file_folder, file_name)
+        data_array[i] = main_service.load_arr_from_txt(working_folder, file_name)
 
     phase = np.linspace(0, 1, config.t_max)
 
@@ -43,20 +45,20 @@ def plot_save_sky_map(obs_i_angle_arr):
     plt.colorbar(im)
 
     file_name = 'map' + '.png'
-    main_service.save_figure(fig, config.full_file_folder, file_name)
+    main_service.save_figure(fig, working_folder, file_name)
 
 
 def plot_save_sky_map_contour(obs_i_angle_arr):
-    file_folder = 'figs/sky_map/'
-    config.full_file_folder = file_folder + config.file_folder_args
+    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+    working_folder = file_folder + config.file_folder_args
 
     file_name = "L_x.txt"
-    L_x = main_service.load_arr_from_txt(config.full_file_folder, file_name)
+    L_x = main_service.load_arr_from_txt(working_folder, file_name)
 
     data_array = [0] * len(obs_i_angle_arr)
     for i in range(len(obs_i_angle_arr)):
         file_name = "i=%d.txt" % obs_i_angle_arr[i]
-        data_array[i] = main_service.load_arr_from_txt(config.full_file_folder, file_name)
+        data_array[i] = main_service.load_arr_from_txt(working_folder, file_name)
 
     phase = np.linspace(0, 1, config.t_max)
 
@@ -85,7 +87,7 @@ def plot_save_sky_map_contour(obs_i_angle_arr):
     plt.colorbar(im)
 
     file_name = 'map_contour' + '.png'
-    main_service.save_figure(fig, config.full_file_folder, file_name)
+    main_service.save_figure(fig, working_folder, file_name)
 
 
 if __name__ == '__main__':

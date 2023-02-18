@@ -14,9 +14,12 @@ if __name__ == '__main__':
 
     time_start = time.time()
 
-    file_folder = 'figs/sky_map/'
-    config.full_file_folder = file_folder + config.file_folder_args
+    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+    working_folder = file_folder + config.file_folder_args
 
+    # ------------------- создание папки для графиков --------------------------
+    main_service.create_file_path(working_folder)
+    # ------------------- создание папки для графиков --------------------------
     for i in range(len(obs_i_angle)):
 
         config.set_e_obs(obs_i_angle[i], 0)
@@ -29,15 +32,11 @@ if __name__ == '__main__':
         print('%f' % obs_i_angle[i])
         R_e_outer_surface, R_e_inner_surface = R_e, R_e  # допущение что толщина = 0
         # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
-        e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
+        # e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
+        e_obs = config.e_obs
         file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
                               % (config.betta_rotate, config.betta_mu, config.a_portion, config.M_rate_c2_Led)
         approx_method = accretionColumnService.approx_method
-
-        # ------------------- создание папки для графиков --------------------------
-        full_file_folder = config.full_file_folder
-        main_service.create_file_path(full_file_folder)
-        # ------------------- создание папки для графиков --------------------------
 
         # ----------------- начало инициализации верхней колонки ------------------------
         # от поверхности NS - угол при котором радиус = радиусу НЗ
@@ -99,10 +98,10 @@ if __name__ == '__main__':
         # ------------------ конец заполнения массивов светимости -----------------------
 
         file_name = "i=%d.txt" % obs_i_angle[i]
-        main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder, file_name)
+        main_service.save_arr_as_txt(sum_simps_integrate, working_folder, file_name)
 
     file_name = "L_x.txt"
-    f = open(full_file_folder + file_name, 'w')
+    f = open(working_folder + file_name, 'w')
     f.write('%f' % top_column.outer_surface.L_x)
     f.close()
 
@@ -112,3 +111,4 @@ if __name__ == '__main__':
             time_calculate_nu_L_nu_on_energy - time_start))
 
     plot_sky_map.plot_save_sky_map(obs_i_angle)
+    plot_sky_map.plot_save_sky_map_contour(obs_i_angle)
