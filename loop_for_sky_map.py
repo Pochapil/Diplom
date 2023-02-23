@@ -10,11 +10,11 @@ import main_service
 import plot_sky_map
 
 if __name__ == '__main__':
-    mc2 = [30]
-    a_portion = [0.1]
+    mc2 = [10, 100]
+    a_portion = [0.1, 0.25, 0.65, 1]
     # fi_0 = [20 * i for i in range(18)]
     fi_0 = [120, 240]
-    betta_mu = [0, 30]
+    betta_mu = [60, 90]
 
     obs_i_angle = np.linspace(0, 180, 19)
 
@@ -113,6 +113,10 @@ if __name__ == '__main__':
                             surface.cos_psi_range = cos_psi_range_final
                         # ------------------ конец заполнения матриц косинусов ---------------------------
 
+
+
+
+
                         # ------------------ начало заполнения массивов светимости -----------------------
                         arr_simps_integrate = [0] * 4
                         sum_simps_integrate = 0
@@ -138,3 +142,6 @@ if __name__ == '__main__':
 
                     plot_sky_map.plot_save_sky_map(obs_i_angle)
                     plot_sky_map.plot_save_sky_map_contour(obs_i_angle)
+
+                    if (a_portion[j] == 1):
+                        break
