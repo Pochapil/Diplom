@@ -133,14 +133,15 @@ class AccretionColumn:
             self.cos_psi_range = cos_psi_range_final
 
         def async_fill_cos_psi_range(self, t_index, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
-                                     bot_column_phi_range, e_obs):
+                                     bot_column_phi_range, e_obs, updated_betta_mu):
             # распараллелил fill_cos_psi_range
             cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
             # поворот
             phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t_index
             # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
             A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
-                                                         config.betta_mu)
+                                                         updated_betta_mu)
+            # print('config.betta_mu in fill cos = %f' % updated_betta_mu)
             e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
