@@ -10,11 +10,13 @@ import main_service
 import plot_sky_map
 
 if __name__ == '__main__':
-    mc2 = [10, 100]
-    a_portion = [0.1, 0.25, 0.65, 1]
-    # fi_0 = [20 * i for i in range(18)]
-    fi_0 = [120, 240]
-    betta_mu = [60, 90]
+    mc2 = [10, 30]
+    a_portion = [0.1]
+    fi_0 = [0]
+    #mc2 = [10, 30, 100]
+    #a_portion = [0.1, 0.25, 0.65, 1]
+    # fi_0 = [20 * i for i in range(1, 18)]
+    betta_mu = [60]
 
     obs_i_angle = np.linspace(0, 180, 19)
 
@@ -34,6 +36,8 @@ if __name__ == '__main__':
 
                     file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
                     working_folder = file_folder + config.file_folder_args
+
+                    print('beta_mu=%d' % config.betta_mu_deg)
 
                     # ------------------- создание папки для графиков --------------------------
                     main_service.create_file_path(working_folder)
@@ -55,9 +59,7 @@ if __name__ == '__main__':
                         # вектор на наблюдателя в системе координат двойной системы (условимся что omega и e_obs лежат в пл-ти x0z)
                         # e_obs = np.array([np.sin(config.obs_i_angle), 0, np.cos(config.obs_i_angle)])
                         e_obs = config.e_obs
-                        file_name_variables = "betta_omega=%d betta_mu=%d a_portion=%f M_rate_c2_Led=%d" \
-                                              % (config.betta_rotate, config.betta_mu, config.a_portion,
-                                                 config.M_rate_c2_Led)
+
                         approx_method = accretionColumnService.approx_method
 
                         # ----------------- начало инициализации верхней колонки ------------------------
@@ -105,7 +107,8 @@ if __name__ == '__main__':
                                                                         repeat(theta_accretion_end),
                                                                         repeat(top_column.outer_surface.phi_range),
                                                                         repeat(bot_column.outer_surface.phi_range),
-                                                                        repeat(e_obs)))
+                                                                        repeat(e_obs),
+                                                                        repeat(config.betta_mu)))
 
                             cos_psi_range_final = []
                             for cos_psi in result_cos_psi_range:
@@ -113,9 +116,16 @@ if __name__ == '__main__':
                             surface.cos_psi_range = cos_psi_range_final
                         # ------------------ конец заполнения матриц косинусов ---------------------------
 
-
-
-
+                        # file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
+                        #                                  2: 'bot_outer', 3: 'bot_inner'}
+                        #
+                        # cos_file_folder = 'data/cos/' + config.file_folder_angle + config.file_folder_args
+                        # for key, surface_name in file_name_for_cos_of_surfaces.items():
+                        #     full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
+                        #     for cos_index in range(config.t_max):
+                        #         file_name = 'save_cos_' + surface_name + ('_%d_phase' % cos_index) + '.txt'
+                        #         main_service.save_arr_as_txt(surfaces[key].cos_psi_range[cos_index],
+                        #                                      full_cos_file_folder, file_name)
 
                         # ------------------ начало заполнения массивов светимости -----------------------
                         arr_simps_integrate = [0] * 4

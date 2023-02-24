@@ -164,7 +164,8 @@ if __name__ == '__main__':
                                                                         repeat(theta_accretion_end),
                                                                         repeat(top_column.outer_surface.phi_range),
                                                                         repeat(bot_column.outer_surface.phi_range),
-                                                                        repeat(e_obs)))
+                                                                        repeat(e_obs),
+                                                                        repeat(config.betta_mu)))
 
                             cos_psi_range_final = []
                             for cos_psi in result_cos_psi_range:
@@ -175,15 +176,15 @@ if __name__ == '__main__':
                         time_cos = time.time()
 
                         # попытка сохранять массив косинусов, но там 3 мерный массив из за фазы
-                        file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
-                                                         2: 'bot_outer', 3: 'bot_inner'}
-                        cos_file_folder = 'figs/cos/' + config.file_folder_angle + config.file_folder_args
-                        for key, surface_name in file_name_for_cos_of_surfaces.items():
-                            full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
-                            for cos_index in range(config.t_max):
-                                file_name = 'save_cos_' + surface_name + ('_%d_phase' % cos_index) + '.txt'
-                                main_service.save_arr_as_txt(surfaces[key].cos_psi_range[cos_index],
-                                                             full_cos_file_folder, file_name)
+                        # file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
+                        #                                  2: 'bot_outer', 3: 'bot_inner'}
+                        # cos_file_folder = 'data/cos/' + config.file_folder_angle + config.file_folder_args
+                        # for key, surface_name in file_name_for_cos_of_surfaces.items():
+                        #     full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
+                        #     for cos_index in range(config.t_max):
+                        #         file_name = 'save_cos_' + surface_name + ('_%d_phase' % cos_index) + '.txt'
+                        #         main_service.save_arr_as_txt(surfaces[key].cos_psi_range[cos_index],
+                        #                                      full_cos_file_folder, file_name)
 
                         # ------------------ начало заполнения массивов светимости -----------------------
                         arr_simps_integrate = [0] * 4

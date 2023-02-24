@@ -49,7 +49,7 @@ surfaces = {0: top_column.outer_surface, 1: top_column.inner_surface, 2: bot_col
             3: bot_column.inner_surface}
 
 file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner', 2: 'bot_outer', 3: 'bot_inner'}
-cos_file_folder = 'figs/cos/' + config.file_folder_angle + config.file_folder_args
+cos_file_folder = 'data/cos/' + config.file_folder_angle + config.file_folder_args
 for key, surface_name in file_name_for_cos_of_surfaces.items():
     cos_psi_range_final = []
     full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
