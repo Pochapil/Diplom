@@ -60,6 +60,7 @@ def plot_figs():
                                      y_axis_label=y_axis_label, figure_title=fig_title)
 
     # ------------------------------------nu L_nu(nu) on phase------------------------------------------------
+    x_axis_label = r'$h \nu$' + ' [KeV]'
     phase_index = 0  # индекс фазы для nu_L_nu(nu)
 
     nu_L_nu = [0] * N_energy
