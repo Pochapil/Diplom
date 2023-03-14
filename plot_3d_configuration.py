@@ -639,7 +639,7 @@ def visualise_3d_angles():
         # ax.plot(x, y, z, color='black')
 
         # рисуем arc
-        theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
+        # theta_range = np.arange(0, config.betta_rotate, config.betta_rotate / config.N_theta_accretion)
         # theta_range = np.arange(0, config.obs_i_angle, config.obs_i_angle / config.N_theta_accretion)
 
         x = lim_value * np.sin(theta_range) * 0.9
@@ -759,6 +759,24 @@ def plot_sphere():
 
 
 if __name__ == "__main__":
+    lim_coeff_for_axis = 0.2
+
+    i_angle = 30
+    betta_mu = 60
+
+    mc2 = 10
+    a_portion = 0.65
+    fi_0 = 0
+
+    config.set_e_obs(i_angle, 0)
+    config.set_betta_mu(betta_mu)
+
+    config.M_rate_c2_Led = mc2
+    config.a_portion = a_portion
+    config.phi_accretion_begin_deg = fi_0
+
+    config.update()
+
     working_folder = config.full_file_folder
 
     file_name = "save_phi_range.txt"
