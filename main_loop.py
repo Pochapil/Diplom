@@ -30,12 +30,14 @@ if __name__ == '__main__':
     mc2 = [10, 30, 100]
     a_portion = [0.1, 0.25, 0.65]
     # fi_0 = [20 * i for i in range(1,18)]
-    fi_0 = [300]
+    fi_0 = [280, 360]
     i_angle = [30, 60, 90]
     betta_mu = [0, 30, 60, 90]
+    # i_angle = [30]
+    # betta_mu = [60, 90]
 
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
-    print('to calculate %d loops need about %f hours' % (N_big, 76 * N_big / 3600))
+    print('to calculate %d loops need about %f hours' % (N_big, 57 * N_big / 3600))
 
     for i_angle_index in range(len(i_angle)):
         for betta_mu_index in range(len(betta_mu)):
@@ -317,6 +319,9 @@ if __name__ == '__main__':
                             # ------------------ начало заполнения массивов Spectral Energy -----------------------
                             arr_simps_integrate = [0] * 4
                             sum_simps_integrate = 0
+
+                            freq = accretionColumnService.get_frequency_from_energy(current_energy)
+
                             for key, surface in surfaces.items():
                                 arr_simps_integrate[key] = surface.calculate_L_nu_on_energy(current_energy)
                                 sum_simps_integrate += np.array(arr_simps_integrate[key])
@@ -328,47 +333,35 @@ if __name__ == '__main__':
                             main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/',
                                                          file_name)
 
+                            file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
+                            main_service.save_arr_as_txt(sum_simps_integrate * freq,
+                                                         full_file_folder + 'nu_L_nu/' + 'txt/',
+                                                         file_name)
+
                             data_array[energy_index] = sum_simps_integrate
-                        # ------------------ цикл для Spectrum Distribution ------------------
+
+                            # arr_surf_on_energy = np.append(arr_simps_integrate, [sum_simps_integrate], 0)
+                            # file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % current_energy
+                            # main_service.save_arr_as_txt(arr_surf_on_energy, full_file_folder + folder + 'surfs/',
+                            #                              file_name)
+
+                            # ------------------ цикл для Spectrum Distribution ------------------
 
                         file_name = "PF.txt"
                         main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
+
+                        file_name = "PF.txt"
+                        main_service.save_arr_as_txt(PF, full_file_folder + 'nu_L_nu/', file_name)
 
                         file_name = "L_nu.txt"
                         main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
 
-                        time_calculate_L_nu_on_energy = time.time()
-
-                        # print('Spectral Energy Distribution')
-                        print('nu_L_nu')
-                        PF = [0] * config.N_energy
-                        data_array = [0] * config.N_energy
-                        folder = 'nu_L_nu/'
-                        # ------------------ цикл для Spectral Energy Distribution ------------------
-                        for energy_index in range(config.N_energy):
-                            current_energy = energy_arr[energy_index]
-                            # ------------------ начало заполнения массивов Spectral Energy -----------------------
-                            arr_simps_integrate = [0] * 4
-                            sum_simps_integrate = 0
-                            for key, surface in surfaces.items():
-                                arr_simps_integrate[key] = surface.calculate_nu_L_nu_on_energy(current_energy)
-                                sum_simps_integrate += np.array(arr_simps_integrate[key])
-                            # ------------------ конец заполнения массивов Spectral Energy -----------------------
-
-                            PF[energy_index] = accretionColumnService.get_pulsed_fraction(sum_simps_integrate)
-
-                            file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
-                            main_service.save_arr_as_txt(sum_simps_integrate, full_file_folder + folder + 'txt/',
-                                                         file_name)
-
-                            data_array[energy_index] = sum_simps_integrate
-                        # ------------------ цикл для Spectral Energy Distribution ------------------
-
-                        file_name = "PF.txt"
-                        main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
+                        freq_array = accretionColumnService.get_frequency_from_energy(np.array(energy_arr))
+                        for index_freq in range(len(data_array)):
+                            data_array[index_freq] = data_array[index_freq] * freq_array[index_freq]
 
                         file_name = "nu_L_nu.txt"
-                        main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
+                        main_service.save_arr_as_txt(data_array, full_file_folder + 'nu_L_nu/', file_name)
 
                         # print("execution time of intersections: %f s" % (time_cos - time_start))
                         # print(
