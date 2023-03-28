@@ -262,6 +262,22 @@ class AccretionColumn:
 
             return integrate_sum
 
+        def async_calculate_L_nu_on_energy(self, t_index, energy):
+            frequency = accretionColumnService.get_frequency_from_energy(energy)
+
+            dS_simps = self.create_ds_for_integral()
+            plank_func = accretionColumnService.plank_energy_on_frequency(frequency, self.T_eff)
+
+            integrate_step = [0] * config.N_phi_accretion
+
+            for phi_index in range(config.N_phi_accretion):
+                integrate_step[phi_index] = 4 * np.pi * np.abs(scipy.integrate.simps(
+                    plank_func * np.array(dS_simps) * np.array(
+                        self.cos_psi_range[t_index][phi_index][:]), self.theta_range))
+            integrate_sum = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
+
+            return integrate_sum
+
         def calculate_nu_L_nu_on_energy(self, energy):
             # КэВ
             frequency = accretionColumnService.get_frequency_from_energy(energy)
