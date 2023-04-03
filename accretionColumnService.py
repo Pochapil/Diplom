@@ -35,6 +35,12 @@ def check_if_intersect(origin_phi, origin_theta, direction_vector, ksi_shock, th
     # все нормирую на радиус НЗ
     # r = origin + t * direction - уравнение луча
 
+    if top_column_phi_range[0] - 2 * np.pi > 0:
+        top_column_phi_range = top_column_phi_range - 2 * np.pi
+
+    if bot_column_phi_range[0] - 2 * np.pi > 0:
+        bot_column_phi_range = bot_column_phi_range - 2 * np.pi
+
     r = R_e / config.R_ns * np.sin(origin_theta) ** 2
     # декартовая СК из сферических
     origin_x = np.sin(origin_theta) * np.cos(origin_phi) * r
