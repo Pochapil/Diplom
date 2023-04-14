@@ -21,7 +21,7 @@ plt.style.use(['science', 'notebook', 'grid'])
 mc2 = [10, 30, 100]
 a_portion_arr = [0.1, 0.25, 0.65]
 # a_portion_arr = [0.25]
-fi_0 = [20 * i for i in range(19)]
+fi_0 = [20 * i for i in range(18)]
 # fi_0 = [0, 20, 40, 60, 100, 160, 200, 220, 260, 300]
 i_angle = [10, 20, 30, 40, 60, 90]
 betta_mu = [30, 60, 90]
@@ -68,7 +68,7 @@ fig = plt.figure(figsize=(12, 6))
 ax = fig.add_subplot(111)
 
 # меняем углы
-a_portion = a_portion_arr[1]
+a_portion = a_portion_arr[2]
 M_rate_c2_Led = mc2[1]
 buff_marker = 0
 
@@ -105,12 +105,15 @@ plt.show()
 
 dispersion_arr = np.zeros((len(i_angle), len(betta_mu)))
 mean_arr = np.zeros((len(i_angle), len(betta_mu)))
+max_min = np.zeros((len(i_angle), len(betta_mu)))
 
 for i_angle_index in range(len(i_angle)):
     for betta_mu_index in range(len(betta_mu)):
         dispersion_arr[i_angle_index][betta_mu_index] = np.var(final_final_array[i_angle_index][betta_mu_index]) ** (
-                    1 / 2)
+                1 / 2)
         mean_arr[i_angle_index][betta_mu_index] = np.mean(final_final_array[i_angle_index][betta_mu_index])
+        max_min[i_angle_index][betta_mu_index] = np.max(final_final_array[i_angle_index][betta_mu_index]) - np.min(
+            final_final_array[i_angle_index][betta_mu_index])
 
 _x, _y = np.meshgrid(i_angle, betta_mu)
 x, y = _x.ravel(), _y.ravel()
@@ -118,8 +121,8 @@ x, y = _x.ravel(), _y.ravel()
 dispersion_arr_rev = dispersion_arr.ravel()
 mean_arr_rev = mean_arr.ravel()
 
-print(mean_arr.shape)
-print(mean_arr)
+# print(mean_arr.shape)
+# print(mean_arr)
 # print(dispersion_arr[i_angle_index][betta_mu_index])
 
 
@@ -147,7 +150,6 @@ print(mean_arr)
 # ax1.title.set_text('First Plot')
 
 
-
 fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111)
 
@@ -164,9 +166,6 @@ fig.suptitle(fig_title, fontsize=14)
 
 plt.colorbar(im)
 plt.show()
-
-
-
 
 fig = plt.figure(figsize=(8, 6))
 ax = fig.add_subplot(111)
@@ -185,6 +184,24 @@ fig.suptitle(fig_title, fontsize=14)
 plt.colorbar(im)
 plt.show()
 
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+
+title_dict = {0: 'mean', 1: 'dispersion', 2: 'max - min'}
+data_dict = {0: mean_arr, 1: dispersion_arr, 2: max_min}
+
+for i in range(len(axes)):
+    col_bar = axes[i].pcolormesh(betta_mu, i_angle, data_dict[i])
+
+    axes[i].set_xlabel('betta_mu')
+    axes[i].set_ylabel('i_angle')
+    axes[i].set_title(title_dict[i])
+
+    plt.colorbar(col_bar, ax=axes[i])
+
+fig_title = 'a = %0.2f, mc = %d' % (a_portion, M_rate_c2_Led)
+fig.suptitle(fig_title, fontsize=14)
+
+plt.show()
 
 # меняем долю а
 M_rate_c2_Led = mc2[2]
