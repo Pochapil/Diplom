@@ -3,6 +3,7 @@ import multiprocessing as mp
 from itertools import repeat
 import time
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import geometricTask.matrix as matrix
 import config
@@ -23,8 +24,8 @@ a_portion_arr = [0.1, 0.25, 0.65]
 # a_portion_arr = [0.25]
 fi_0 = [20 * i for i in range(18)]
 # fi_0 = [0, 20, 40, 60, 100, 160, 200, 220, 260, 300]
-i_angle = [10, 20, 30, 40, 60, 90]
-betta_mu = [30, 60, 90]
+i_angle = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+betta_mu = [10, 20, 30, 40, 50, 60, 70, 80, 90]
 # betta_mu = [30]
 
 obs_i_angle_deg = i_angle[0]
@@ -73,6 +74,11 @@ M_rate_c2_Led = mc2[1]
 buff_marker = 0
 
 final_final_array = np.zeros((len(i_angle), len(betta_mu), len(fi_0)))
+
+bins_size = 6
+bins_arr = np.zeros((len(i_angle), len(betta_mu), bins_size))
+position_in_bins_arr = np.zeros((len(i_angle), len(betta_mu), len(fi_0)))
+
 for i_angle_index in range(len(i_angle)):
     for betta_mu_index in range(len(betta_mu)):
         final_array = []
@@ -92,16 +98,61 @@ for i_angle_index in range(len(i_angle)):
 
             label = 'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
 
+        bins_arr[i_angle_index][betta_mu_index] = np.linspace(min(final_array), max(final_array), bins_size)
+        position_in_bins_arr[i_angle_index][betta_mu_index] = np.digitize(final_array,
+                                                                          bins_arr[i_angle_index][betta_mu_index])
+
         final_final_array[i_angle_index][betta_mu_index] = final_array
         marker = marker_dict[buff_marker % 4]
         buff_marker += 1
         ax.plot(fi_0, final_array, label=label, marker=marker)
 
-plt.legend(ncol=3, fontsize=10, framealpha=0.2)
+# plt.legend(ncol=3, fontsize=10, framealpha=0.2)
 plt.show()
 
-# print(final_array)
+bar_flag = False
 
+if bar_flag:
+    for i_angle_index in range(len(i_angle)):
+        for betta_mu_index in range(len(betta_mu)):
+
+            obs_i_angle_deg = i_angle[i_angle_index]
+            betta_mu_deg = betta_mu[betta_mu_index]
+
+            bins_dict = dict((i, 0) for i in range(1, bins_size + 1))
+
+            unique, counts = np.unique(position_in_bins_arr[i_angle_index][betta_mu_index], return_counts=True)
+            count_bins = dict(zip(unique, counts))
+
+            for key, value in count_bins.items():
+                bins_dict[key] = count_bins[key]
+
+            count_bins = bins_dict
+
+            count_bins[len(count_bins) - 1] = count_bins[len(count_bins) - 1] + count_bins[len(count_bins)]
+
+            labels_arr = []
+            for i in range(1, len(bins_arr[i_angle_index][betta_mu_index])):
+                labels_arr.append('%0.3f - %0.3f' % (
+                    bins_arr[i_angle_index][betta_mu_index][i - 1], bins_arr[i_angle_index][betta_mu_index][i]))
+
+            # fig = plt.figure(figsize=(8, 6))
+
+            plt.bar(range(len(count_bins) - 1), list(count_bins.values())[:-1], align='center', edgecolor='black')
+            plt.xticks(range(len(count_bins) - 1), labels_arr, fontsize=12)
+
+            plt.xlabel('PF')
+            plt.ylabel('N')
+
+            plt.title('i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led))
+
+            save_folder = 'figs/bars/mc2=%d/a=%0.2f/' % (M_rate_c2_Led, a_portion)
+            save_file_name = 'i=%d betta_mu=%d bar.png' % (obs_i_angle_deg, betta_mu_deg)
+
+            main_service.create_file_path(save_folder)
+            plt.savefig(save_folder + save_file_name)
+
+            plt.cla()
 
 dispersion_arr = np.zeros((len(i_angle), len(betta_mu)))
 mean_arr = np.zeros((len(i_angle), len(betta_mu)))
@@ -115,80 +166,45 @@ for i_angle_index in range(len(i_angle)):
         max_min[i_angle_index][betta_mu_index] = np.max(final_final_array[i_angle_index][betta_mu_index]) - np.min(
             final_final_array[i_angle_index][betta_mu_index])
 
-_x, _y = np.meshgrid(i_angle, betta_mu)
-x, y = _x.ravel(), _y.ravel()
-
-dispersion_arr_rev = dispersion_arr.ravel()
-mean_arr_rev = mean_arr.ravel()
-
-# print(mean_arr.shape)
-# print(mean_arr)
-# print(dispersion_arr[i_angle_index][betta_mu_index])
-
-
-# fig = plt.figure(figsize=(12, 6))
-# ax1 = fig.add_subplot(121, projection='3d')
-# ax2 = fig.add_subplot(122, projection='3d')
+# fig = plt.figure(figsize=(8, 6))
+# ax = fig.add_subplot(111)
 #
-# ax1.bar3d(x, y, np.zeros_like(mean_arr_rev), 5, 5, mean_arr_rev, shade=True)
-# ax1.set_title('mean')
-# ax1.set_xlabel('i_angle')
-# ax1.set_ylabel('betta_mu')
+# im = ax.pcolormesh(betta_mu, i_angle, mean_arr)
 #
-# ax2.bar3d(x, y, np.zeros_like(dispersion_arr_rev), 5, 5, dispersion_arr_rev, shade=True)
-# ax2.set_title('dispersion')
-# ax2.set_xlabel('i_angle')
-# ax2.set_ylabel('betta_mu')
+# x_axis_label = 'betta_mu'
+# y_axis_label = 'i_angle'
 #
+# ax.set_xlabel(x_axis_label, fontsize=24)
+# ax.set_ylabel(y_axis_label, fontsize=24)
+#
+# fig_title = 'mean'
+# fig.suptitle(fig_title, fontsize=14)
+#
+# plt.colorbar(im)
 # plt.show()
-
-# fig, axes = plt.subplots(2, 1, figsize=(12, 6))
 #
-# ax1 = axes[0]
-# ax2 = axes[1]
+# fig = plt.figure(figsize=(8, 6))
+# ax = fig.add_subplot(111)
 #
-# ax1.title.set_text('First Plot')
-
-
-fig = plt.figure(figsize=(8, 6))
-ax = fig.add_subplot(111)
-
-im = ax.pcolormesh(betta_mu, i_angle, mean_arr)
-
-x_axis_label = 'betta_mu'
-y_axis_label = 'i_angle'
-
-ax.set_xlabel(x_axis_label, fontsize=24)
-ax.set_ylabel(y_axis_label, fontsize=24)
-
-fig_title = 'mean'
-fig.suptitle(fig_title, fontsize=14)
-
-plt.colorbar(im)
-plt.show()
-
-fig = plt.figure(figsize=(8, 6))
-ax = fig.add_subplot(111)
-
-im = ax.pcolormesh(betta_mu, i_angle, dispersion_arr)
-
-x_axis_label = 'betta_mu'
-y_axis_label = 'i_angle'
-
-ax.set_xlabel(x_axis_label, fontsize=24)
-ax.set_ylabel(y_axis_label, fontsize=24)
-
-fig_title = 'dispersion'
-fig.suptitle(fig_title, fontsize=14)
-
-plt.colorbar(im)
-plt.show()
-
-fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+# im = ax.pcolormesh(betta_mu, i_angle, dispersion_arr)
+#
+# x_axis_label = 'betta_mu'
+# y_axis_label = 'i_angle'
+#
+# ax.set_xlabel(x_axis_label, fontsize=24)
+# ax.set_ylabel(y_axis_label, fontsize=24)
+#
+# fig_title = 'dispersion'
+# fig.suptitle(fig_title, fontsize=14)
+#
+# plt.colorbar(im)
+# plt.show()
+#
 
 title_dict = {0: 'mean', 1: 'dispersion', 2: 'max - min'}
 data_dict = {0: mean_arr, 1: dispersion_arr, 2: max_min}
 
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))
 for i in range(len(axes)):
     col_bar = axes[i].pcolormesh(betta_mu, i_angle, data_dict[i])
 
@@ -199,62 +215,114 @@ for i in range(len(axes)):
     plt.colorbar(col_bar, ax=axes[i])
 
 fig_title = 'a = %0.2f, mc = %d' % (a_portion, M_rate_c2_Led)
+
+# plt.subplots_adjust(hspace=0.5)
+
 fig.suptitle(fig_title, fontsize=14)
+fig.tight_layout()
+# plt.show()
 
-plt.show()
+save_folder = 'figs/colormesh/mc2=%d/a=%0.2f/' % (M_rate_c2_Led, a_portion)
+save_file_name = 'colormesh_fig.png'
+main_service.save_figure(fig, save_folder, save_file_name)
 
-# меняем долю а
-M_rate_c2_Led = mc2[2]
-obs_i_angle_deg = 30
-betta_mu_deg = 60
+fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+for i in range(2, len(axes)):
+    col_bar = axes[i].pcolormesh(betta_mu, i_angle, data_dict[i])
 
-fig = plt.figure(figsize=(12, 6))
-ax = fig.add_subplot(111)
-buff_marker = 0
-for a_index in range(len(a_portion_arr)):
-    final_array = []
-    for i in range(len(fi_0)):
-        a_portion = a_portion_arr[a_index]
-        phi_accretion_begin_deg = fi_0[i]
+    axes[i].set_xlabel('betta_mu')
+    axes[i].set_ylabel('i_angle')
+    axes[i].set_title(title_dict[i])
 
-        full_file_folder = get_folder()
-        working_folder = full_file_folder + folder
+    plt.colorbar(col_bar, ax=axes[i])
 
-        PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
-        final_array.append(PF_array[energy_index])
+fig_title = 'a = %0.2f, mc = %d' % (a_portion, M_rate_c2_Led)
+fig.suptitle(fig_title, fontsize=14)
+fig.tight_layout()
 
-        label = 'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
-        buff_marker += 1
+max_value_mean = 0.7
+min_value_mean = 0.1
 
-    ax.plot(fi_0, final_array, label=label)
+col_bar = axes[0].pcolormesh(betta_mu, i_angle, data_dict[0], vmax=max_value_mean, vmin=min_value_mean)
+axes[0].set_xlabel('betta_mu')
+axes[0].set_ylabel('i_angle')
+axes[0].set_title(title_dict[0])
+plt.colorbar(col_bar, ax=axes[0])
 
-plt.legend(ncol=3, fontsize=10, framealpha=0.2)
-plt.show()
+max_value_disp = 0.2
+min_value_disp = 0.02
 
-# меняем mc
-a_portion = a_portion_arr[2]
-obs_i_angle_deg = 30
-betta_mu_deg = 60
+col_bar = axes[1].pcolormesh(betta_mu, i_angle, data_dict[1], vmax=max_value_disp, vmin=min_value_disp)
+axes[1].set_xlabel('betta_mu')
+axes[1].set_ylabel('i_angle')
+axes[1].set_title(title_dict[1])
+plt.colorbar(col_bar, ax=axes[1])
 
-fig = plt.figure(figsize=(12, 6))
-ax = fig.add_subplot(111)
-buff_marker = 0
-for mc_index in range(len(mc2)):
-    final_array = []
-    for i in range(len(fi_0)):
-        M_rate_c2_Led = mc2[mc_index]
-        phi_accretion_begin_deg = fi_0[i]
+# plt.show()
 
-        full_file_folder = get_folder()
-        working_folder = full_file_folder + folder
+save_file_name = 'colormesh_fig_fixed.png'
+main_service.save_figure(fig, save_folder, save_file_name)
 
-        PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
-        final_array.append(PF_array[energy_index])
+with open(full_file_folder + 'save_values.txt') as f:
+    lines = f.readlines()
+    print(lines[3][12:20])
+    print(lines[3][27:29])
+    print(lines)
 
-        label = 'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
-        buff_marker += 1
+flag_next = False
+if flag_next:
+    # меняем долю а
+    M_rate_c2_Led = mc2[2]
+    obs_i_angle_deg = 30
+    betta_mu_deg = 60
 
-    ax.plot(fi_0, final_array, label=label)
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(111)
+    buff_marker = 0
+    for a_index in range(len(a_portion_arr)):
+        final_array = []
+        for i in range(len(fi_0)):
+            a_portion = a_portion_arr[a_index]
+            phi_accretion_begin_deg = fi_0[i]
 
-plt.legend(ncol=3, fontsize=10, framealpha=0.2)
-plt.show()
+            full_file_folder = get_folder()
+            working_folder = full_file_folder + folder
+
+            PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+            final_array.append(PF_array[energy_index])
+
+            label = 'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
+            buff_marker += 1
+
+        ax.plot(fi_0, final_array, label=label)
+
+    plt.legend(ncol=3, fontsize=10, framealpha=0.2)
+    plt.show()
+
+    # меняем mc
+    a_portion = a_portion_arr[2]
+    obs_i_angle_deg = 30
+    betta_mu_deg = 60
+
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(111)
+    buff_marker = 0
+    for mc_index in range(len(mc2)):
+        final_array = []
+        for i in range(len(fi_0)):
+            M_rate_c2_Led = mc2[mc_index]
+            phi_accretion_begin_deg = fi_0[i]
+
+            full_file_folder = get_folder()
+            working_folder = full_file_folder + folder
+
+            PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+            final_array.append(PF_array[energy_index])
+
+            label = 'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
+            buff_marker += 1
+
+        ax.plot(fi_0, final_array, label=label)
+
+    plt.legend(ncol=3, fontsize=10, framealpha=0.2)
+    plt.show()
