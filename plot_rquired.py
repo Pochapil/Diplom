@@ -166,6 +166,86 @@ for i_angle_index in range(len(i_angle)):
         max_min[i_angle_index][betta_mu_index] = np.max(final_final_array[i_angle_index][betta_mu_index]) - np.min(
             final_final_array[i_angle_index][betta_mu_index])
 
+'''считываю L_iso'''
+
+L_iso_data_dict = {}
+
+for i_angle_index in range(len(i_angle)):
+    for betta_mu_index in range(len(betta_mu)):
+        obs_i_angle_deg = i_angle[i_angle_index]
+        betta_mu_deg = betta_mu[betta_mu_index]
+
+        full_file_folder = get_folder()
+
+        with open(full_file_folder + 'save_values.txt') as f:
+            lines = f.readlines()
+            # print(lines[3][12:20])
+            # print(lines[3][27:29])
+            # print(lines)
+
+            L_sio = float(lines[3][12:20]) * 10 ** float(lines[3][27:29])
+            print(L_sio)
+
+        L_iso_data_dict[L_sio] = mean_arr[i_angle_index][betta_mu_index]
+
+print(L_iso_data_dict)
+lists = sorted(L_iso_data_dict.items())  # sorted by key, return a list of tuples
+x, y = zip(*lists)  # unpack a list of pairs into two tuples
+plt.plot(x, y)
+plt.show()
+
+'''L_nu'''
+
+L_nu_flag = False
+L_nu_array_index = 0
+
+if L_nu_flag:
+    L_nu_data_dict = {}
+
+    file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % energy_array[energy_index]
+    folder = 'nu_L_nu/txt/'
+    for a_index in range(1, len(a_portion_arr)):
+        for mc_index in range(1, len(mc2)):
+            for i_angle_index in range(len(i_angle)):
+                for betta_mu_index in range(len(betta_mu)):
+                    for i in range(len(fi_0)):
+                        a_portion = a_portion_arr[a_index]
+                        M_rate_c2_Led = mc2[mc_index]
+
+                        obs_i_angle_deg = i_angle[i_angle_index]
+                        betta_mu_deg = betta_mu[betta_mu_index]
+
+                        phi_accretion_begin_deg = fi_0[i]
+
+
+
+                        full_file_folder = get_folder()
+
+                        L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+
+                        L_nu_data_dict[L_nu_array[L_nu_array_index]] = final_final_array[i_angle_index][betta_mu_index][i]
+
+                    # print(L_nu_data_dict)
+                    lists = sorted(L_nu_data_dict.items())  # sorted by key, return a list of tuples
+                    x, y = zip(*lists)  # unpack a list of pairs into two tuples
+                    plt.plot(x, y, color='black')
+
+                    plt.xlabel(r'$L_{\nu}$')
+                    plt.ylabel('PF')
+
+                    plt.title(
+                        'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led))
+
+                    save_folder = 'figs/PF_to_L_nu/mc2=%d/a=%0.2f/' % (M_rate_c2_Led, a_portion)
+                    save_file_name = 'i=%d betta_mu=%d PF_to_L_nu.png' % (obs_i_angle_deg, betta_mu_deg)
+
+                    main_service.create_file_path(save_folder)
+                    plt.savefig(save_folder + save_file_name)
+
+                    plt.cla()
+
+                    # plt.show()
+
 # fig = plt.figure(figsize=(8, 6))
 # ax = fig.add_subplot(111)
 #
@@ -200,6 +280,8 @@ for i_angle_index in range(len(i_angle)):
 # plt.colorbar(im)
 # plt.show()
 #
+
+''' Дисперсия среднне и max - min colormesh '''
 
 title_dict = {0: 'mean', 1: 'dispersion', 2: 'max - min'}
 data_dict = {0: mean_arr, 1: dispersion_arr, 2: max_min}
@@ -262,12 +344,7 @@ plt.colorbar(col_bar, ax=axes[1])
 
 save_file_name = 'colormesh_fig_fixed.png'
 main_service.save_figure(fig, save_folder, save_file_name)
-
-with open(full_file_folder + 'save_values.txt') as f:
-    lines = f.readlines()
-    print(lines[3][12:20])
-    print(lines[3][27:29])
-    print(lines)
+# ---------------------------------------------------------------------------------------------------
 
 flag_next = False
 if flag_next:
