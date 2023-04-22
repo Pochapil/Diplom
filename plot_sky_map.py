@@ -5,11 +5,14 @@ import matplotlib.pyplot as plt
 import main_service
 
 
-
-
 def plot_save_sky_map(obs_i_angle_arr):
     file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
     working_folder = file_folder + config.file_folder_args
+
+    print('beta_mu=%d' % config.betta_mu_deg)
+
+    title = 'beta_mu=%d mc2=%d a=%0.2f fi_0=%d' % (
+        config.betta_mu_deg, config.M_rate_c2_Led, config.a_portion, config.phi_accretion_begin_deg)
 
     file_name = "L_x.txt"
     L_x = main_service.load_arr_from_txt(working_folder, file_name)
@@ -33,13 +36,13 @@ def plot_save_sky_map(obs_i_angle_arr):
 
     im = ax.pcolormesh(phase, obs_i_angle_arr, data_to_plot)
 
-    x_axis_label = 'Phase'
-    y_axis_label = r'$i_{obs}$'
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$\theta_{obs}$'
 
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
 
-    fig_title = 'L_iso/L_x'
+    fig_title = r'$L_{iso}/L_{x}$ ' + title
     fig.suptitle(fig_title, fontsize=14)
 
     plt.colorbar(im)
@@ -51,6 +54,9 @@ def plot_save_sky_map(obs_i_angle_arr):
 def plot_save_sky_map_contour(obs_i_angle_arr):
     file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
     working_folder = file_folder + config.file_folder_args
+
+    title = 'beta_mu=%d mc2=%d a=%0.2f fi_0=%d' % (
+        config.betta_mu_deg, config.M_rate_c2_Led, config.a_portion, config.phi_accretion_begin_deg)
 
     file_name = "L_x.txt"
     L_x = main_service.load_arr_from_txt(working_folder, file_name)
@@ -75,14 +81,17 @@ def plot_save_sky_map_contour(obs_i_angle_arr):
     im = ax.contourf(phase, obs_i_angle_arr, data_to_plot, levels=30)
     # cmap = 'cividis', cmap='Spectral', cmap='Spectral_r'
 
-    x_axis_label = 'Phase'
-    y_axis_label = r'$i_{obs}$'
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$\theta_{obs}$'
 
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
 
     # fig_title = 'L_iso/L_x'
-    #fig.suptitle(fig_title, fontsize=14)
+    # fig.suptitle(fig_title, fontsize=14)
+
+    fig_title = r'$L_{iso}/L_{x}$ ' + title
+    fig.suptitle(fig_title, fontsize=14)
 
     plt.colorbar(im)
 
@@ -91,6 +100,25 @@ def plot_save_sky_map_contour(obs_i_angle_arr):
 
 
 if __name__ == '__main__':
+
+    mc2 = [30]
+    a_portion = [0.25]
+    fi_0 = [0]
+    betta_mu = [10]
+
     obs_i_angle_arr = np.linspace(0, 180, 19)
-    plot_save_sky_map(obs_i_angle_arr)
-    plot_save_sky_map_contour(obs_i_angle_arr)
+
+    for betta_mu_index in range(len(betta_mu)):
+        for mc_index in range(len(mc2)):
+            for j in range(len(a_portion)):
+                for k in range(len(fi_0)):
+                    config.set_betta_mu(betta_mu[betta_mu_index])
+
+                    config.M_rate_c2_Led = mc2[mc_index]
+                    config.a_portion = a_portion[j]
+                    config.phi_accretion_begin_deg = fi_0[k]
+
+                    config.update()
+
+                    plot_save_sky_map(obs_i_angle_arr)
+                    plot_save_sky_map_contour(obs_i_angle_arr)
