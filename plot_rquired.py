@@ -32,7 +32,6 @@ betta_mu = [10, 20, 30, 40, 50, 60, 70, 80, 90]
 i_angle = [60]
 betta_mu = [30]
 
-
 obs_i_angle_deg = i_angle[0]
 betta_mu_deg = betta_mu[0]
 M_rate_c2_Led = mc2[1]
@@ -44,7 +43,9 @@ bar_flag = False  # mean disp max-min
 L_iso_flag = False  # PF(L_*) - там только 1 значение у L_* т.к. зависит только от m, a и не зависит от phi_0
 L_nu_iso_flag = False  # L_nu(phase, fi_0)
 flag_next = False  # фиксируем углы, меняем m или a
-L_nu_avg_on_fi_flag = False # L_nu_avg_on_phase(fi_0)
+L_nu_avg_on_fi_flag = False  # L_nu_avg_on_phase(fi_0)
+mean_disp_flag = False  # отрисовать mean,disp,max-min
+
 
 def get_folder():
     file_folder = 'figs/loop/'
@@ -192,6 +193,81 @@ for a_index in range(len(a_portion_arr)):
                 max_min[a_index][mc_index][i_angle_index][betta_mu_index] = np.max(
                     final_final_array[a_index][mc_index][i_angle_index][betta_mu_index]) - np.min(
                     final_final_array[a_index][mc_index][i_angle_index][betta_mu_index])
+
+''' Дисперсия среднне и max - min colormesh '''
+
+if mean_disp_flag:
+
+    title_dict = {0: 'mean', 1: r'$\sigma = \sqrt{D[X]}$', 2: 'max - min'}
+    data_dict = {0: mean_arr, 1: dispersion_arr, 2: max_min}
+
+    for a_index in range(len(a_portion_arr)):
+        for mc_index in range(len(mc2)):
+
+            a_portion = a_portion_arr[a_index]
+            M_rate_c2_Led = mc2[mc_index]
+
+            fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+            for i in range(len(axes)):
+                col_bar = axes[i].pcolormesh(betta_mu, i_angle, data_dict[i][a_index][mc_index])
+
+                axes[i].set_xlabel('betta_mu')
+                axes[i].set_ylabel('i_angle')
+                axes[i].set_title(title_dict[i])
+
+                plt.colorbar(col_bar, ax=axes[i])
+
+            fig_title = 'a = %0.2f, mc = %d' % (a_portion, M_rate_c2_Led)
+
+            # plt.subplots_adjust(hspace=0.5)
+
+            fig.suptitle(fig_title, fontsize=14)
+            fig.tight_layout()
+            # plt.show()
+
+            save_folder = 'figs/colormesh_mean_disp/mc2=%d/a=%0.2f/' % (M_rate_c2_Led, a_portion)
+            save_file_name = 'colormesh_mean_disp_fig.png'
+            main_service.save_figure(fig, save_folder, save_file_name)
+
+            fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+            for i in range(2, len(axes)):
+                col_bar = axes[i].pcolormesh(betta_mu, i_angle, data_dict[i][a_index][mc_index])
+
+                axes[i].set_xlabel('betta_mu')
+                axes[i].set_ylabel('i_angle')
+                axes[i].set_title(title_dict[i])
+
+                plt.colorbar(col_bar, ax=axes[i])
+
+            fig_title = 'a = %0.2f, mc = %d' % (a_portion, M_rate_c2_Led)
+            fig.suptitle(fig_title, fontsize=14)
+            fig.tight_layout()
+
+            max_value_mean = 0.7
+            min_value_mean = 0.1
+
+            col_bar = axes[0].pcolormesh(betta_mu, i_angle, data_dict[0][a_index][mc_index], vmax=max_value_mean,
+                                         vmin=min_value_mean)
+            axes[0].set_xlabel('betta_mu')
+            axes[0].set_ylabel('i_angle')
+            axes[0].set_title(title_dict[0])
+            plt.colorbar(col_bar, ax=axes[0])
+
+            max_value_disp = 0.2
+            min_value_disp = 0.02
+
+            col_bar = axes[1].pcolormesh(betta_mu, i_angle, data_dict[1][a_index][mc_index], vmax=max_value_disp,
+                                         vmin=min_value_disp)
+            axes[1].set_xlabel('betta_mu')
+            axes[1].set_ylabel('i_angle')
+            axes[1].set_title(title_dict[1])
+            plt.colorbar(col_bar, ax=axes[1])
+
+            # plt.show()
+
+            save_file_name = 'colormesh_mean_disp_fig_fixed.png'
+            main_service.save_figure(fig, save_folder, save_file_name)
+            # ---------------------------------------------------------------------------------------------------
 
 '''считываю L_iso'''
 
@@ -362,7 +438,6 @@ if L_nu_iso_flag:
                     fig.suptitle(figure_title, fontsize=16)
 
                     main_service.save_figure(fig, save_folder, save_file_name)
-
 
 if L_nu_avg_on_fi_flag:
 
