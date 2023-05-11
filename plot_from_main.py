@@ -21,7 +21,11 @@ def plot_figs():
         arr_to_plt[i] = main_service.extend_arr_for_phase(data_array[i])
 
     labels_arr = [r'$top_{pol}$', r'$top_{eq}$', r'$bottom_{pol}$', r'$bottom_{eq}$', 'sum']
-    fig_title = 'total luminosity of surfaces'
+    # fig_title = 'total luminosity of surfaces'
+    fig_title = r'$\theta{obs}$' + ('=%d' % config.obs_i_angle_deg) + (r'$^\circ$') + ' ' + (r'$\beta_{\mu}$') + \
+                ('=%d' % config.betta_mu_deg) + (r'$^\circ$') + ' ' + ('a=%0.2f ' % config.a_portion) + \
+                (r'$\dot{m}$') + ('=%d ' % config.M_rate_c2_Led) + (r'$\phi_0$') + \
+                ('=%d' % config.phi_accretion_begin_deg) + (r'$^\circ$')
     # fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr, x_axis_label='Phase',
     #                                  y_axis_label=r'$Luminosity \: [erg/s]$', figure_title=fig_title)
 
@@ -39,8 +43,8 @@ def plot_figs():
     i += 1
     ax.plot(phi_for_plot, arr_to_plt[i], label=labels_arr[i], color='black')
 
-    x_axis_label = 'Phase'
-    y_axis_label = 'L [erg/s]'
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$L_{\rm{iso}}$' + ' [erg/s]'
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
 
@@ -49,6 +53,7 @@ def plot_figs():
     # ax.set_xlabel('Phase', fontsize=24)
     # ax.set_ylabel('L [erg/s]', fontsize=24)
 
+    #fig.suptitle(fig_title, fontsize=24)
     ax.legend()
 
     file_name = 'total_luminosity_of_surfaces.png'
@@ -80,8 +85,7 @@ def plot_figs():
     theta_range = main_service.load_arr_from_txt(working_folder, file_name)
 
     fig = main_service.create_figure(theta_range, data_array[0], x_axis_label=r'$\theta$',
-                                     y_axis_label=r'$T_{eff} \: [K]$',
-                                     figure_title=r'$T_{eff}$', is_y_2d=False)
+                                     y_axis_label=r'$T_{eff} \: [K]$', is_y_2d=False)
     file_name = 'T_eff.png'
     main_service.save_figure(fig, working_folder, file_name)
 
