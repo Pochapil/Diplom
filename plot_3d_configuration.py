@@ -342,6 +342,8 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     ax.set_ylim([-lim_value, lim_value])
     ax.set_zlim([-lim_value, lim_value])
 
+    ax.set_aspect("equal")
+
     phase = 0
     e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * grad_to_rad,
@@ -387,14 +389,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
                                       np.cos(-config.betta_mu_deg)])
 
         A_inverse = np.linalg.inv(A_matrix_analytic)
-
-        omega = np.dot(A_inverse, i_vector_in_mu_sk)  # переход в магнитную СК
-
-        azimuth_1, elevation_1 = vectors.get_angles_from_vector(omega)
-
-        omega_vector = [omega[0, 0], omega[0, 1], omega[0, 2]]
-
-        e_obs_0 = np.dot(A_inverse, config.e_obs)
+        omega = np.dot(A_inverse, i_vector_in_mu_sk)  # переход обратно в omega СК
 
         A_inverse_matrix = matrix.newRy(-config.betta_mu)
 
@@ -413,6 +408,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
         omega_vector = [np.sin(-betta_mu * grad_to_rad) * np.cos(0),
                         np.sin(-betta_mu * grad_to_rad) * np.sin(0),
                         np.cos(-betta_mu * grad_to_rad)]
+
         view_plane_normal = np.array(view_plane_normal)
         omega_vector = np.array(omega_vector)
 
@@ -432,6 +428,8 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
         # print(np.dot(omega_projection_on_view_plane, mu_projection_on_view_plane))
         if phase % 180 == 0:
             roll_angle = 0
+            if i_angle < betta_mu and phase % 360== 0:
+                roll_angle = 180
         else:
             roll_angle = -np.arccos(np.dot(omega_projection_on_view_plane, mu_projection_on_view_plane) / (
                     np.linalg.norm(omega_projection_on_view_plane) * np.linalg.norm(
@@ -439,7 +437,6 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
 
         if phase > 180 and phase < 360 or phase > 540:
             roll_angle = - roll_angle
-
 
         x1_vec = [np.sin(90 * grad_to_rad) * np.cos(0),
                   np.sin(90 * grad_to_rad) * np.sin(0),
@@ -480,6 +477,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
         # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
         # ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
 
+        # roll angle добавил
         ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad, roll=roll_angle)
         # ax.view_init(0, phase, roll=config.betta_mu_deg)
 
@@ -859,6 +857,23 @@ def plot_sphere():
     plt.show()
 
 
+def visualise_3d_star(phi_range_column, theta_range_column):
+    # fig, ax = plt.subplots()
+    lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
+    grad_to_rad = np.pi / 180
+
+    fig = plt.figure(figsize=(8, 8))
+    ax = plt.axes(projection='3d')
+
+    N_phi_accretion = len(phi_range_column)
+    N_theta_accretion = len(theta_range_column)
+
+    # рисуем звезду
+    plot_NS(ax)
+
+    plt.show()
+
+
 if __name__ == "__main__":
 
     gif_flag = False
@@ -898,6 +913,7 @@ if __name__ == "__main__":
     if gif_flag:
         create_gif(phi_range_column, theta_range_column)
 
+    # visualise_3d_star(phi_range_column, theta_range_column)
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
     visualise_3d_configuration(phi_range_column, theta_range_column)
 

@@ -53,7 +53,7 @@ def plot_figs():
     # ax.set_xlabel('Phase', fontsize=24)
     # ax.set_ylabel('L [erg/s]', fontsize=24)
 
-    #fig.suptitle(fig_title, fontsize=24)
+    # fig.suptitle(fig_title, fontsize=24)
     ax.legend()
 
     file_name = 'total_luminosity_of_surfaces.png'
@@ -84,8 +84,19 @@ def plot_figs():
     file_name = "save_theta_range.txt"
     theta_range = main_service.load_arr_from_txt(working_folder, file_name)
 
-    fig = main_service.create_figure(theta_range, data_array[0], x_axis_label=r'$\theta$',
+    with open(working_folder + 'save_values.txt') as f:
+        lines = f.readlines()
+        R_e = float(lines[0][6:-1])
+
+    ksi = R_e * (np.sin(theta_range)) ** 2
+    # print(ksi)
+
+    fig = main_service.create_figure(ksi, data_array[0], x_axis_label=r'$\xi$',
                                      y_axis_label=r'$T_{eff} \: [K]$', is_y_2d=False)
+
+
+    # fig = main_service.create_figure(theta_range, data_array[0], x_axis_label=r'$\theta$',
+    #                                  y_axis_label=r'$T_{eff} \: [K]$', is_y_2d=False)
     file_name = 'T_eff.png'
     main_service.save_figure(fig, working_folder, file_name)
 
