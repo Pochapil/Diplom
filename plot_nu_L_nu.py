@@ -15,7 +15,7 @@ def plot_figs():
 
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
-    x_axis_label = 'Phase'
+    x_axis_label = r'$\Phi$'
     y_axis_label = r'$\nu \cdot L_{\nu} \: [erg/s]$'
     # -------------------------------------------------------------------------------------------
     file_name = "PF.txt"
@@ -25,7 +25,7 @@ def plot_figs():
     energy_arr = main_service.load_arr_from_txt(config.full_file_folder, file_name)
     N_energy = config.N_energy
 
-    fig = main_service.create_figure(energy_arr, PF, x_axis_label='Phase', y_axis_label='PF', is_y_2d=False)
+    fig = main_service.create_figure(energy_arr, PF, x_axis_label=r'$\Phi$', y_axis_label='PF', is_y_2d=False)
 
     file_name = "PF.png"
     main_service.save_figure(fig, working_folder, file_name)
@@ -123,7 +123,7 @@ def plot_figs():
     # plt.xlabel('phase')
     # plt.ylabel('luminosity [erg/s]')
     plt.rc('font', size=24)
-    fig.text(0.5, 0.07, 'Phase', ha='center')
+    fig.text(0.5, 0.07, r'$\Phi$', ha='center')
     fig.text(0.06, 0.5, r'$\nu \cdot L_{\nu} \: [erg/s]$', va='center', rotation='vertical')
     file_name = 'pretty_fig.png'
     main_service.save_figure(fig, working_folder, file_name)
@@ -170,7 +170,7 @@ def plot_figs():
 
     im = ax.pcolormesh(phase, energy_arr, data_to_plot)
 
-    x_axis_label = 'Phase'
+    x_axis_label = r'$\Phi$'
     y_axis_label = r'$h \nu$' + ' [KeV]'
 
     ax.set_xlabel(x_axis_label, fontsize=24)
