@@ -13,6 +13,56 @@ import vectors
 lim_coeff_for_axis = 0.15
 
 
+def get_projection_on_vector(input_vector, project_vector):
+    return np.dot(input_vector, project_vector) * project_vector / (np.linalg.norm(project_vector)) ** 2
+
+
+def get_projection_on_surface(input_vector, surface_norm_vector):
+    projection_on_norm = get_projection_on_vector(input_vector, surface_norm_vector)
+    return input_vector - projection_on_norm
+
+
+def get_roll_angle(first_vector, second_vector, phase):
+    if phase % 180 == 0:
+        roll_angle = 0
+        if i_angle < betta_mu and phase % 360 == 0:
+            roll_angle = 180
+    else:
+        roll_angle = -np.arccos(np.dot(first_vector, second_vector) / (
+                np.linalg.norm(first_vector) * np.linalg.norm(second_vector))) / config.grad_to_rad
+
+    if phase > 180 and phase < 360 or phase > 540:
+        roll_angle = - roll_angle
+
+    return roll_angle
+
+
+def calculate_roll_angle(e_obs_mu, phase):
+    '''надо достать угол между проекциями mu и omega на картинную плоскость - чтобы повернуть картинную плоскость
+    на этот угол и перевести в СК связанную с omega'''
+    view_plane_normal = [e_obs_mu[0, 0], e_obs_mu[0, 1], e_obs_mu[0, 2]]  # x,y,z
+    omega_vector = [np.sin(-betta_mu * config.grad_to_rad) * np.cos(0),
+                    np.sin(-betta_mu * config.grad_to_rad) * np.sin(0),
+                    np.cos(-betta_mu * config.grad_to_rad)]
+
+    view_plane_normal = np.array(view_plane_normal)
+    omega_vector = np.array(omega_vector)
+
+    # беру проекцию на картинную плоскость, оттуда достаю угол.
+    omega_projection_on_view_plane = get_projection_on_surface(omega_vector, view_plane_normal)
+    mu_projection_on_view_plane = get_projection_on_surface(np.array([0, 0, 1]), view_plane_normal)
+
+    roll_angle = get_roll_angle(omega_projection_on_view_plane, mu_projection_on_view_plane, phase)
+
+    return roll_angle
+
+def lim_axes(ax, lim_value):
+    ax.set_xlim([-lim_value, lim_value])
+    ax.set_ylim([-lim_value, lim_value])
+    ax.set_zlim([-lim_value, lim_value])
+    ax.set_aspect("equal")
+
+
 def plot_NS(ax):
     # рисуем звезду
     theta_range = np.arange(0, np.pi, np.pi / config.N_theta_accretion)
@@ -24,7 +74,7 @@ def plot_NS(ax):
     y = r1 * np.sin(v) * np.sin(u)
     z = r1 * np.cos(v)
 
-    ax.plot_surface(x, y, z, color='b', alpha=1)
+    ax.plot_surface(x, y, z, color='b', shade=False, alpha=1)
 
 
 def get_angles_from_vector(vector):
@@ -233,9 +283,7 @@ def create_gif(phi_range_column, theta_range_column):
 
     add_vector(ax, origin, omega_vector, 'black', lim_value)
 
-    ax.set_xlim([-lim_value, lim_value])
-    ax.set_ylim([-lim_value, lim_value])
-    ax.set_zlim([-lim_value, lim_value])
+    lim_axes(ax, lim_value)
 
     phase = 0
     e_obs = config.e_obs
@@ -270,8 +318,9 @@ def create_gif(phi_range_column, theta_range_column):
         #
         #     add_vector(ax, origin, observer_mu_vector, 'black', lim_value)
 
+        roll_angle = calculate_roll_angle(e_obs_mu, phase)
         # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
-        ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+        ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad, roll=roll_angle)
 
         figure_title = r'$\Phi$' + ' = %.2f' % (phase / 360)
         fig.suptitle(figure_title, fontsize=14)
@@ -338,11 +387,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
     axSlider1 = fig.add_axes([0.25, 0.1, 0.65, 0.05])
     slider1 = Slider(axSlider1, 'phase', valmin=0, valmax=2, valinit=0)
 
-    ax.set_xlim([-lim_value, lim_value])
-    ax.set_ylim([-lim_value, lim_value])
-    ax.set_zlim([-lim_value, lim_value])
-
-    ax.set_aspect("equal")
+    lim_axes(ax, lim_value)
 
     phase = 0
     e_obs = config.e_obs
@@ -397,71 +442,12 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
         psi_1 = np.arctan(A_matrix_analytic[1, 0] * A_matrix_analytic[0, 0])
         psi_2 = np.arctan(-A_matrix_analytic[2, 0] * A_matrix_analytic[0, 0] / np.cos(psi_1))
 
-        omega = np.dot(A_matrix_analytic, [0, 0, 1])
-        omega_vector = [omega[0, 0], omega[0, 1], omega[0, 2]]
-        azimuth_1, elevation_1 = vectors.get_angles_from_vector(omega)
-
-        roll_angle = np.arctan(omega[0, 1] / omega[0, 2]) / grad_to_rad
-
         # беру проекцию на картинную плоскость, оттуда достаю угол.
-        view_plane_normal = [e_obs_mu[0, 0], e_obs_mu[0, 1], e_obs_mu[0, 2]]  # x,y,z
-        omega_vector = [np.sin(-betta_mu * grad_to_rad) * np.cos(0),
-                        np.sin(-betta_mu * grad_to_rad) * np.sin(0),
-                        np.cos(-betta_mu * grad_to_rad)]
-
-        view_plane_normal = np.array(view_plane_normal)
-        omega_vector = np.array(omega_vector)
-
         # не делю на норму т.к. нормированные векторы np.linalg.norm()
-        omega_projection_on_norm = np.dot(view_plane_normal, omega_vector) * view_plane_normal / (
-            np.linalg.norm(view_plane_normal)) ** 2
-        omega_projection_on_view_plane = omega_vector - omega_projection_on_norm
-
-        # print(np.linalg.norm(omega_projection_on_norm))
-
-        mu_projection_on_norm = np.dot(view_plane_normal, [0, 0, 1]) * view_plane_normal / (
-            np.linalg.norm(view_plane_normal)) ** 2
-        mu_projection_on_view_plane = np.array([0, 0, 1]) - mu_projection_on_norm
+        roll_angle = calculate_roll_angle(e_obs_mu, phase)
 
         # print(np.linalg.norm(mu_projection_on_view_plane))
-
         # print(np.dot(omega_projection_on_view_plane, mu_projection_on_view_plane))
-        if phase % 180 == 0:
-            roll_angle = 0
-            if i_angle < betta_mu and phase % 360== 0:
-                roll_angle = 180
-        else:
-            roll_angle = -np.arccos(np.dot(omega_projection_on_view_plane, mu_projection_on_view_plane) / (
-                    np.linalg.norm(omega_projection_on_view_plane) * np.linalg.norm(
-                mu_projection_on_view_plane))) / grad_to_rad
-
-        if phase > 180 and phase < 360 or phase > 540:
-            roll_angle = - roll_angle
-
-        x1_vec = [np.sin(90 * grad_to_rad) * np.cos(0),
-                  np.sin(90 * grad_to_rad) * np.sin(0),
-                  np.cos(90 * grad_to_rad)]
-        x2_vec = [0, 0, 1]
-        x1_vec_projection_on_norm = np.dot(view_plane_normal, x1_vec) * view_plane_normal / (
-            np.linalg.norm(view_plane_normal)) ** 2
-        x1_vec_projection_on_view_plane = np.array(x1_vec) - x1_vec_projection_on_norm
-
-        x2_vec_projection_on_norm = np.dot(view_plane_normal, x2_vec) * view_plane_normal / (
-            np.linalg.norm(view_plane_normal)) ** 2
-        x2_vec_projection_on_view_plane = np.array(x2_vec) - x2_vec_projection_on_norm
-
-        angle = np.arccos(np.dot(x1_vec_projection_on_view_plane, x2_vec_projection_on_view_plane) / (
-                np.linalg.norm(x1_vec_projection_on_view_plane) * np.linalg.norm(
-            x2_vec_projection_on_view_plane))) / grad_to_rad
-
-        # print(angle)
-
-        # roll_angle = np.arccos(np.dot(np.array([0,0,1]), mu_projection_on_view_plane)/np.linalg.norm(mu_projection_on_view_plane)) / grad_to_rad
-        # print(roll_angle)
-
-        azimuth_1, elevation_1 = vectors.get_angles_from_vector_one_dimension(omega_projection_on_view_plane)
-
-        # roll_angle = config.betta_mu_deg - config.obs_i_angle_deg
 
         # if val == 0.5:
         # observer_mu_vector = [np.sin(elevation) * np.cos(azimuth),
@@ -536,15 +522,13 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
     mu_vector = [0, 0, 1]
     add_vector(ax, origin, mu_vector, 'red', lim_value)
 
-    # omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0),
-    #                 np.sin(betta_mu * grad_to_rad) * np.sin(0),
-    #                 np.cos(betta_mu * grad_to_rad)]
-    #
-    # add_vector(ax, origin, omega_vector, 'black', lim_value)
+    omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0),
+                    np.sin(betta_mu * grad_to_rad) * np.sin(0),
+                    np.cos(betta_mu * grad_to_rad)]
 
-    ax.set_xlim([-lim_value, lim_value])
-    ax.set_ylim([-lim_value, lim_value])
-    ax.set_zlim([-lim_value, lim_value])
+    add_vector(ax, origin, omega_vector, 'black', lim_value)
+
+    lim_axes(ax, lim_value)
 
     e_obs = config.e_obs
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * 2 * np.pi, config.betta_mu)
@@ -558,9 +542,9 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
     #
     # add_vector(ax, origin, omega_vector, 'blue', lim_value)
     # config.betta_rotate / grad_to_rad + config.betta_mu / grad_to_rad
-
+    roll_angle = calculate_roll_angle(e_obs_mu, phase * 360)
     # 90 - т.к. находим через arccos (в другой СК - theta от 0Z 0 - 180), а рисовать нужно в СК 90 - -90
-    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad)
+    ax.view_init(90 - elevation / grad_to_rad, azimuth / grad_to_rad, roll=roll_angle)
 
     # Hide axes ticks
     ax.set_xticks([])
