@@ -30,10 +30,11 @@ fi_0 = [20 * i for i in range(18)]
 # fi_0 = [0, 20, 40, 60, 100, 160, 200, 220, 260, 300]
 i_angle = [10, 20, 30, 40, 50, 60, 70, 80, 90]
 betta_mu = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+
 # betta_mu = [30]
 
-# i_angle = [60]
-# betta_mu = [0]
+# i_angle = [0]
+# betta_mu = [40]
 
 obs_i_angle_deg = i_angle[0]
 betta_mu_deg = betta_mu[0]
@@ -44,13 +45,13 @@ a_portion = a_portion_arr[1]
 L_nu_flag = False  # PF(L_nu)
 bar_flag = False  # mean disp max-min
 L_iso_flag = False  # PF(L_*) - там только 1 значение у L_* т.к. зависит только от m, a и не зависит от phi_0
-L_nu_iso_flag = False  # L_nu(phase, fi_0)
+L_nu_iso_flag = True  # L_nu(phase, fi_0)
 flag_next = False  # фиксируем углы, меняем m или a
 L_nu_avg_on_fi_flag = False  # L_nu_avg_on_phase(fi_0)
 mean_disp_flag = False  # отрисовать mean,disp,max-min
 
 flag_masses_PF_L_nu = False
-nu_L_nu_to_mass_flag = True
+nu_L_nu_to_mass_flag = False
 
 
 def get_folder():
@@ -496,7 +497,7 @@ if L_nu_iso_flag:
 
                     im = ax.contourf(phase, fi_0, L_nu_data, levels=30)
                     clb = plt.colorbar(im)
-                    clb.set_label(r'$\nu L_{\nu}$' + ' [erg/s]', fontsize=22)
+                    clb.set_label(r'$\nu L_{\nu}$' + ' [erg/s]', fontsize=26)
 
                     figure_title = r'$L_{\nu}$ ' + 'i=%d betta_mu=%d a=%0.2f m=%d' % (
                         obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
@@ -507,8 +508,8 @@ if L_nu_iso_flag:
                     x_axis_label = r'$\Phi$'
                     y_axis_label = r'$\phi_0$'
 
-                    ax.set_xlabel(x_axis_label, fontsize=22)
-                    ax.set_ylabel(y_axis_label, fontsize=22)
+                    ax.set_xlabel(x_axis_label, fontsize=26)
+                    ax.set_ylabel(y_axis_label, fontsize=26)
                     # fig.suptitle(figure_title, fontsize=22)
 
                     main_service.save_figure(fig, save_folder, save_file_name)
