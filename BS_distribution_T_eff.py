@@ -72,6 +72,7 @@ def get_Teff_distribution(R_e, delta_ns, A_normal):
 
     # analytic solve bs
     # 35 формула
+    # доля излучения в стороны от всей Lt полной светимости, темп аккреции
     beta = 1 - gamma * np.exp(gamma) * (special.expn(1, gamma) - special.expn(1, gamma * ksiShock))
 
     # 32 формула - аналитическое решение
