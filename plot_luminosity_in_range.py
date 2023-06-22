@@ -29,7 +29,7 @@ def plot_figs():
 
     # fig = main_service.create_figure(energy_arr, PF, is_y_2d=False)
 
-    fig = main_service.create_figure(energy_arr[:-1], PF, x_axis_label=r'$h \nu$ [KeV]', y_axis_label='PF',
+    fig = main_service.create_figure(energy_arr[:-1], PF, x_axis_label=r'$h \nu$ [keV]', y_axis_label='PF',
                                      is_y_2d=False)
 
     file_name = "PF.png"
@@ -59,10 +59,10 @@ def plot_figs():
         energy_max[i] = energy_arr[i + 1]
 
     for energy_i in range(N_energy - 1):
-        fig_title = 'luminosity in range %0.2f - %0.2f KeV of surfaces, PF = %0.3f' % (
+        fig_title = 'luminosity in range %0.2f - %0.2f keV of surfaces, PF = %0.3f' % (
             energy_min[energy_i], energy_max[energy_i], PF[energy_i])
-        fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], x_axis_label='Phase',
-                                         y_axis_label='Luminosity [erg/s]', figure_title=fig_title, is_y_2d=False)
+        fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], x_axis_label=r'$\Phi$',
+                                         y_axis_label='L [erg/s]', figure_title=fig_title, is_y_2d=False)
 
         file_name = 'luminosity_in_range%0.2f_-_%0.2f_KeV_of_surfaces.png' % (
             energy_min[energy_i], energy_max[energy_i])
@@ -73,10 +73,10 @@ def plot_figs():
     labels_arr = [''] * N_energy
 
     for i in range(N_energy):
-        labels_arr[i] = "%0.2f - %0.2f KeV" % (energy_min[i], energy_max[i])
+        labels_arr[i] = "%0.2f - %0.2f keV" % (energy_min[i], energy_max[i])
 
-    fig = main_service.create_figure(phi_for_plot, arr_to_plt[:N_energy], labels_arr=labels_arr, x_axis_label='Phase',
-                                     y_axis_label='Luminosity [erg/s]')
+    fig = main_service.create_figure(phi_for_plot, arr_to_plt[:N_energy], labels_arr=labels_arr, x_axis_label=r'$\Phi$',
+                                     y_axis_label='L [erg/s]')
 
     file_name = 'sum_of_luminosity_in_range.png'
     main_service.save_figure(fig, working_folder, file_name)
@@ -89,7 +89,7 @@ def plot_figs():
     fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
     for i in range(N_column_plot):
         ax = axes[i]
-        label = "%0.1f - %0.1f KeV\n PF=%0.3f" % (
+        label = "%0.1f - %0.1f keV\n PF=%0.3f" % (
             energy_min[energy_indexes[i]], energy_max[energy_indexes[i]], PF[energy_indexes[i]])
         ax.tick_params(axis='both', labelsize=12)
         ax.plot(phi_for_plot, arr_to_plt[energy_indexes[i]], color='black', lw=0.8)
@@ -101,19 +101,19 @@ def plot_figs():
 
     # fig.add_subplot(111, frameon=False)
     # plt.tick_params(labelcolor='none', which='both', top=False, bottom=False, left=False, right=False)
-    # plt.xlabel('phase')
+    # plt.xlabel(r'$\Phi$')
     # plt.ylabel('luminosity [erg/s]')
     plt.rc('font', size=24)
-    fig.text(0.5, 0.07, 'Phase', ha='center')
-    fig.text(0.06, 0.5, 'Luminosity(L) [erg/s]', va='center', rotation='vertical')
+    fig.text(0.5, 0.07, r'$\Phi$', ha='center')
+    fig.text(0.06, 0.5, 'L [erg/s]', va='center', rotation='vertical')
     file_name = 'pretty_fig.png'
     main_service.save_figure(fig, working_folder, file_name)
 
     fig = plt.figure(figsize=(12, 4))
     ax = fig.add_subplot(111)
     ax.step(phi_for_plot, arr_to_plt[16], color='black', lw=0.9)
-    ax.set_xlabel('Phase', fontsize=24)
-    ax.set_ylabel('Luminosity(L) [erg/s]', fontsize=24)
+    ax.set_xlabel(r'$\Phi$', fontsize=24)
+    ax.set_ylabel('L [erg/s]', fontsize=24)
     file_name = 'step.png'
     main_service.save_figure(fig, working_folder, file_name)
     plt.rc('font', size=10)

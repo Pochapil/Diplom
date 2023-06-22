@@ -52,14 +52,14 @@ def plot_figs():
     # по идее переписать!!
     labels_arr = [''] * N_energy
     for i in range(N_energy):
-        labels_arr[i] = '%0.2f KeV' % energy_arr[i]
+        labels_arr[i] = '%0.2f keV' % energy_arr[i]
 
     fig_title = r'$\nu L_{\nu}$'
     fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr=labels_arr, x_axis_label=x_axis_label,
                                      y_axis_label=y_axis_label, figure_title=fig_title)
 
     # ------------------------------------nu L_nu(nu) on phase------------------------------------------------
-    x_axis_label = r'$h \nu$' + ' [KeV]'
+    x_axis_label = r'$h \nu$' + ' [keV]'
     phase_index = 0  # индекс фазы для nu_L_nu(nu)
 
     nu_L_nu = [0] * N_energy
@@ -103,7 +103,7 @@ def plot_figs():
     fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
     for i in range(N_column_plot):
         ax = axes[i]
-        label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[energy_indexes[i]], PF[energy_indexes[i]])
+        label = "%0.1f keV\n PF=%0.3f" % (energy_arr[energy_indexes[i]], PF[energy_indexes[i]])
         ax.tick_params(axis='both', labelsize=12)
         ax.plot(phi_for_plot, arr_to_plt[energy_indexes[i]], color='black', lw=0.8)
         # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
@@ -170,7 +170,7 @@ def plot_figs():
     im = ax.pcolormesh(phase, energy_arr, data_to_plot)
 
     x_axis_label = r'$\Phi$'
-    y_axis_label = r'$h \nu$' + ' [KeV]'
+    y_axis_label = r'$h \nu$' + ' [keV]'
 
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)

@@ -40,7 +40,7 @@ for i in range(N_deg):
     label = r'$\varphi_0$' + ('=%d' % phi_accretion_begin_deg[i]) + r'$^{\circ}$'
     ax.plot(energy_arr, PF, label=label)
 
-x_axis_label = r'$h \nu$' + ' [KeV]'
+x_axis_label = r'$h \nu$' + ' [keV]'
 y_axis_label = 'PF'
 
 ax.set_xlabel(x_axis_label, fontsize=24)
@@ -78,7 +78,7 @@ for j in range(len(M_rate_c2_Led)):
             ax.plot(energy_arr, PF,
                     label='M=%d, a=%0.2f, angle=%d' % (M_rate_c2_Led[j], a_portion[k], phi_accretion_begin_deg[i]))
 
-x_axis_label = r'$h \nu$' + ' [KeV]'
+x_axis_label = r'$h \nu$' + ' [keV]'
 y_axis_label = 'PF'
 
 ax.set_xlabel(x_axis_label, fontsize=24)

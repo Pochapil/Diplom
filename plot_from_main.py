@@ -71,7 +71,7 @@ def plot_figs():
     labels_arr = [r'$\theta_{observer}$', r'$\phi_{observer}$']
     fig_title = 'Observer angles'
     combined_arrays_for_plot = np.append([observer_theta], [observer_phi], 0)
-    fig = main_service.create_figure(phi_for_plot, combined_arrays_for_plot, labels_arr, x_axis_label='Phase',
+    fig = main_service.create_figure(phi_for_plot, combined_arrays_for_plot, labels_arr, x_axis_label=r'$\Phi$',
                                      y_axis_label=r'$Angle \: [rad]$', figure_title=fig_title)
 
     file_name = 'Observer_angles.png'

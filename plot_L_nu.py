@@ -17,7 +17,7 @@ def plot_figs():
 
     y_axis_label = r'$L_{\nu} \: [erg \cdot s^{-1} \cdot hz^{-1}]$'
     # -------------------------------------------------------------------------------------------
-    x_axis_label = r'$h \nu$' + ' [KeV]'
+    x_axis_label = r'$h \nu$' + ' [keV]'
 
     file_name = "PF.txt"
     PF = main_service.load_arr_from_txt(working_folder, file_name)
@@ -32,7 +32,7 @@ def plot_figs():
     main_service.save_figure(fig, working_folder, file_name)
 
     # -------------------------------read L_nu data----------------------------------------------------
-    x_axis_label = 'Phase'
+    x_axis_label = r'$\Phi$'
 
     file_name = "L_nu.txt"
     data_array = main_service.load_arr_from_txt(working_folder, file_name)
@@ -43,8 +43,8 @@ def plot_figs():
 
     # --------------------------------L_nu on dif energy------------------------------------------------
     for energy_i in range(N_energy):
-        fig_title = 'Spectrum of energy %0.2f KeV of surfaces, PF = %0.3f' % (energy_arr[energy_i], PF[energy_i])
-        fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$L_{\nu}(phase)$',
+        fig_title = 'Spectrum of energy %0.2f keV of surfaces, PF = %0.3f' % (energy_arr[energy_i], PF[energy_i])
+        fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$L_{\nu}(\Phi)$',
                                          x_axis_label=x_axis_label, y_axis_label=y_axis_label, figure_title=fig_title,
                                          is_y_2d=False)
 
@@ -55,7 +55,7 @@ def plot_figs():
     # по идее переписать!!
     labels_arr = [''] * N_energy
     for i in range(N_energy):
-        labels_arr[i] = '%0.2f KeV' % energy_arr[i]
+        labels_arr[i] = '%0.2f keV' % energy_arr[i]
     fig_title = r'$L_{\nu}$'
     fig = main_service.create_figure(phi_for_plot, arr_to_plt, labels_arr=labels_arr, x_axis_label=x_axis_label,
                                      y_axis_label=y_axis_label, figure_title=fig_title)
@@ -64,7 +64,7 @@ def plot_figs():
     main_service.save_figure(fig, working_folder, file_name)
 
     # ------------------------------------L_nu(nu) on phase--------------------------------------------------
-    x_axis_label = r'$h \nu$' + ' [KeV]'
+    x_axis_label = r'$h \nu$' + ' [keV]'
     phase_index = 0  # индекс фазы для L_nu(nu)
 
     L_nu = [0] * N_energy
@@ -114,7 +114,8 @@ def plot_figs():
     ax = fig.add_subplot(111)
     ax.plot(energy_arr, L_nu_avg_on_phase, label=r'$L_{\nu} \, avg$', color='red')
     for i in range(N_phases):
-        ax.plot(energy_arr, L_nu_phases[i], label=r'$L_{\nu}$' + ' on phase %0.2f' % phi_for_plot[phase_indexes[i]])
+        ax.plot(energy_arr, L_nu_phases[i],
+                label=r'$L_{\nu}$' + ' on ' + r'$\Phi$' + ' = %0.2f' % phi_for_plot[phase_indexes[i]])
     plt.xscale('log')
     plt.yscale('log')
     ax.legend()
@@ -132,7 +133,7 @@ def plot_figs():
     fig, axes = plt.subplots(N_column_plot, 1, figsize=(12, 3 * N_column_plot), sharex=True)
     for i in range(N_column_plot):
         ax = axes[i]
-        label = "%0.1f KeV\n PF=%0.3f" % (energy_arr[energy_indexes[i]], PF[energy_indexes[i]])
+        label = "%0.1f keV\n PF=%0.3f" % (energy_arr[energy_indexes[i]], PF[energy_indexes[i]])
         ax.tick_params(axis='both', labelsize=12)
         ax.plot(phi_for_plot, arr_to_plt[energy_indexes[i]], color='black', lw=0.8)
         # ax.plot(phi_for_plot, arr_to_plt[i], color='black', lw=0.8, label=label)
@@ -145,7 +146,7 @@ def plot_figs():
     # plt.xlabel('phase')
     # plt.ylabel('luminosity [erg/s]')
     plt.rc('font', size=24)
-    fig.text(0.5, 0.07, 'Phase', ha='center')
+    fig.text(0.5, 0.07, r'$\Phi$', ha='center')
     fig.text(0.06, 0.5, r'$L_{\nu} \, [erg \cdot s^{-1} \cdot hz^{-1}]$', va='center', rotation='vertical')
     file_name = 'pretty_fig.png'
     main_service.save_figure(fig, working_folder, file_name)
@@ -232,8 +233,8 @@ def plot_figs():
 
     im = ax.pcolormesh(phase, energy_arr, data_to_plot)
 
-    x_axis_label = 'Phase'
-    y_axis_label = r'$h \nu$' + ' [KeV]'
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$h \nu$' + ' [keV]'
 
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
