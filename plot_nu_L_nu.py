@@ -16,7 +16,7 @@ def plot_figs():
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))
 
     x_axis_label = r'$\Phi$'
-    y_axis_label = r'$\nu \cdot L_{\nu} \: [erg/s]$'
+    y_axis_label = r'$\nu L_{\nu} \: [erg/s]$'
     # -------------------------------------------------------------------------------------------
     file_name = "PF.txt"
     PF = main_service.load_arr_from_txt(working_folder, file_name)
@@ -40,11 +40,10 @@ def plot_figs():
 
     # -------------------------------------nu L_nu on dif energy--------------------------------------------
     for energy_i in range(N_energy):
-        fig_title = 'Spectral Energy Distribution of energy %0.2f KeV of surfaces, PF = %0.3f' % (
-            energy_arr[energy_i], PF[energy_i])
-        fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], labels_arr=r'$\nu \cdot L_{\nu}(\nu)$',
-                                         x_axis_label=x_axis_label, y_axis_label=y_axis_label, figure_title=fig_title,
-                                         is_y_2d=False)
+        # fig_title = 'Spectral Energy Distribution of energy %0.2f KeV of surfaces, PF = %0.3f' % (
+        #     energy_arr[energy_i], PF[energy_i])
+        fig = main_service.create_figure(phi_for_plot, arr_to_plt[energy_i], x_axis_label=x_axis_label,
+                                         y_axis_label=y_axis_label, is_y_2d=False)
 
         file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy_arr[energy_i]
         main_service.save_figure(fig, working_folder, file_name)
