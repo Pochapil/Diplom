@@ -69,3 +69,38 @@ file_name = 'surfaces_T_eff.txt'
 
 time_calculate = time.time()
 print("execution time of program: %f s" % (time_calculate - time_start))
+
+energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
+energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
+# чтобы убрать погрешности и закрыть массив точным числом
+energy_arr.append(config.energy_max)
+
+data_array = [0] * config.N_energy
+for energy_index in range(config.N_energy):
+    current_energy = energy_arr[energy_index]
+    # ------------------ начало заполнения массивов Spectral Energy -----------------------
+    arr_simps_integrate = [0] * 4
+    sum_simps_integrate = 0
+    for key, surface in surfaces.items():
+        arr_simps_integrate[key] = surface.calculate_L_nu_on_energy(current_energy)
+        sum_simps_integrate += np.array(arr_simps_integrate[key])
+
+    nu = accretionColumnService.get_frequency_from_energy(current_energy)
+
+    data_array[energy_index] = sum_simps_integrate * nu
+
+
+data_array_nu = [0] * config.N_energy
+for energy_index in range(config.N_energy):
+    current_energy = energy_arr[energy_index]
+    # ------------------ начало заполнения массивов Spectral Energy -----------------------
+    arr_simps_integrate = [0] * 4
+    sum_simps_integrate = 0
+    for key, surface in surfaces.items():
+        arr_simps_integrate[key] = surface.calculate_nu_L_nu_on_energy(current_energy)
+        sum_simps_integrate += np.array(arr_simps_integrate[key])
+
+    data_array_nu[energy_index] = sum_simps_integrate
+
+
+print(np.array(data_array_nu) - np.array(data_array))
