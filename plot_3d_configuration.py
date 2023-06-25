@@ -5,6 +5,7 @@ from matplotlib.widgets import Slider, TextBox, Button
 from matplotlib.animation import PillowWriter
 from matplotlib import animation
 from mpl_toolkits.mplot3d import Axes3D
+import scienceplots
 
 import config
 import main_service

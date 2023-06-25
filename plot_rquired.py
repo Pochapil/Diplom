@@ -5,6 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib as mpl
+import scienceplots
 
 import geometricTask.matrix as matrix
 import config

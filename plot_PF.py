@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import scienceplots
 
 import config
 import main_service

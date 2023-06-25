@@ -2,6 +2,7 @@ import config
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
+import scienceplots
 
 import main_service
 
