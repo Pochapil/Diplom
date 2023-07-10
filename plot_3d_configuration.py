@@ -24,6 +24,7 @@ def get_projection_on_surface(input_vector, surface_norm_vector):
 
 
 def get_roll_angle(first_vector, second_vector, phase):
+
     if phase % 180 == 0:
         roll_angle = 0
         if i_angle < betta_mu and phase % 360 == 0:
@@ -31,6 +32,9 @@ def get_roll_angle(first_vector, second_vector, phase):
     else:
         roll_angle = -np.arccos(np.dot(first_vector, second_vector) / (
                 np.linalg.norm(first_vector) * np.linalg.norm(second_vector))) / config.grad_to_rad
+
+    if betta_mu == 0:
+        roll_angle = 0
 
     if phase > 180 and phase < 360 or phase > 540:
         roll_angle = - roll_angle
@@ -54,6 +58,9 @@ def calculate_roll_angle(e_obs_mu, phase):
     mu_projection_on_view_plane = get_projection_on_surface(np.array([0, 0, 1]), view_plane_normal)
 
     roll_angle = get_roll_angle(omega_projection_on_view_plane, mu_projection_on_view_plane, phase)
+
+    if i_angle == 0:
+        roll_angle = 0
 
     return roll_angle
 
@@ -490,7 +497,7 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
 def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase):
     # fig, ax = plt.subplots()
 
-    vector_flag = False
+    vector_flag = True
 
     lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
@@ -867,17 +874,17 @@ def visualise_3d_star(phi_range_column, theta_range_column):
 
 if __name__ == "__main__":
 
-    gif_flag = False
+    gif_flag = True
     config_vectors_flag = False
     phase_flag = False
 
     lim_coeff_for_axis = 0.1
 
-    i_angle = 60
+    i_angle = 0
     betta_mu = 40
 
     mc2 = 30
-    a_portion = 0.25
+    a_portion = 0.65
     fi_0 = 0
 
     config.set_e_obs(i_angle, 0)
@@ -914,7 +921,7 @@ if __name__ == "__main__":
     save_folder = 'figs/phases/' + file_folder_angle + file_folder_args
 
     if phase_flag:
-        phase = 0.65
+        phase = 0.5
         fig = visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase)
         file_name = "phase = %0.2f.png" % phase
         main_service.save_figure(fig, save_folder, file_name)
