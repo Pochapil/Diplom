@@ -24,6 +24,7 @@ def get_projection_on_surface(input_vector, surface_norm_vector):
 
 
 def get_roll_angle(first_vector, second_vector, phase):
+
     if phase % 180 == 0:
         roll_angle = 0
         if i_angle < betta_mu and phase % 360 == 0:
@@ -31,6 +32,9 @@ def get_roll_angle(first_vector, second_vector, phase):
     else:
         roll_angle = -np.arccos(np.dot(first_vector, second_vector) / (
                 np.linalg.norm(first_vector) * np.linalg.norm(second_vector))) / config.grad_to_rad
+
+    if betta_mu == 0:
+        roll_angle = 0
 
     if phase > 180 and phase < 360 or phase > 540:
         roll_angle = - roll_angle
@@ -54,6 +58,9 @@ def calculate_roll_angle(e_obs_mu, phase):
     mu_projection_on_view_plane = get_projection_on_surface(np.array([0, 0, 1]), view_plane_normal)
 
     roll_angle = get_roll_angle(omega_projection_on_view_plane, mu_projection_on_view_plane, phase)
+
+    if i_angle == 0:
+        roll_angle = 0
 
     return roll_angle
 
@@ -489,6 +496,9 @@ def visualise_3d_configuration(phi_range_column, theta_range_column):
 
 def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase):
     # fig, ax = plt.subplots()
+
+    vector_flag = True
+
     lim_value = lim_coeff_for_axis * config.M_rate_c2_Led / 10
     grad_to_rad = np.pi / 180
 
@@ -518,16 +528,19 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
     # низ
     ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="green", alpha=0.2)
 
+
     # вектора
     origin = [0, 0, 0]
     mu_vector = [0, 0, 1]
-    add_vector(ax, origin, mu_vector, 'red', lim_value)
+    if vector_flag:
+        add_vector(ax, origin, mu_vector, 'red', lim_value)
 
     omega_vector = [-np.sin(betta_mu * grad_to_rad) * np.cos(0),
                     np.sin(betta_mu * grad_to_rad) * np.sin(0),
                     np.cos(betta_mu * grad_to_rad)]
 
-    add_vector(ax, origin, omega_vector, 'black', lim_value)
+    if vector_flag:
+        add_vector(ax, origin, omega_vector, 'black', lim_value)
 
     lim_axes(ax, lim_value)
 
@@ -861,13 +874,13 @@ def visualise_3d_star(phi_range_column, theta_range_column):
 
 if __name__ == "__main__":
 
-    gif_flag = False
+    gif_flag = True
     config_vectors_flag = False
     phase_flag = False
 
     lim_coeff_for_axis = 0.1
 
-    i_angle = 60
+    i_angle = 0
     betta_mu = 40
 
     mc2 = 30
