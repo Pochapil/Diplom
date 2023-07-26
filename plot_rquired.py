@@ -43,15 +43,17 @@ M_rate_c2_Led = mc2[1]
 phi_accretion_begin_deg = fi_0[0]
 a_portion = a_portion_arr[1]
 
-L_nu_flag = False  # PF(L_nu)
-bar_flag = False  # mean disp max-min
+L_nu_flag = False  # PF(L_nu) - pf берутся среднее по фазе, из-за fi_0 - множество точек
+L_nu_flag_particular_fi_0 = True  # PF(L_nu) на конкретном значении fi_0
+
+bar_flag = False  # mean disp max-min - диаграммы 3д, черновик
 L_iso_flag = False  # PF(L_*) - там только 1 значение у L_* т.к. зависит только от m, a и не зависит от phi_0
-L_nu_iso_flag = True  # L_nu(phase, fi_0)
+L_nu_iso_flag = False  # L_nu(phase, fi_0)
 flag_next = False  # фиксируем углы, меняем m или a
 L_nu_avg_on_fi_flag = False  # L_nu_avg_on_phase(fi_0)
 mean_disp_flag = False  # отрисовать mean,disp,max-min
 
-flag_masses_PF_L_nu = False
+flag_masses_PF_L_nu = False  # PF(L_nu) много точек, берутся линии по mc, a
 nu_L_nu_to_mass_flag = False
 
 
@@ -805,6 +807,114 @@ if flag_masses_PF_L_nu:
     save_folder = 'figs/PF_to_L_nu/mc_a_many/noncolors/'
     save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (obs_i_angle_deg, betta_mu_deg)
     main_service.save_figure(fig2, save_folder, save_file_name)
+
+if L_nu_flag_particular_fi_0:
+
+    mc2 = [10, 20, 30, 50, 100, 200]
+    a_portion_arr = [0.25, 0.65]
+    fi_0 = [20 * i for i in range(18)]
+    i_angle = [80]
+    betta_mu = [80]
+
+    final_final_array = np.zeros((len(a_portion_arr), len(mc2), len(fi_0)))
+
+    folder = 'nu_L_nu/'
+    file_name = 'PF.txt'
+
+    for a_index in range(len(a_portion_arr)):
+        for mc_index in range(len(mc2)):
+            final_array = []
+            for i in range(len(fi_0)):
+                a_portion = a_portion_arr[a_index]
+                M_rate_c2_Led = mc2[mc_index]
+
+                obs_i_angle_deg = i_angle[0]
+                betta_mu_deg = betta_mu[0]
+
+                phi_accretion_begin_deg = fi_0[i]
+
+                full_file_folder = get_folder()
+                working_folder = full_file_folder + folder
+
+                PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+                final_array.append(PF_array[energy_index])
+
+            final_final_array[a_index][mc_index] = final_array
+
+    file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % energy_array[energy_index]
+    folder = 'nu_L_nu/txt/'
+
+    # x = np.zeros((len(a_portion_arr), len(mc2)))
+    # y = np.zeros((len(a_portion_arr), len(mc2)))
+
+    # marker_dict = {0: 'x', 1: '+', 2: 'o', 3: '.'}
+
+    line_color_dict = {0: 'blue', 1: 'green', 2: 'orange', 3: 'red', 4: 'purple', 5: 'black'}
+
+    marker_index = 0
+
+    # marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
+    for i in range(len(fi_0)):
+
+        fig2 = plt.figure(figsize=(12, 6))
+        ax2 = fig2.add_subplot(111)
+        marker_index = 0
+
+        for a_index in range(len(a_portion_arr)):
+            line_color_index = 0
+            for mc_index in range(len(mc2)):
+                L_nu_data_dict = {}
+
+                a_portion = a_portion_arr[a_index]
+                M_rate_c2_Led = mc2[mc_index]
+
+                obs_i_angle_deg = i_angle[0]
+                betta_mu_deg = betta_mu[0]
+
+                phi_accretion_begin_deg = fi_0[i]
+
+                full_file_folder = get_folder()
+
+                L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+
+                L_nu_data_dict[np.mean(L_nu_array)] = final_final_array[a_index][mc_index][i]
+
+                # L_nu_data_dict[L_nu_array[L_nu_array_index]] = final_final_array[i_angle_index][betta_mu_index][
+                #     i]
+
+                print(full_file_folder)
+                # print(L_nu_data_dict)
+                # print(L_nu_data_dict)
+                lists = sorted(L_nu_data_dict.items())  # sorted by key, return a list of tuples
+                x, y = zip(*lists)  # unpack a list of pairs into two tuples
+
+                fillstyle = 'full'
+                if marker_index == 0:
+                    fillstyle = 'none'
+
+                if marker_index == 0:
+                    ax2.scatter(x, y, s=30, facecolors='none', edgecolors=line_color_dict[line_color_index])
+                else:
+                    ax2.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index])
+
+                line_color_index += 1
+
+            marker_index = 3
+
+        x_axis_label = r'$\nu L_{\nu}$' + ' [erg/s]'
+        y_axis_label = r'$PF_{' + '%.2f' % energy_array[energy_index] + r'}$'
+
+        figure_title = 'i=%d betta_mu=%d a=%0.2f' % (obs_i_angle_deg, betta_mu_deg, a_portion)
+
+        ax2.set_xlabel(x_axis_label, fontsize=22)
+        ax2.set_ylabel(y_axis_label, fontsize=22)
+
+        ax2.set_xscale('log')
+
+        save_folder = 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/'
+        save_file_name = 'i=%d betta_mu=%d fi_0=%d' % (obs_i_angle_deg, betta_mu_deg, fi_0[i])
+
+        main_service.save_figure(fig2, save_folder, save_file_name)
 
 if nu_L_nu_to_mass_flag:
     mc2 = [10, 20, 30, 50, 100, 200]
