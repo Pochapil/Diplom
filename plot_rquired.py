@@ -853,6 +853,10 @@ if L_nu_flag_particular_fi_0:
 
     marker_index = 0
 
+    colors = np.array(fi_0) / 340
+    fig1 = plt.figure(figsize=(12, 6))
+    ax1 = fig1.add_subplot(111)
+
     # marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
     for i in range(len(fi_0)):
 
@@ -862,6 +866,7 @@ if L_nu_flag_particular_fi_0:
 
         for a_index in range(len(a_portion_arr)):
             line_color_index = 0
+            L_nu_data_dict_for_a = {}
             for mc_index in range(len(mc2)):
                 L_nu_data_dict = {}
 
@@ -878,7 +883,7 @@ if L_nu_flag_particular_fi_0:
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
                 L_nu_data_dict[np.mean(L_nu_array)] = final_final_array[a_index][mc_index][i]
-
+                L_nu_data_dict_for_a.update(L_nu_data_dict)
                 # L_nu_data_dict[L_nu_array[L_nu_array_index]] = final_final_array[i_angle_index][betta_mu_index][
                 #     i]
 
@@ -901,6 +906,14 @@ if L_nu_flag_particular_fi_0:
 
             marker_index = 3
 
+            lists = sorted(L_nu_data_dict_for_a.items())  # sorted by key, return a list of tuples
+            x, y = zip(*lists)  # unpack a list of pairs into two tuples
+
+            if a_index == 0:
+                ax1.plot(x, y, label='fi_0 = %d' % fi_0[i], color = cm.jet(colors)[i])
+            else:
+                ax1.plot(x, y, color=cm.jet(colors)[i])
+
         x_axis_label = r'$\nu L_{\nu}$' + ' [erg/s]'
         y_axis_label = r'$PF_{' + '%.2f' % energy_array[energy_index] + r'}$'
 
@@ -911,10 +924,28 @@ if L_nu_flag_particular_fi_0:
 
         ax2.set_xscale('log')
 
-        save_folder = 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/'
-        save_file_name = 'i=%d betta_mu=%d fi_0=%d' % (obs_i_angle_deg, betta_mu_deg, fi_0[i])
+        save_folder = 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' + 'i=%d betta_mu=%d/' % (
+            obs_i_angle_deg, betta_mu_deg)
+        save_file_name = 'fi_0=%d' % fi_0[i]
 
         main_service.save_figure(fig2, save_folder, save_file_name)
+
+        x_axis_label = r'$\nu L_{\nu}$' + ' [erg/s]'
+        y_axis_label = r'$PF_{' + '%.2f' % energy_array[energy_index] + r'}$'
+
+        ax1.set_xlabel(x_axis_label, fontsize=22)
+        ax1.set_ylabel(y_axis_label, fontsize=22)
+
+        ax1.set_xscale('log')
+        ax1.legend(ncol=3, fontsize=10, framealpha=0.2)
+
+        save_folder = 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' + 'i=%d betta_mu=%d/' % (
+            obs_i_angle_deg, betta_mu_deg)
+        save_file_name = 'all fi_0'
+
+        main_service.save_figure(fig1, save_folder, save_file_name)
+
+
 
 if nu_L_nu_to_mass_flag:
     mc2 = [10, 20, 30, 50, 100, 200]
