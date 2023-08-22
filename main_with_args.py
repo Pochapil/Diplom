@@ -383,3 +383,5 @@ if __name__ == '__main__':
     time_calculate_nu_L_nu_on_energy = time.time()
     # print("execution time of program: %f s" % (
     #         time_calculate_nu_L_nu_on_energy - time_start))
+    print('calculate for i=%d beta_mu=%d mc=%0.2f a=%0.2f fi_0=%0.2f done' % (
+        i_angle, betta_mu, mc2, a_portion, fi_0))
