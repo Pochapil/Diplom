@@ -64,7 +64,10 @@ class AccretionColumn:
 
             # создание сетки по которой было найдено распределение T_eff
             ksi_stop = 1
-            ksi_inc = (self.ksi_shock - ksi_stop) / (config.N_theta_accretion - 1)
+            if self.ksi_shock > self.R_e / config.R_ns:
+                ksi_inc = (self.R_e / config.R_ns - ksi_stop) / (config.N_theta_accretion - 1)
+            else:
+                ksi_inc = (self.ksi_shock - ksi_stop) / (config.N_theta_accretion - 1)
             ksi_range = np.array([ksi_stop + ksi_inc * i for i in range(config.N_theta_accretion)])
 
             # интерполяция
