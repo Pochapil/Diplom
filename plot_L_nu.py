@@ -188,7 +188,8 @@ def plot_figs():
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
 
-    plt.ylim(1e17)
+    # plt.ylim(1e17)
+    plt.ylim(min(L_nu_avg_on_phase))
 
     file_name = 'L_nu(nu)_avg_and_black_body' + '.png'
     main_service.save_figure(fig, working_folder, file_name)
