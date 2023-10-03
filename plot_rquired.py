@@ -78,7 +78,6 @@ def get_folder_with_args(obs_i_angle_deg, betta_mu_deg, M_rate_c2_Led, a_portion
 full_file_folder = get_folder()
 
 folder = 'nu_L_nu/'
-working_folder = full_file_folder + folder
 
 file_name = 'PF.txt'
 
@@ -117,8 +116,6 @@ for a_index in range(len(a_portion_arr)):
                 for i in range(len(fi_0)):
                     full_file_folder = get_folder_with_args(i_angle[i_angle_index], betta_mu[betta_mu_index],
                                                             mc2[mc_index], a_portion_arr[a_index], fi_0[i])
-
-                    working_folder = full_file_folder + folder
 
                     PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
                     final_array.append(PF_array[energy_index])
@@ -379,15 +376,8 @@ if L_nu_flag:
                     L_nu_data_dict = {}
                     color_dict = {}
                     for i in range(len(fi_0)):
-                        a_portion = a_portion_arr[a_index]
-                        M_rate_c2_Led = mc2[mc_index]
-
-                        obs_i_angle_deg = i_angle[i_angle_index]
-                        betta_mu_deg = betta_mu[betta_mu_index]
-
-                        phi_accretion_begin_deg = fi_0[i]
-
-                        full_file_folder = get_folder()
+                        full_file_folder = get_folder_with_args(i_angle[i_angle_index], betta_mu[betta_mu_index],
+                                                                mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                         L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -467,6 +457,7 @@ if L_nu_flag:
 
                 # plt.show()
 
+"""2 мерный график nu L nu от phi_0, Phi"""
 if L_nu_iso_flag:
 
     file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % energy_array[energy_index]
@@ -485,15 +476,8 @@ if L_nu_iso_flag:
                     L_nu_data = []
                     color_dict = {}
                     for i in range(len(fi_0)):
-                        a_portion = a_portion_arr[a_index]
-                        M_rate_c2_Led = mc2[mc_index]
-
-                        obs_i_angle_deg = i_angle[i_angle_index]
-                        betta_mu_deg = betta_mu[betta_mu_index]
-
-                        phi_accretion_begin_deg = fi_0[i]
-
-                        full_file_folder = get_folder()
+                        full_file_folder = get_folder_with_args(i_angle[i_angle_index], betta_mu[betta_mu_index],
+                                                                mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                         L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -536,15 +520,8 @@ if L_nu_avg_on_fi_flag:
                     L_nu_data = []
 
                     for i in range(len(fi_0)):
-                        a_portion = a_portion_arr[a_index]
-                        M_rate_c2_Led = mc2[mc_index]
-
-                        obs_i_angle_deg = i_angle[i_angle_index]
-                        betta_mu_deg = betta_mu[betta_mu_index]
-
-                        phi_accretion_begin_deg = fi_0[i]
-
-                        full_file_folder = get_folder()
+                        full_file_folder = get_folder_with_args(i_angle[i_angle_index], betta_mu[betta_mu_index],
+                                                                mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                         L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -617,7 +594,6 @@ if flag_next:
             phi_accretion_begin_deg = fi_0[i]
 
             full_file_folder = get_folder()
-            working_folder = full_file_folder + folder
 
             PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
             final_array.append(PF_array[energy_index])
@@ -645,7 +621,6 @@ if flag_next:
             phi_accretion_begin_deg = fi_0[i]
 
             full_file_folder = get_folder()
-            working_folder = full_file_folder + folder
 
             PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
             final_array.append(PF_array[energy_index])
@@ -674,16 +649,8 @@ if flag_masses_PF_L_nu:
         for mc_index in range(len(mc2)):
             final_array = []
             for i in range(len(fi_0)):
-                a_portion = a_portion_arr[a_index]
-                M_rate_c2_Led = mc2[mc_index]
-
-                obs_i_angle_deg = i_angle[0]
-                betta_mu_deg = betta_mu[0]
-
-                phi_accretion_begin_deg = fi_0[i]
-
-                full_file_folder = get_folder()
-                working_folder = full_file_folder + folder
+                full_file_folder = get_folder_with_args(i_angle[0], betta_mu[0],
+                                                        mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                 PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
                 final_array.append(PF_array[energy_index])
@@ -719,15 +686,8 @@ if flag_masses_PF_L_nu:
             L_nu_data_dict = {}
             color_dict = {}
             for i in range(len(fi_0)):
-                a_portion = a_portion_arr[a_index]
-                M_rate_c2_Led = mc2[mc_index]
-
-                obs_i_angle_deg = i_angle[0]
-                betta_mu_deg = betta_mu[0]
-
-                phi_accretion_begin_deg = fi_0[i]
-
-                full_file_folder = get_folder()
+                full_file_folder = get_folder_with_args(i_angle[0], betta_mu[0],
+                                                        mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -754,8 +714,8 @@ if flag_masses_PF_L_nu:
             label = 'm=%d' % (M_rate_c2_Led)
 
             # ax.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors), label=label)
-
             # ax1.scatter(x, y, marker=marker_dict[marker_index % 4], label=label)
+
             fillstyle = 'full'
             if marker_index == 0:
                 fillstyle = 'none'
@@ -828,8 +788,6 @@ if L_nu_flag_particular_fi_0:
             for i in range(len(fi_0)):
                 full_file_folder = get_folder_with_args(i_angle[0], betta_mu[0],
                                                         mc2[mc_index], a_portion_arr[a_index], fi_0[i])
-
-                working_folder = full_file_folder + folder
 
                 PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
                 final_array.append(PF_array[energy_index])
@@ -961,7 +919,7 @@ if nu_L_nu_to_mass_flag:
             with open(full_file_folder + 'save_values.txt') as f:
                 lines = f.readlines()
                 L_iso = float(lines[3][12:20]) * 10 ** float(lines[3][27:29])
-
+                # total L_x = 4.396383 * 10**38 - 12 это индекс начала числа, 27-29 это степень 10
             L_x_data[a_index][mc_index] = L_iso
 
     # a_index = 1
