@@ -29,10 +29,10 @@ a_portion_arr = [0.25, 0.65]
 # a_portion_arr = [0.25]
 fi_0 = [20 * i for i in range(18)]
 # fi_0 = [0, 20, 40, 60, 100, 160, 200, 220, 260, 300]
-i_angle = [10, 20, 30, 40, 50, 60, 70, 80, 90]
-betta_mu = [10, 20, 30, 40, 50, 60, 70, 80, 90]
+i_angle = [10 * i for i in range(1, 10)]
+betta_mu = [10 * i for i in range(1, 10)]
 
-# betta_mu = [30]
+# betta_mu = [10, 20, 30, 40, 50, 60, 70, 80, 90]
 
 # i_angle = [0]
 # betta_mu = [40]
@@ -58,6 +58,15 @@ nu_L_nu_to_mass_flag = False
 
 
 def get_folder():
+    file_folder = 'figs/loop/'
+    file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
+    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
+    full_file_folder = file_folder + file_folder_angle + file_folder_args
+
+    return full_file_folder
+
+
+def get_folder_with_args(obs_i_angle_deg, betta_mu_deg, M_rate_c2_Led, a_portion, phi_accretion_begin_deg):
     file_folder = 'figs/loop/'
     file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
     file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
@@ -106,17 +115,9 @@ for a_index in range(len(a_portion_arr)):
             for betta_mu_index in range(len(betta_mu)):
                 final_array = []
                 for i in range(len(fi_0)):
-                    a_portion = a_portion_arr[a_index]
-                    M_rate_c2_Led = mc2[mc_index]
+                    full_file_folder = get_folder_with_args(i_angle[i_angle_index], betta_mu[betta_mu_index],
+                                                            mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
-                    obs_i_angle_deg = i_angle[i_angle_index]
-                    betta_mu_deg = betta_mu[betta_mu_index]
-
-                    phi_accretion_begin_deg = fi_0[i]
-                    if phi_accretion_begin_deg == 360:
-                        phi_accretion_begin_deg = 0
-
-                    full_file_folder = get_folder()
                     working_folder = full_file_folder + folder
 
                     PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
@@ -825,15 +826,9 @@ if L_nu_flag_particular_fi_0:
         for mc_index in range(len(mc2)):
             final_array = []
             for i in range(len(fi_0)):
-                a_portion = a_portion_arr[a_index]
-                M_rate_c2_Led = mc2[mc_index]
+                full_file_folder = get_folder_with_args(i_angle[0], betta_mu[0],
+                                                        mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
-                obs_i_angle_deg = i_angle[0]
-                betta_mu_deg = betta_mu[0]
-
-                phi_accretion_begin_deg = fi_0[i]
-
-                full_file_folder = get_folder()
                 working_folder = full_file_folder + folder
 
                 PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
@@ -870,15 +865,8 @@ if L_nu_flag_particular_fi_0:
             for mc_index in range(len(mc2)):
                 L_nu_data_dict = {}
 
-                a_portion = a_portion_arr[a_index]
-                M_rate_c2_Led = mc2[mc_index]
-
-                obs_i_angle_deg = i_angle[0]
-                betta_mu_deg = betta_mu[0]
-
-                phi_accretion_begin_deg = fi_0[i]
-
-                full_file_folder = get_folder()
+                full_file_folder = get_folder_with_args(i_angle[0], betta_mu[0],
+                                                        mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -910,7 +898,7 @@ if L_nu_flag_particular_fi_0:
             x, y = zip(*lists)  # unpack a list of pairs into two tuples
 
             if a_index == 0:
-                ax1.plot(x, y, label='fi_0 = %d' % fi_0[i], color = cm.jet(colors)[i])
+                ax1.plot(x, y, label='fi_0 = %d' % fi_0[i], color=cm.jet(colors)[i])
             else:
                 ax1.plot(x, y, color=cm.jet(colors)[i])
 
@@ -945,8 +933,6 @@ if L_nu_flag_particular_fi_0:
 
         main_service.save_figure(fig1, save_folder, save_file_name)
 
-
-
 if nu_L_nu_to_mass_flag:
     mc2 = [10, 20, 30, 50, 100, 200]
     a_portion_arr = [0.25, 0.65]
@@ -965,15 +951,8 @@ if nu_L_nu_to_mass_flag:
     for a_index in range(len(a_portion_arr)):
         for mc_index in range(len(mc2)):
             for i in range(len(fi_0)):
-                a_portion = a_portion_arr[a_index]
-                M_rate_c2_Led = mc2[mc_index]
-
-                obs_i_angle_deg = i_angle[0]
-                betta_mu_deg = betta_mu[0]
-
-                phi_accretion_begin_deg = fi_0[i]
-
-                full_file_folder = get_folder()
+                full_file_folder = get_folder_with_args(i_angle[0], betta_mu[0],
+                                                        mc2[mc_index], a_portion_arr[a_index], fi_0[i])
 
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
