@@ -22,17 +22,27 @@ if __name__ == '__main__':
         plot_luminosity_in_range.plot_figs()
         plot_L_nu.plot_figs()
         plot_nu_L_nu.plot_figs()
-        plt.close('all')
+        plt.close('all')  # чтобы очистить память от fig из предыдущих вызовов
 
 
     save_cos_flag = False
 
-    mc2 = [10, 30, 100]
-    a_portion = [0.1, 0.25, 0.65]
-    # fi_0 = [20 * i for i in range(1,18)]
-    fi_0 = [280, 360]
-    i_angle = [30, 60, 90]
-    betta_mu = [0, 30, 60, 90]
+    # mc2 = [10, 30, 100]
+    # a_portion = [0.25, 0.65]
+    # a_portion = [0.65]
+    # fi_0 = [20 * i for i in range(18)]
+
+    fi_0 = [0]
+    # i_angle = [60, 90]
+    # betta_mu = [60, 90]
+
+    mc2 = [200]
+    a_portion = [0.25]
+    # fi_0 = [20 * i for i in range(10, 18)]
+    i_angle = [60]
+    betta_mu = [40]
+    # betta_mu = [10, 20, 40, 50, 70, 80]
+
     # i_angle = [30]
     # betta_mu = [60, 90]
 
@@ -98,13 +108,13 @@ if __name__ == '__main__':
                         surfaces = {0: top_column.outer_surface, 1: top_column.inner_surface,
                                     2: bot_column.outer_surface, 3: bot_column.inner_surface}
 
-                        # ----------------------------- график T_eff --------------------------------
+                        # ----------------------------- сохранение массивов T_eff --------------------------------
                         arr_T_eff = []
                         for key, surface in surfaces.items():
                             arr_T_eff.append(surface.T_eff)
                         file_name = 'surfaces_T_eff.txt'
                         main_service.save_arr_as_txt(arr_T_eff, full_file_folder, file_name)
-                        # ----------------------------- график T_eff --------------------------------
+                        # ----------------------------- сохранение массивов T_eff --------------------------------
 
                         file_name = "save_phi_range.txt"
                         main_service.save_arr_as_txt(top_column.outer_surface.phi_range, full_file_folder, file_name)
@@ -141,8 +151,7 @@ if __name__ == '__main__':
                         power_index = 0
                         number = top_column.inner_surface.calculate_total_luminosity()
 
-                        f.write(
-                            'difference L_x / L_calc - 1 : %f ' % (
+                        f.write('difference L_x / L_calc - 1 : %f ' % (
                                     (top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '%\n')
 
                         while number > 10:
