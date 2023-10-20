@@ -7,8 +7,8 @@ import main_service
 
 
 def plot_save_sky_map(obs_i_angle_arr):
-    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
-    working_folder = file_folder + config.file_folder_args
+    file_folder = config.PROJECT_DIR + 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+    working_folder = file_folder + config.file_folder_accretion_args
 
     print('beta_mu=%d' % config.betta_mu_deg)
 
@@ -57,8 +57,8 @@ def plot_save_sky_map(obs_i_angle_arr):
 
 
 def plot_save_sky_map_contour(obs_i_angle_arr):
-    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
-    working_folder = file_folder + config.file_folder_args
+    file_folder = config.PROJECT_DIR + 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+    working_folder = file_folder + config.file_folder_accretion_args
 
     # title = 'beta_mu=%d mc2=%d a=%0.2f fi_0=%d' % (
     #     config.betta_mu_deg, config.M_rate_c2_Led, config.a_portion, config.phi_accretion_begin_deg)
