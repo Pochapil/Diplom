@@ -20,7 +20,7 @@ def get_projection_on_vector(input_vector, project_vector):
 
 
 def get_projection_on_surface(input_vector, surface_norm_vector):
-    # на нормаль к поверхности и вычитаем из вектора
+    # на нормаль к плоскости и вычитаем из вектора
     projection_on_norm = get_projection_on_vector(input_vector, surface_norm_vector)
     return input_vector - projection_on_norm
 
@@ -45,8 +45,9 @@ def get_roll_angle(i_angle, betta_mu, first_vector, second_vector, phase):
 
 def calculate_roll_angle(i_angle, betta_mu, e_obs_mu, phase):
     # phase in deg!
-    '''надо достать угол между проекциями mu и omega на картинную плоскость - чтобы повернуть картинную плоскость
-    на этот угол и перевести в СК связанную с omega'''
+    '''Метод view init задает координаты картинной плоскости. Поэтому для того, чтобы перейти из магнитной СК обратно
+    в СК, связанную с omega, надо достать угол между проекциями mu и omega на картинную плоскость и повернуть картинную плоскость
+    на этот угол. Для этого нахожу проекцию на плоскость векторов mu и omega  и нахожу угол между ними через косинус'''
     view_plane_normal = [e_obs_mu[0, 0], e_obs_mu[0, 1], e_obs_mu[0, 2]]  # x,y,z
     omega_vector = [np.sin(-betta_mu * config.grad_to_rad) * np.cos(0),
                     np.sin(-betta_mu * config.grad_to_rad) * np.sin(0),
@@ -197,7 +198,7 @@ def create_gif(i_angle, betta_mu, phi_range_column, theta_range_column):
         fig.suptitle(figure_title, fontsize=14)
 
         # Hide axes ticks
-        hide_axes_and_background(ax)
+        # hide_axes_and_background(ax)
 
     ani = animation.FuncAnimation(fig, animate, frames=60, interval=10)
 
@@ -292,11 +293,6 @@ def visualise_3d_configuration(i_angle, betta_mu, phi_range_column, theta_range_
         ax.view_init(90 - elevation / config.grad_to_rad, azimuth / config.grad_to_rad, roll=roll_angle)
         # ax.view_init(0, phase, roll=config.betta_mu_deg)
 
-        # Hide axes ticks
-        # ax.set_xticks([])
-        # ax.set_yticks([])
-        # ax.set_zticks([])
-
     slider1.on_changed(rotate)
 
     ax_box = fig.add_axes([0.25, 0.03, 0.05, 0.05])
@@ -364,7 +360,7 @@ def visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, ph
 if __name__ == "__main__":
     gif_flag = False
     config_vectors_flag = False
-    phase_flag = True
+    phase_flag = False
 
     lim_coeff_for_axis = 0.1
 
