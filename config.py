@@ -2,16 +2,70 @@ from numpy import pi
 import numpy as np
 import os
 
+
+def update():
+    global M_accretion_rate
+    M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
+
+    global lim_phi_accretion
+    lim_phi_accretion = 2 * pi * a_portion
+
+    global phi_accretion_begin
+    phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad
+
+    global file_folder, file_folder_accretion_args, file_folder_angle_args, full_file_folder
+    file_folder_angle_args = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
+    full_file_folder = PROJECT_DIR + file_folder + file_folder_angle_args + file_folder_accretion_args
+
+
+def get_folder_with_args(i_angle, betta_mu, M_rate_c2_Led, a_portion, fi_0):
+    '''получаю имя папки откуда достать данные'''
+    file_folder = 'figs/loop/'
+    file_folder_angle_args = 'i=%d betta_mu=%d/' % (i_angle, betta_mu)
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, fi_0)
+    full_file_folder = file_folder + file_folder_angle_args + file_folder_accretion_args
+
+    return PROJECT_DIR + full_file_folder
+
+
+def get_e_obs(i_angle, phi_angle):
+    e_obs = np.array([np.sin(i_angle) * np.cos(phi_angle),
+                      np.sin(i_angle) * np.sin(phi_angle),
+                      np.cos(i_angle)])
+    return e_obs
+
+
+def set_e_obs(i_angle, phi_angle):
+    global obs_i_angle_deg, obs_i_angle, obs_phi_angle, e_obs
+    obs_i_angle_deg = i_angle
+    obs_i_angle = obs_i_angle_deg * grad_to_rad
+    obs_phi_angle = phi_angle * grad_to_rad
+    e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
+                      np.sin(obs_i_angle) * np.sin(obs_phi_angle),
+                      np.cos(obs_i_angle)])
+
+    update()
+
+
+def set_betta_mu(betta_mu_deg_arg):
+    global betta_mu, betta_mu_deg
+    betta_mu_deg = betta_mu_deg_arg
+    betta_mu = betta_mu_deg * grad_to_rad
+
+    update()
+
+
 # Parameters
 
 # глобальные постоянные
-MSun = 1.9891e33  # масса молнца [г]
+M_Sun = 1.9891e33  # масса молнца [г]
 G = 6.67e-8  # гравитационная постоянная [см3·с−2·г−1]
 c = 2.99792458e10  # скорость света [см/с]
-sigmStfBolc = 5.67e-5  # постоянная Стефана Больцмана в сгс
+sigm_Stf_Bolc = 5.67e-5  # постоянная Стефана Больцмана в сгс
 a_rad_const = 7.5657e-15  # радиационная константа p=aT**4 [эрг см-3 К-4] постоянная излучения - Плотность энергии и давление равновесного излучения
-sigmaT = 6.652e-25  # сечение томсона [см-2]
-massP = 1.67e-24  # масса протона [г]
+sigma_T = 6.652e-25  # сечение томсона [см-2]
+mass_P = 1.67e-24  # масса протона [г]
 h_plank_ergs = 6.62607015e-27  # постоянная Планка в [эрг * с]
 h_plank_evs = 4.135667669e-15  # постоянная Планка в [эв * с]
 k_bolc = 1.380649e-16  # постоянная Больцмана [эрг/К]
@@ -19,7 +73,7 @@ k_bolc = 1.380649e-16  # постоянная Больцмана [эрг/К]
 grad_to_rad = pi / 180
 
 # параметры НЗ
-M_ns = 1.4 * MSun  # масса нз [г]
+M_ns = 1.4 * M_Sun  # масса нз [г]
 R_ns = 1e6  # радиус нз [см]
 # H = 2 * 10 ** 13  # магнитное поле стр 19 над формулой 37
 mu = 0.1e30  # магнитный момент [Гаусс * см3]
@@ -30,7 +84,7 @@ H = 2 * mu / R_ns ** 3
 dRe_div_Re = 0.25  # взял просто число
 # M_accretion_rate = 10 ** 38 * R_ns / G / MSun  # темп аккреции
 ksi_rad = 3 / 2
-a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
+ksi_param = 0.5  # между 1 и 2 формулой в статье - размер магнитосферы
 k = 0.35  # opacity непрозрачность
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
@@ -38,7 +92,7 @@ L_edd = 4 * pi * G * M_ns * c / k
 M_rate_c2_Led = 30
 M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
 
-ksi_param = 0.5  # между 1 и 2 формулой в статье - размер магнитосферы
+a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
 
 lim_phi_accretion = 2 * pi * a_portion  # верхний предел по phi
 phi_accretion_begin_deg = 0  # нижний предел по phi
@@ -69,58 +123,6 @@ e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
                   np.sin(obs_i_angle) * np.sin(obs_phi_angle),
                   np.cos(obs_i_angle)])
 
-
-def update():
-    global M_accretion_rate
-    M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
-
-    global lim_phi_accretion
-    lim_phi_accretion = 2 * pi * a_portion
-
-    global phi_accretion_begin
-    phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad
-
-    global file_folder, file_folder_args, file_folder_angle, full_file_folder
-    file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
-    full_file_folder = file_folder + file_folder_angle + file_folder_args
-
-
-def get_full_file_folder(i_angle, betta_mu, M_rate_c2_Led, a_portion, fi_0):
-    file_folder = 'figs/loop/'
-    file_folder_angle = 'i=%d betta_mu=%d/' % (i_angle, betta_mu)
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, fi_0)
-    full_file_folder = file_folder + file_folder_angle + file_folder_args
-    return full_file_folder
-
-
-def get_e_obs(i_angle, phi_angle):
-    e_obs = np.array([np.sin(i_angle) * np.cos(phi_angle),
-                      np.sin(i_angle) * np.sin(phi_angle),
-                      np.cos(i_angle)])
-    return e_obs
-
-
-def set_e_obs(i_angle, phi_angle):
-    global obs_i_angle_deg, obs_i_angle, obs_phi_angle, e_obs
-    obs_i_angle_deg = i_angle
-    obs_i_angle = obs_i_angle_deg * grad_to_rad
-    obs_phi_angle = phi_angle * grad_to_rad
-    e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
-                      np.sin(obs_i_angle) * np.sin(obs_phi_angle),
-                      np.cos(obs_i_angle)])
-
-    update()
-
-
-def set_betta_mu(betta_mu_deg_arg):
-    global betta_mu, betta_mu_deg
-    betta_mu_deg = betta_mu_deg_arg
-    betta_mu = betta_mu_deg * grad_to_rad
-
-    update()
-
-
 # угол между осью вращения системы и собственным вращением НЗ (берем ось z сонаправленно с осью собств. вращения omega)
 betta_rotate = 0 * grad_to_rad
 phi_rotate = 0 * grad_to_rad
@@ -129,13 +131,15 @@ betta_mu_deg = 30
 betta_mu = betta_mu_deg * grad_to_rad
 phi_mu_0 = 0 * grad_to_rad
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-print(ROOT_DIR.replace('\\', '/'))
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = PROJECT_DIR.replace('\\', '/') + '/'
 
 file_folder = 'figs/loop/'
-file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
-file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
-full_file_folder = file_folder + file_folder_angle + file_folder_args
+file_folder_angle_args = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
+file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
+full_file_folder = file_folder + file_folder_angle_args + file_folder_accretion_args
+
+# print(PROJECT_DIR + full_file_folder)
 
 # для pretty графиков - индекс по энергии и сколько subfigures
 N_column_plot = 5

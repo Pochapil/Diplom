@@ -27,8 +27,8 @@ ax = fig.add_subplot(111)
 
 for i in range(N_deg):
     file_folder = config.file_folder
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg[i])
-    full_file_folder = file_folder + file_folder_args
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg[i])
+    full_file_folder = file_folder + file_folder_accretion_args
 
     working_folder = full_file_folder + folder
 
@@ -65,8 +65,8 @@ for j in range(len(M_rate_c2_Led)):
     for k in range(len(a_portion)):
         for i in range(N_deg):
             file_folder = config.file_folder
-            file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led[j], a_portion[k], phi_accretion_begin_deg[i])
-            full_file_folder = file_folder + file_folder_args
+            file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led[j], a_portion[k], phi_accretion_begin_deg[i])
+            full_file_folder = file_folder + file_folder_accretion_args
 
             working_folder = full_file_folder + folder
 
@@ -102,8 +102,8 @@ ax = fig.add_subplot(111)
 
 for i in range(len(M_rate_c2_Led)):
     file_folder = config.file_folder
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led[i], a_portion, phi_accretion_begin_deg)
-    full_file_folder = file_folder + file_folder_args
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led[i], a_portion, phi_accretion_begin_deg)
+    full_file_folder = file_folder + file_folder_accretion_args
 
     working_folder = full_file_folder + folder
 
