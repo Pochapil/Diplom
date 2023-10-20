@@ -1,23 +1,9 @@
 import numpy as np
-import multiprocessing as mp
-from itertools import repeat
-import time
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-import matplotlib as mpl
-import scienceplots
 
-import geometricTask.matrix as matrix
 import config
-import accretionColumnService
-from accretionColumn import AccretionColumn
-import vectors
 import main_service
-
-import plot_from_main
-import plot_luminosity_in_range
-import plot_L_nu
-import plot_nu_L_nu
 
 plt.style.use(['science', 'notebook', 'grid'])
 
@@ -96,7 +82,7 @@ marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
 # меняем углы
 
 buff_marker = 0
-
+# такой порядок: a, mc2, i, beta, fi - для того, чтобы делать colormesh x = beta, y=i; по fi делаем усреднение
 final_final_array = np.zeros((len(a_portion_arr), len(mc2), len(i_angle), len(betta_mu), len(fi_0)))
 
 bins_size = 6
@@ -138,8 +124,39 @@ for a_index in range(len(a_portion_arr)):
 ax.set_xlabel(r'$\phi_0$', fontsize=24)
 ax.set_ylabel(r'$PF_{' + '%.2f' % energy_array[energy_index] + r'}$', fontsize=24)
 
-plt.legend(ncol=3, fontsize=10, framealpha=0.2)
+
+# plt.legend(ncol=3, fontsize=10, framealpha=0.2)
 # plt.show()
+
+
+def get_data(i_angle_arr, betta_mu_arr, a_arr, mc2_arr, fi_0, energy_index=8):
+    folder = 'nu_L_nu/'
+    file_name = 'PF.txt'
+
+    final_final_array = np.zeros((len(a_arr), len(mc2_arr), len(i_angle_arr), len(betta_mu_arr), len(fi_0)))
+
+    for a_index in range(len(a_arr)):
+        for mc_index in range(len(mc2_arr)):
+            for i_angle_index in range(len(i_angle_arr)):
+                for betta_mu_index in range(len(betta_mu_arr)):
+                    final_array = []
+                    for fi_0_index in range(len(fi_0)):
+                        full_file_folder = get_folder_with_args(i_angle_arr[i_angle_index],
+                                                                betta_mu_arr[betta_mu_index],
+                                                                mc2_arr[mc_index], a_arr[a_index],
+                                                                fi_0[fi_0_index])
+
+                        PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+                        final_array.append(PF_array[energy_index])
+
+                    # label = r'$\theta{obs}$' + ('=%d' % obs_i_angle_deg) + (r'$\beta_{\mu}$') + ('=%d' % betta_mu_deg) + \
+                    #         ('a=%0.2f' % a_portion) + (r'$\dot{m}$') + ('=%d' % M_rate_c2_Led)
+
+                    # label = 'i=%d betta_mu=%d a=%0.2f m=%d' % (obs_i_angle_deg, betta_mu_deg, a_portion, M_rate_c2_Led)
+                    final_final_array[a_index][mc_index][i_angle_index][betta_mu_index] = final_array
+
+    return final_final_array
+
 
 '''Bars'''
 
