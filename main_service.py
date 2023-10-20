@@ -8,6 +8,7 @@ import config
 
 
 def create_file_path(file_path):
+    # parents - создает пропущенные папки если их нет, exist_ok=True - не выдает ошибку если существует папка
     pathlib.Path(file_path).mkdir(parents=True, exist_ok=True)
 
 
