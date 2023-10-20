@@ -130,8 +130,8 @@ def get_Teff_distribution(R_e, delta_ns, A_normal):
                 s * config.G * config.M_ns)
 
     # получаем эффективную температуру из закона Стефана-Больцмана
-    Teff = (fTheta() / config.sigmStfBolc) ** (1 / 4)
-    Teffbs = (fThetabs(ksi_bs) / config.sigmStfBolc) ** (1 / 4)
+    Teff = (fTheta() / config.sigm_Stf_Bolc) ** (1 / 4)
+    Teffbs = (fThetabs(ksi_bs) / config.sigm_Stf_Bolc) ** (1 / 4)
 
     # формула 37, 1 - полная светимость
     L_x = (1 - beta) * config.M_accretion_rate * config.G * config.M_ns / config.R_ns

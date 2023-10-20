@@ -175,7 +175,7 @@ class AccretionColumn:
                 for i in range(config.N_phi_accretion):
                     # /pi т.к считаем мощность, которая приходит на наблюдателя, а не всю светимость (пи входит в сигма)
                     # 4 * - для L_iso
-                    simps_integrate_step[i] = np.abs(4 * config.sigmStfBolc * scipy.integrate.simps(
+                    simps_integrate_step[i] = np.abs(4 * config.sigm_Stf_Bolc * scipy.integrate.simps(
                         self.T_eff ** 4 * np.array(self.cos_psi_range[t][i][:]) * np.array(dS_simps), self.theta_range))
                 sum_simps_integrate[t] = scipy.integrate.simps(simps_integrate_step, self.phi_range)
 
@@ -190,7 +190,7 @@ class AccretionColumn:
             for i in range(config.N_phi_accretion):
                 # /pi т.к считаем мощность, которая приходит на наблюдателя, а не всю светимость (пи входит в сигма)
                 # 4 * - для L_iso
-                simps_integrate_step[i] = np.abs(config.sigmStfBolc * scipy.integrate.simps(
+                simps_integrate_step[i] = np.abs(config.sigm_Stf_Bolc * scipy.integrate.simps(
                     self.T_eff ** 4 * np.array(self.cos_psi_range[t_index][i][:]) * np.array(dS_simps),
                     self.theta_range))
             sum_simps_integrate = scipy.integrate.simps(simps_integrate_step, self.phi_range)
@@ -202,8 +202,8 @@ class AccretionColumn:
 
             total_luminosity_step = [0] * config.N_phi_accretion
             for i in range(config.N_phi_accretion):
-                total_luminosity_step[i] = config.sigmStfBolc * scipy.integrate.simps(self.T_eff ** 4 * dS_simps,
-                                                                                      self.theta_range)
+                total_luminosity_step[i] = config.sigm_Stf_Bolc * scipy.integrate.simps(self.T_eff ** 4 * dS_simps,
+                                                                                        self.theta_range)
             total_luminosity = scipy.integrate.simps(total_luminosity_step, self.phi_range)
 
             return total_luminosity
