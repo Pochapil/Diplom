@@ -95,7 +95,6 @@ def plot_figs():
     fig = main_service.create_figure(ksi, data_array[0], x_axis_label=r'$\xi$',
                                      y_axis_label=r'$T_{eff} \: [K]$', is_y_2d=False)
 
-
     # fig = main_service.create_figure(theta_range, data_array[0], x_axis_label=r'$\theta$',
     #                                  y_axis_label=r'$T_{eff} \: [K]$', is_y_2d=False)
     file_name = 'T_eff.png'
@@ -103,4 +102,18 @@ def plot_figs():
 
 
 if __name__ == '__main__':
+    i_angle = 60
+    betta_mu = 40
+    mc2 = 200
+    a_portion = 0.25
+    fi_0 = 0
+
+    config.set_e_obs(i_angle, 0)
+    config.set_betta_mu(betta_mu)
+    config.M_rate_c2_Led = mc2
+    config.a_portion = a_portion
+    config.phi_accretion_begin_deg = fi_0
+
+    config.update()
+
     plot_figs()

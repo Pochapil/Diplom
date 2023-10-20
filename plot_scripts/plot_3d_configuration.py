@@ -874,13 +874,13 @@ def visualise_3d_star(phi_range_column, theta_range_column):
 
 if __name__ == "__main__":
 
-    gif_flag = True
+    gif_flag = False
     config_vectors_flag = False
     phase_flag = False
 
     lim_coeff_for_axis = 0.1
 
-    i_angle = 0
+    i_angle = 30
     betta_mu = 40
 
     mc2 = 30
@@ -915,10 +915,10 @@ if __name__ == "__main__":
     # plot_3d_configuration(phi_range_column, theta_range_column, 40, 60, 0.8)
     visualise_3d_configuration(phi_range_column, theta_range_column)
 
-    file_folder_angle = 'i=%d betta_mu=%d/' % (config.obs_i_angle_deg, config.betta_mu_deg)
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (
+    file_folder_angle_args = 'i=%d betta_mu=%d/' % (config.obs_i_angle_deg, config.betta_mu_deg)
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (
         config.M_rate_c2_Led, config.a_portion, config.phi_accretion_begin_deg)
-    save_folder = 'figs/phases/' + file_folder_angle + file_folder_args
+    save_folder = config.PROJECT_DIR + 'figs/phases/' + file_folder_angle_args + file_folder_accretion_args
 
     if phase_flag:
         phase = 0.5

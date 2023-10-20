@@ -1,8 +1,6 @@
 import sys
 
 import numpy as np
-import multiprocessing as mp
-from itertools import repeat
 import time
 import matplotlib.pyplot as plt
 
@@ -13,10 +11,7 @@ from accretionColumn import AccretionColumn
 import vectors
 import main_service
 
-import plot_from_main
-import plot_luminosity_in_range
-import plot_L_nu
-import plot_nu_L_nu
+from plot_scripts import plot_from_main, plot_luminosity_in_range, plot_nu_L_nu, plot_L_nu
 
 if __name__ == '__main__':
     def plot_all():

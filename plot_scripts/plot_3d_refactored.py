@@ -202,7 +202,7 @@ def create_gif(i_angle, betta_mu, phi_range_column, theta_range_column):
 
     ani = animation.FuncAnimation(fig, animate, frames=60, interval=10)
 
-    file_folder = 'figs/gifs/'
+    file_folder = '../figs/gifs/'
     file_name = 'i=%d betta_mu=%d a=%0.2f m=%d fi0=%d ani.gif' % (
         config.obs_i_angle_deg, config.betta_mu_deg, config.a_portion, config.M_rate_c2_Led,
         config.phi_accretion_begin_deg)
@@ -397,10 +397,10 @@ if __name__ == "__main__":
 
     visualise_3d_configuration(i_angle, betta_mu, phi_range_column, theta_range_column)
 
-    file_folder_angle = 'i=%d betta_mu=%d/' % (config.obs_i_angle_deg, config.betta_mu_deg)
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (
+    file_folder_angle_args = 'i=%d betta_mu=%d/' % (config.obs_i_angle_deg, config.betta_mu_deg)
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (
         config.M_rate_c2_Led, config.a_portion, config.phi_accretion_begin_deg)
-    save_folder = 'figs/phases/' + file_folder_angle + file_folder_args
+    save_folder = config.PROJECT_DIR + 'figs/phases/' + file_folder_angle_args + file_folder_accretion_args
 
     if phase_flag:
         phase = 0.75

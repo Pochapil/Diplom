@@ -23,17 +23,6 @@ plt.style.use(['science', 'notebook', 'grid'])  # для красивых гра
 marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
 
 
-def get_folder_with_args(obs_i_angle_deg, betta_mu_deg, mc2, a_portion, fi_0):
-    '''получаю имя папки откуда достать данные'''
-
-    file_folder = 'figs/loop/'
-    file_folder_angle = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
-    file_folder_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (mc2, a_portion, fi_0)
-    full_file_folder = file_folder + file_folder_angle + file_folder_args
-
-    return full_file_folder
-
-
 def get_PF_data(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8):
     '''достаю массивы PF для указанных входных аргументов'''
 
@@ -48,10 +37,10 @@ def get_PF_data(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, ene
                 for betta_mu_index in range(len(betta_mu_arr)):
                     final_array = []
                     for fi_0_index in range(len(fi_0_arr)):
-                        full_file_folder = get_folder_with_args(i_angle_arr[i_angle_index],
-                                                                betta_mu_arr[betta_mu_index],
-                                                                mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                                fi_0_arr[fi_0_index])
+                        full_file_folder = config.get_folder_with_args(i_angle_arr[i_angle_index],
+                                                                       betta_mu_arr[betta_mu_index],
+                                                                       mc2_arr[mc2_index], a_portion_arr[a_index],
+                                                                       fi_0_arr[fi_0_index])
 
                         PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
                         final_array.append(PF_array[energy_index])
@@ -126,8 +115,7 @@ def plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_a
 
     # получаем массивы для отрисовки
     dispersion_arr, mean_arr, max_min_arr = get_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr,
-                                                              fi_0_arr,
-                                                              final_final_array=final_final_array)
+                                                              fi_0_arr, final_final_array=final_final_array)
     # словари для циклов
     title_dict = {0: 'mean(PF)', 1: r'$\sigma = \sqrt{D[PF]}$', 2: 'max(PF) - min(PF)'}
     data_dict = {0: mean_arr, 1: dispersion_arr, 2: max_min_arr}
@@ -152,7 +140,8 @@ def plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_a
             x_axis_label = r'$\beta_{\mu}$'
             y_axis_label = r'$\theta_{obs}$'
 
-            save_folder = 'figs/colormesh_mean_disp/mc2=%d/a=%0.2f/' % (mc2_arr[mc2_index], a_portion_arr[a_index])
+            save_folder = config.PROJECT_DIR + 'figs/colormesh_mean_disp/mc2=%d/a=%0.2f/' % (
+            mc2_arr[mc2_index], a_portion_arr[a_index])
 
             save_file_name = 'colormesh_mean_disp_fig.png'
             plot_and_save_col_bar(1, 3, save_file_name)
@@ -199,9 +188,9 @@ def plot_L_nu(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energ
                     L_nu_data_dict = {}
                     color_dict = {}
                     for fi_0_index in range(len(fi_0_arr)):
-                        full_file_folder = get_folder_with_args(i_angle_arr[i_angle_index],
-                                                                betta_mu_arr[betta_mu_index], mc2_arr[mc2_index],
-                                                                a_portion_arr[a_index], fi_0_arr[fi_0_index])
+                        full_file_folder = config.get_folder_with_args(i_angle_arr[i_angle_index],
+                                                                       betta_mu_arr[betta_mu_index], mc2_arr[mc2_index],
+                                                                       a_portion_arr[a_index], fi_0_arr[fi_0_index])
 
                         L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -239,7 +228,7 @@ def plot_L_nu(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energ
                 ax.set_xscale('log')
                 ax.legend()
 
-                save_folder = 'figs/PF_to_L_nu/mc_a/colors/'
+                save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a/colors/'
                 save_file_name = 'i=%d betta_mu=%d PF_to_L_nu_color.png' % (
                     i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index])
                 main_service.save_figure(fig, save_folder, save_file_name)
@@ -253,7 +242,7 @@ def plot_L_nu(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energ
                 ax1.set_xscale('log')
                 ax1.legend()
 
-                save_folder = 'figs/PF_to_L_nu/mc_a/noncolors/'
+                save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a/noncolors/'
                 save_file_name = 'i=%d betta_mu=%d PF_to_L_nu.png' % (
                     i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index])
                 main_service.save_figure(fig1, save_folder, save_file_name)
@@ -277,10 +266,10 @@ def plot_L_nu_iso(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, e
 
                     L_nu_data = []
                     for fi_0_index in range(len(fi_0_arr)):
-                        full_file_folder = get_folder_with_args(i_angle_arr[i_angle_index],
-                                                                betta_mu_arr[betta_mu_index],
-                                                                mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                                fi_0_arr[fi_0_index])
+                        full_file_folder = config.get_folder_with_args(i_angle_arr[i_angle_index],
+                                                                       betta_mu_arr[betta_mu_index],
+                                                                       mc2_arr[mc2_index], a_portion_arr[a_index],
+                                                                       fi_0_arr[fi_0_index])
 
                         L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -294,8 +283,8 @@ def plot_L_nu_iso(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, e
                         i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index], a_portion_arr[a_index],
                         mc2_arr[mc2_index])
 
-                    save_folder = 'figs/L_nu_to_phi_to_phase/mc2=%d a=%0.2f/' % (
-                    mc2_arr[mc2_index], a_portion_arr[a_index])
+                    save_folder = config.PROJECT_DIR + 'figs/L_nu_to_phi_to_phase/mc2=%d a=%0.2f/' % (
+                        mc2_arr[mc2_index], a_portion_arr[a_index])
                     save_file_name = 'i=%d betta_mu=%d L_nu_to_phi_to_phase.png' % (
                         i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index])
 
@@ -330,10 +319,10 @@ def plot_L_nu_avg_on_fi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_
                     L_nu_data = []
 
                     for fi_0_index in range(len(fi_0_arr)):
-                        full_file_folder = get_folder_with_args(i_angle_arr[i_angle_index],
-                                                                betta_mu_arr[betta_mu_index],
-                                                                mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                                fi_0_arr[fi_0_index])
+                        full_file_folder = config.get_folder_with_args(i_angle_arr[i_angle_index],
+                                                                       betta_mu_arr[betta_mu_index],
+                                                                       mc2_arr[mc2_index], a_portion_arr[a_index],
+                                                                       fi_0_arr[fi_0_index])
 
                         L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -345,7 +334,8 @@ def plot_L_nu_avg_on_fi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_
                                    (r'$\beta_{\mu}$') + ('=%d' % betta_mu_arr[betta_mu_index]) + (r'$^\circ$') + \
                                    'a=%0.2f m=%d' % (a_portion_arr[a_index], mc2_arr[mc2_index])
 
-                    save_folder = 'figs/L_nu_avg_on_phase_to_phi/mc2=%d a=%0.2f/' % (mc2_arr[mc2_index], a_portion_arr[a_index])
+                    save_folder = config.PROJECT_DIR + 'figs/L_nu_avg_on_phase_to_phi/mc2=%d a=%0.2f/' % (
+                        mc2_arr[mc2_index], a_portion_arr[a_index])
                     save_file_name = 'i=%d betta_mu=%d L_nu_avg_on_phase_to_phi.png' % (
                         i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index])
 
@@ -381,8 +371,9 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
         for mc2_index in range(len(mc2_arr)):
             final_array = []
             for fi_0_index in range(len(fi_0_arr)):
-                full_file_folder = get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                        fi_0_arr[fi_0_index])
+                full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
+                                                               a_portion_arr[a_index],
+                                                               fi_0_arr[fi_0_index])
 
                 PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
                 final_array.append(PF_array[energy_index])
@@ -409,8 +400,9 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
             L_nu_data_dict = {}
             color_dict = {}
             for fi_0_index in range(len(fi_0_arr)):
-                full_file_folder = get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                        fi_0_arr[fi_0_index])
+                full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
+                                                               a_portion_arr[a_index],
+                                                               fi_0_arr[fi_0_index])
 
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -463,7 +455,7 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
         # fig.suptitle(figure_title, fontsize=14)
 
-        save_folder = 'figs/PF_to_L_nu/mc_a_many/colors/' + 'a=%0.2f/' % a_portion_arr[a_index]
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/colors/' + 'a=%0.2f/' % a_portion_arr[a_index]
         save_file_name = 'i=%d betta_mu=%d PF_to_L_nu_color.png' % (i_angle, betta_mu)
         main_service.save_figure(fig, save_folder, save_file_name)
 
@@ -474,7 +466,7 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
         ax1.set_xscale('log')
         ax1.legend()
 
-        save_folder = 'figs/PF_to_L_nu/mc_a_many/noncolors/' + 'a=%0.2f/' % a_portion_arr[a_index]
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/noncolors/' + 'a=%0.2f/' % a_portion_arr[a_index]
         save_file_name = 'i=%d betta_mu=%d PF_to_L_nu.png' % (i_angle, betta_mu)
         main_service.save_figure(fig1, save_folder, save_file_name)
 
@@ -484,7 +476,7 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
     ax2.set_xscale('log')
 
-    save_folder = 'figs/PF_to_L_nu/mc_a_many/noncolors/'
+    save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/noncolors/'
     save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (i_angle, betta_mu)
     main_service.save_figure(fig2, save_folder, save_file_name)
 
@@ -504,8 +496,9 @@ def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi
         for mc2_index in range(len(mc2_arr)):
             final_array = []
             for fi_0_index in range(len(fi_0_arr)):
-                full_file_folder = get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                        fi_0_arr[fi_0_index])
+                full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
+                                                               a_portion_arr[a_index],
+                                                               fi_0_arr[fi_0_index])
 
                 PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
                 final_array.append(PF_array[energy_index])
@@ -538,8 +531,9 @@ def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi
             for mc2_index in range(len(mc2_arr)):
                 L_nu_data_dict = {}
 
-                full_file_folder = get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index], a_portion_arr[a_index],
-                                                        fi_0_arr[fi_0_index])
+                full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
+                                                               a_portion_arr[a_index],
+                                                               fi_0_arr[fi_0_index])
 
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
 
@@ -589,7 +583,8 @@ def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi
 
         ax2.set_xscale('log')
 
-        save_folder = 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' + 'i=%d betta_mu=%d/' % (i_angle, betta_mu)
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' \
+                      + 'i=%d betta_mu=%d/' % (i_angle, betta_mu)
         save_file_name = 'fi_0=%d' % fi_0_arr[fi_0_index]
         main_service.save_figure(fig2, save_folder, save_file_name)
 
@@ -602,29 +597,42 @@ def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi
         ax1.set_xscale('log')
         ax1.legend(ncol=3, fontsize=10, framealpha=0.2)
 
-        save_folder = 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' + 'i=%d betta_mu=%d/' % (i_angle, betta_mu)
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' +\
+                      'i=%d betta_mu=%d/' % (i_angle, betta_mu)
         save_file_name = 'all fi_0'
         main_service.save_figure(fig1, save_folder, save_file_name)
 
-
-i_angle_arr = [10 * i for i in range(1, 10)]
-betta_mu_arr = [10 * i for i in range(1, 10)]
-mc2_arr = [30, 100]
-a_portion_arr = [0.25, 0.65]
-fi_0_arr = [20 * i for i in range(18)]
 
 energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
 energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
 energy_arr.append(config.energy_max)
 
-final_final_array = get_PF_data(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
-plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, final_final_array=final_final_array)
+all_flag = False
+if all_flag:
+    i_angle_arr = [10 * i for i in range(1, 10)]
+    betta_mu_arr = [10 * i for i in range(1, 10)]
+    mc2_arr = [30, 100]
+    a_portion_arr = [0.25, 0.65]
+    fi_0_arr = [20 * i for i in range(18)]
+
+    energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
+    energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
+    energy_arr.append(config.energy_max)
+
+    final_final_array = get_PF_data(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
+    plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, final_final_array=final_final_array)
 
 i_angle = 80
 betta_mu = 80
 mc2_arr = [10, 20, 30, 50, 100, 200]
 a_portion_arr = [0.25, 0.65]
 fi_0_arr = [20 * i for i in range(18)]
+
+# i_angle = 60
+# betta_mu = 40
+# mc2_arr = [140]
+# a_portion_arr = [0.25]
+# fi_0_arr = [0]
 
 plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
 plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)

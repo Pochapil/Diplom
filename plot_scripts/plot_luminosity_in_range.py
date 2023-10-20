@@ -121,4 +121,18 @@ def plot_figs():
 
 
 if __name__ == '__main__':
+    i_angle = 60
+    betta_mu = 40
+    mc2 = 200
+    a_portion = 0.25
+    fi_0 = 0
+
+    config.set_e_obs(i_angle, 0)
+    config.set_betta_mu(betta_mu)
+    config.M_rate_c2_Led = mc2
+    config.a_portion = a_portion
+    config.phi_accretion_begin_deg = fi_0
+
+    config.update()
+
     plot_figs()

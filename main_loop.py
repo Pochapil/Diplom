@@ -11,10 +11,7 @@ from accretionColumn import AccretionColumn
 import vectors
 import main_service
 
-import plot_from_main
-import plot_luminosity_in_range
-import plot_L_nu
-import plot_nu_L_nu
+from plot_scripts import plot_from_main, plot_luminosity_in_range, plot_nu_L_nu, plot_L_nu
 
 if __name__ == '__main__':
     def plot_all():
@@ -36,7 +33,7 @@ if __name__ == '__main__':
     # i_angle = [60, 90]
     # betta_mu = [60, 90]
 
-    mc2 = [200]
+    mc2 = [30]
     a_portion = [0.25]
     # fi_0 = [20 * i for i in range(10, 18)]
     i_angle = [60]
@@ -152,7 +149,7 @@ if __name__ == '__main__':
                         number = top_column.inner_surface.calculate_total_luminosity()
 
                         f.write('difference L_x / L_calc - 1 : %f ' % (
-                                    (top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '%\n')
+                                (top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '%\n')
 
                         while number > 10:
                             number = number / 10
@@ -192,7 +189,7 @@ if __name__ == '__main__':
                         if save_cos_flag:
                             file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
                                                              2: 'bot_outer', 3: 'bot_inner'}
-                            cos_file_folder = 'data/cos/' + config.file_folder_angle + config.file_folder_args
+                            cos_file_folder = 'data/cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
                             for key, surface_name in file_name_for_cos_of_surfaces.items():
                                 full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
                                 for cos_index in range(config.t_max):
@@ -279,8 +276,8 @@ if __name__ == '__main__':
                         # чтобы убрать погрешности и закрыть массив точным числом
                         energy_arr.append(config.energy_max)
 
-                        PF = [0] * (
-                                config.N_energy - 1)  # -1 т.к. берем в диапазоне энергий, следовательно, на 1 меньше чем точек
+                        PF = [0] * (config.N_energy - 1)
+                        # -1 т.к. берем в диапазоне энергий, следовательно, на 1 меньше чем точек
                         data_array = [0] * (config.N_energy - 1)
                         folder = 'luminosity_in_range/'
                         for energy_index in range(config.N_energy - 1):
