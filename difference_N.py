@@ -4,18 +4,18 @@ import matplotlib.pyplot as plt
 import main_service
 import config
 
-parent_folder = 'figs/difference_N/'
+parent_folder = config.PROJECT_DIR + 'figs/difference_N/'
 curr_folder = 'luminosity_in_range/'
-file_folder_args = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
+file_folder_accretion_args = 'a=%0.2f fi_0=%d/' % (config.a_portion, config.phi_accretion_begin_deg)
 
 first_folder = 'Th 100 Phi 100/'
-full_file_folder = parent_folder + first_folder + file_folder_args + curr_folder
+full_file_folder = parent_folder + first_folder + file_folder_accretion_args + curr_folder
 
 file_name = "luminosity_in_range.txt"
 first_data_array = main_service.load_arr_from_txt(full_file_folder, file_name)
 
 second_folder = 'Th 300 Phi 300 Om 3/'
-full_file_folder = parent_folder + second_folder + file_folder_args + curr_folder
+full_file_folder = parent_folder + second_folder + file_folder_accretion_args + curr_folder
 
 second_data_array = main_service.load_arr_from_txt(full_file_folder, file_name)
 

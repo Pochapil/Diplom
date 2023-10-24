@@ -10,14 +10,15 @@ import main_service
 import plot_sky_map
 
 if __name__ == '__main__':
-    mc2 = [10, 30]
-    a_portion = [0.1]
+    # mc2 = [10, 30, 100]
+    mc2 = [30]
+    a_portion = [0.25]
     fi_0 = [0]
     #mc2 = [10, 30, 100]
     #a_portion = [0.1, 0.25, 0.65, 1]
     # fi_0 = [20 * i for i in range(1, 18)]
-    betta_mu = [60]
-
+    # betta_mu = [30, 60, 90]
+    betta_mu = [20]
     obs_i_angle = np.linspace(0, 180, 19)
 
     time_start = time.time()
@@ -34,8 +35,8 @@ if __name__ == '__main__':
 
                     config.update()
 
-                    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
-                    working_folder = file_folder + config.file_folder_args
+                    file_folder = config.PROJECT_DIR + 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+                    working_folder = file_folder + config.file_folder_accretion_args
 
                     print('beta_mu=%d' % config.betta_mu_deg)
 
