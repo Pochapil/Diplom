@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     time_start = time.time()
 
-    file_folder = 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
+    file_folder = config.PROJECT_DIR + 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
     working_folder = file_folder + config.file_folder_args
 
     # ------------------- создание папки для графиков --------------------------
