@@ -26,7 +26,7 @@ def plot_figs():
     energy_arr = main_service.load_arr_from_txt(config.full_file_folder, file_name)
     N_energy = config.N_energy
 
-    fig = main_service.create_figure(energy_arr, PF, x_axis_label=r'$\Phi$', y_axis_label='PF', is_y_2d=False)
+    fig = main_service.create_figure(energy_arr, PF, x_axis_label=r'$h \nu$' + ' [keV]', y_axis_label='PF', is_y_2d=False)
 
     file_name = "PF.png"
     main_service.save_figure(fig, working_folder, file_name)
