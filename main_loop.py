@@ -29,16 +29,18 @@ if __name__ == '__main__':
     # a_portion = [0.65]
     # fi_0 = [20 * i for i in range(18)]
 
-    fi_0 = [0]
+    fi_0 = [60, 120]
     # i_angle = [60, 90]
     # betta_mu = [60, 90]
 
+    # i_angle = [10 * i for i in range(1, 10)]
+    # betta_mu = [10 * i for i in range(1, 10)]
     mc2 = [30]
-    a_portion = [0.25]
+    a_portion = [0.65]
     # fi_0 = [20 * i for i in range(10, 18)]
+
     i_angle = [60]
     betta_mu = [40]
-    # betta_mu = [10, 20, 40, 50, 70, 80]
 
     # i_angle = [30]
     # betta_mu = [60, 90]
@@ -162,20 +164,38 @@ if __name__ == '__main__':
 
                         # ------------------ начало заполнения матриц косинусов ---------------------------
                         # for key, surface in surfaces.items():
-                        #     surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end, top_column.outer_surface.phi_range,
-                        #                                bot_column.outer_surface.phi_range, e_obs)
+                        #     if config.opacity_above_shock == 0:
+                        #         surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
+                        #                                    top_column.outer_surface.phi_range,
+                        #                                    bot_column.outer_surface.phi_range, e_obs)
+                        #     else:
+                        #         surface.fill_cos_psi_range_with_opacity(theta_accretion_begin, theta_accretion_end,
+                        #                                                 top_column.outer_surface.phi_range,
+                        #                                                 bot_column.outer_surface.phi_range, e_obs,
+                        #                                                 config.opacity_above_shock)
 
                         # распараллелил
                         for key, surface in surfaces.items():
                             with mp.Pool(mp.cpu_count()) as pool:
-                                result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range,
-                                                                    zip(range(config.t_max),
-                                                                        repeat(theta_accretion_begin),
-                                                                        repeat(theta_accretion_end),
-                                                                        repeat(top_column.outer_surface.phi_range),
-                                                                        repeat(bot_column.outer_surface.phi_range),
-                                                                        repeat(e_obs),
-                                                                        repeat(config.betta_mu)))
+                                if config.opacity_above_shock == 0:
+                                    result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range,
+                                                                        zip(range(config.t_max),
+                                                                            repeat(theta_accretion_begin),
+                                                                            repeat(theta_accretion_end),
+                                                                            repeat(top_column.outer_surface.phi_range),
+                                                                            repeat(bot_column.outer_surface.phi_range),
+                                                                            repeat(e_obs),
+                                                                            repeat(config.betta_mu)))
+                                else:
+                                    result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range_with_opacity,
+                                                                        zip(range(config.t_max),
+                                                                            repeat(theta_accretion_begin),
+                                                                            repeat(theta_accretion_end),
+                                                                            repeat(top_column.outer_surface.phi_range),
+                                                                            repeat(bot_column.outer_surface.phi_range),
+                                                                            repeat(e_obs),
+                                                                            repeat(config.betta_mu),
+                                                                            repeat(config.opacity_above_shock)))
 
                             cos_psi_range_final = []
                             for cos_psi in result_cos_psi_range:
