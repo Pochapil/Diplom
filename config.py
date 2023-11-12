@@ -3,6 +3,62 @@ import numpy as np
 import os
 
 
+def set_config_params(mu_arg, opacity_above_shock_arg, i_angle_arg, betta_mu_arg, M_rate_c2_Led_arg, a_portion_arg,
+                      fi_0_arg):
+    global mu
+    mu = mu_arg
+
+    global opacity_above_shock
+    opacity_above_shock = opacity_above_shock_arg
+
+    global betta_mu, betta_mu_deg
+    betta_mu_deg = betta_mu_arg
+    betta_mu = betta_mu_deg * grad_to_rad
+
+    global obs_i_angle_deg, obs_i_angle, obs_phi_angle, e_obs
+    obs_i_angle_deg = i_angle_arg
+    obs_i_angle = obs_i_angle_deg * grad_to_rad
+    e_obs = np.array([np.sin(obs_i_angle) * np.cos(obs_phi_angle),
+                      np.sin(obs_i_angle) * np.sin(obs_phi_angle),
+                      np.cos(obs_i_angle)])
+
+    global M_accretion_rate, M_rate_c2_Led
+    M_rate_c2_Led = M_rate_c2_Led_arg
+    M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
+
+    global lim_phi_accretion, a_portion
+    a_portion = a_portion_arg
+    lim_phi_accretion = 2 * pi * a_portion
+
+    global phi_accretion_begin, phi_accretion_begin_deg
+    phi_accretion_begin_deg = fi_0_arg
+    phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad
+
+    update_project_dir()
+    update_folder()
+    print(full_file_folder)
+
+
+def update_folder():
+    global file_folder, file_folder_accretion_args, file_folder_angle_args, full_file_folder
+    file_folder_angle_args = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
+    file_folder_accretion_args = 'mc2=%d/a=%0.2f fi_0=%d/' % (M_rate_c2_Led, a_portion, phi_accretion_begin_deg)
+    full_file_folder = PROJECT_DIR + file_folder + file_folder_angle_args + file_folder_accretion_args
+
+
+def update_project_dir():
+    global PROJECT_DIR
+
+    if opacity_above_shock != 0 or mu != 0.1e30:
+        buf = mu
+        count = 1
+        while buf > 1:
+            count += 1
+            buf //= 10
+        # PROJECT_DIR += 'mu=%d/opacity/%0.2f/' % (count, opacity_above_shock)
+        PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/opacity={opacity_above_shock:.2f}/'
+
+
 def update():
     global M_accretion_rate
     M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
@@ -85,7 +141,8 @@ dRe_div_Re = 0.25  # взял просто число
 # M_accretion_rate = 10 ** 38 * R_ns / G / MSun  # темп аккреции
 ksi_rad = 3 / 2
 ksi_param = 0.5  # между 1 и 2 формулой в статье - размер магнитосферы
-k = 0.35  # opacity непрозрачность
+k = 0.35  # opacity непрозрачность [см**2 / г]
+opacity_above_shock = 1.0  # непрозрачность вещества над ударной волной: 0 - полностью прозрачное, 1 - непрозрачное
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
 
@@ -133,6 +190,8 @@ phi_mu_0 = 0 * grad_to_rad
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = PROJECT_DIR.replace('\\', '/') + '/'
+update_project_dir()
+#print(PROJECT_DIR)
 
 file_folder = 'figs/loop/'
 file_folder_angle_args = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
