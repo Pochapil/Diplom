@@ -141,7 +141,7 @@ def plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_a
             y_axis_label = r'$\theta_{obs}$'
 
             save_folder = config.PROJECT_DIR + 'figs/colormesh_mean_disp/mc2=%d/a=%0.2f/' % (
-            mc2_arr[mc2_index], a_portion_arr[a_index])
+                mc2_arr[mc2_index], a_portion_arr[a_index])
 
             save_file_name = 'colormesh_mean_disp_fig.png'
             plot_and_save_col_bar(1, 3, save_file_name)
@@ -380,7 +380,7 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
             final_final_array[a_index][mc2_index] = final_array
 
-    line_color_dict = {0: 'blue', 1: 'green', 2: 'orange', 3: 'red', 4: 'purple', 5: 'black'}
+    line_color_dict = {0: 'blue', 1: 'green', 2: 'orange', 3: 'red', 4: 'purple', 5: 'black', 6: 'yellow'}
     marker_index = 0
 
     folder = 'nu_L_nu/txt/'
@@ -433,12 +433,12 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
                 fillstyle = 'none'
 
             ax.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors), label=label)
-            ax1.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index])
+            ax1.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index % 6])
 
             if marker_index == 0:
-                ax2.scatter(x, y, s=30, facecolors='none', edgecolors=line_color_dict[line_color_index])
+                ax2.scatter(x, y, s=30, facecolors='none', edgecolors=line_color_dict[line_color_index % 6])
             else:
-                ax2.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index])
+                ax2.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index % 6])
 
             line_color_index += 1
 
@@ -597,7 +597,7 @@ def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi
         ax1.set_xscale('log')
         ax1.legend(ncol=3, fontsize=10, framealpha=0.2)
 
-        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' +\
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/fi_0_particular/' + \
                       'i=%d betta_mu=%d/' % (i_angle, betta_mu)
         save_file_name = 'all fi_0'
         main_service.save_figure(fig1, save_folder, save_file_name)
