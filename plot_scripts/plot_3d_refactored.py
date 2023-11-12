@@ -1,4 +1,3 @@
-import geometricTask.matrix as matrix
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, TextBox, Button
@@ -10,6 +9,7 @@ import scienceplots
 import config
 import main_service
 import vectors
+import geometricTask.matrix as matrix
 
 lim_coeff_for_axis = 0.15
 
@@ -31,8 +31,13 @@ def get_roll_angle(i_angle, betta_mu, first_vector, second_vector, phase):
         if i_angle < betta_mu and phase % 360 == 0:
             roll_angle = 180
     else:
-        roll_angle = -np.arccos(np.dot(first_vector, second_vector) / (
-                np.linalg.norm(first_vector) * np.linalg.norm(second_vector))) / config.grad_to_rad
+        r_first_vector = np.linalg.norm(first_vector)
+        r_second_vector = np.linalg.norm(second_vector)
+        if r_first_vector == 0 or r_second_vector == 0:
+            roll_angle = 0
+        else:
+            roll_angle = -np.arccos(np.dot(first_vector, second_vector) / (r_first_vector * r_second_vector))
+            roll_angle = roll_angle / config.grad_to_rad
 
     if betta_mu == 0:
         roll_angle = 0
@@ -109,6 +114,26 @@ def plot_accr_columns(ax, phi_range_column, theta_range_column):
     ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="green", alpha=0.2)
 
 
+def plot_magnet_lines(ax, phi_range_column):
+    step_theta_accretion = (np.pi / 2) / (config.N_theta_accretion - 1)
+    theta_range = np.array([step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    # верх
+    phi_range = phi_range_column
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color="blue", alpha=0.06)
+    # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
+
+    # низ
+    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="blue", alpha=0.06)
+
+
 def plot_mu_omega_vector(ax, betta_mu, lim_value):
     # вектора
     origin = [0, 0, 0]
@@ -138,6 +163,7 @@ def hide_axes_and_background(ax):
     ax.zaxis.set_pane_color((1.0, 1.0, 1.0, 0.0))
 
     ax.set_axis_off()
+
 
 # vectors.get_angles_from_vector(vector)
 
@@ -200,7 +226,7 @@ def create_gif(i_angle, betta_mu, phi_range_column, theta_range_column):
         # Hide axes ticks
         # hide_axes_and_background(ax)
 
-    ani = animation.FuncAnimation(fig, animate, frames=60, interval=10)
+    ani = animation.FuncAnimation(fig, animate, frames=60, interval=10)  # blit = True
 
     file_folder = '../figs/gifs/'
     file_name = 'i=%d betta_mu=%d a=%0.2f m=%d fi0=%d ani.gif' % (
@@ -224,6 +250,9 @@ def visualise_3d_configuration(i_angle, betta_mu, phi_range_column, theta_range_
     plot_NS(ax, phi_range_column, theta_range_column)
 
     plot_accr_columns(ax, phi_range_column, theta_range_column)
+
+    if plot_magnet_lines_flag:
+        plot_magnet_lines(ax, phi_range_column)
 
     # вектора
     plot_mu_omega_vector(ax, betta_mu, lim_value)
@@ -362,7 +391,11 @@ if __name__ == "__main__":
     config_vectors_flag = False
     phase_flag = False
 
+    plot_magnet_lines_flag = True
+
     lim_coeff_for_axis = 0.1
+    if plot_magnet_lines_flag:
+        lim_coeff_for_axis = 0.14
 
     i_angle = 60
     betta_mu = 40
@@ -403,7 +436,7 @@ if __name__ == "__main__":
     save_folder = config.PROJECT_DIR + 'figs/phases/' + file_folder_angle_args + file_folder_accretion_args
 
     if phase_flag:
-        phase = 0.75
+        phase = 0.0
         fig = visualise_3d_configuration_on_phase(phi_range_column, theta_range_column, phase)
         file_name = "phase = %0.2f.png" % phase
         main_service.save_figure(fig, save_folder, file_name)
