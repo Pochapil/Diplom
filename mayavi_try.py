@@ -22,20 +22,20 @@ def get_projection_on_surface(input_vector, surface_norm_vector):
 def get_roll_angle(first_vector, second_vector, phase):
     # first_angle = np.arctan2(first_vector[1], first_vector[0])
     # second_angle = np.arctan2(second_vector[1], second_vector[0])
-    # roll_angle = abs(second_angle - first_angle)
+    # roll_angle = second_angle - first_angle
     #
     # # print(first_vector)
     # # print(second_vector)
     # # print()
-    # # print(first_angle)
-    # # print(second_angle)
+    # print('first angle = %f' % (first_angle / config.grad_to_rad))
+    # print(second_angle / config.grad_to_rad)
+    # print()
     #
     # if (first_vector[0] < 0 and second_vector[0] < 0 or first_vector[0] > 0 and second_vector[0] > 0) \
     #         and first_vector[1] * second_vector[1] < 0:
     #     roll_angle = np.pi - roll_angle
     #
     # return roll_angle / config.grad_to_rad
-
 
     if phase % 180 == 0:
         roll_angle = 0
@@ -55,8 +55,6 @@ def get_roll_angle(first_vector, second_vector, phase):
 
     if phase > 180 and phase < 360 or phase > 540:
         roll_angle = - roll_angle
-
-
 
     return roll_angle
 
@@ -79,7 +77,7 @@ def calculate_roll_angle(i_angle, betta_mu, e_obs_mu, phase):
     mu_projection_on_view_plane = get_projection_on_surface(np.array([0, 0, 1]), view_plane_normal)
 
     roll_angle = get_roll_angle(omega_projection_on_view_plane, mu_projection_on_view_plane, phase)
-    print(roll_angle)
+    # print(roll_angle)
     return roll_angle
 
 
@@ -161,6 +159,29 @@ def get_data_for_columns(theta_range_column, phi_range_column, fi_0):
     z = r * np.cos(theta_range)
 
     return x, y, z
+
+
+def get_data_for_magnet_lines(theta_range_column, phi_range_column, fi_0):
+    step_theta_accretion = (np.pi / 2 - theta_range_column[-1]) / (config.N_theta_accretion - 1)
+    theta_range = np.array([theta_range_column[-1] + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+    phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    # верх
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    return x, y, z
+
+    ax.plot_wireframe(x, y, z, rstride=4, cstride=4, color="blue", alpha=0.06)
+    # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
+
+    # низ
+    ax.plot_wireframe(-x, -y, -z, rstride=4, cstride=4, color="blue", alpha=0.06)
 
 
 def plot_magnet_lines(ax, phi_range_column):
@@ -251,6 +272,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
         slider_i_angle = Range(0, 90, i_angle)
         slider_betta_mu = Range(0, 90, betta_mu)
         slider_phase = Range(0., 2., 0.)
+        slider_distance = Range(0.1, 5, 1)
 
         button_magnet_line = Button('draw_magnet_lines')
 
@@ -271,13 +293,27 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             # низ
             self.bot_surf = self.scene.mlab.mesh(-x, -y, -z, color=(0, 1, 0))
 
+            self.flag_draw_magnet_lines = True
+            x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, config.phi_accretion_begin_deg)
+            opacity_for_magnet_line = 0.1
+            self.top_magnet_lines = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line)
+            self.bot_magnet_lines = self.scene.mlab.mesh(-x, -y, -z, color=(0, 0, 1), opacity=opacity_for_magnet_line)
+
+            mlab.plot3d([0, 0], [0, 0], [0, 0.6], color=(1, 0, 0), tube_radius=0.01, tube_sides=4)
+
+            omega_vector = [-np.sin(betta_mu * config.grad_to_rad) * np.cos(0),
+                            np.sin(betta_mu * config.grad_to_rad) * np.sin(0),
+                            np.cos(betta_mu * config.grad_to_rad)]
+
+            self.omega_vector = mlab.plot3d([0, omega_vector[0]], [0, omega_vector[1]], [0, omega_vector[2]],
+                                            color=(0, 0, 0), tube_radius=0.01, tube_sides=4)
             x1 = [0, 1]
             y1 = [0, 1]
             z1 = [0, 1]
             # self.omega_vec = self.scene.mlab.quiver3d(x1, y1, z1)
             # self.f()
 
-        def f(self, phase=0):
+        def view_phase(self, phase=0):
             e_obs = config.e_obs
             A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * config.grad_to_rad,
                                                          config.betta_mu)
@@ -286,42 +322,63 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             azimuth, elevation = vectors.get_angles_from_vector(e_obs_mu)
             # ax.view_init(90 - elevation / config.grad_to_rad, azimuth / config.grad_to_rad)
 
-            roll_angle = calculate_roll_angle(i_angle, betta_mu, e_obs_mu, phase)
-            # ax.view_init(90 - elevation / config.grad_to_rad, azimuth / config.grad_to_rad, roll=roll_angle)
+            roll_angle = calculate_roll_angle(config.obs_i_angle_deg, config.betta_mu_deg, e_obs_mu, phase)
+            # print(roll_angle)
 
-            self.scene.mlab.view(azimuth=azimuth / config.grad_to_rad, elevation=elevation / config.grad_to_rad)
+            # ax.view_init(90 - elevation / config.grad_to_rad, azimuth / config.grad_to_rad, roll=roll_angle)
+            distance = self.slider_distance
+            self.scene.mlab.view(azimuth=azimuth / config.grad_to_rad, elevation=elevation / config.grad_to_rad,
+                                 distance=distance, focalpoint=[0, 0, 0])
+            # roll angle считаем для плоскости камеры - поэтому roll там
+            # только здесь нашел про камеру https://docs.enthought.com/mayavi/mayavi/mlab_figures_decorations.html
             camera = self.scene.camera
             camera.roll(roll_angle)
-
-            # self.scene.mlab.roll(betta_mu-i_angle)
-            # roll = roll_angle - 90
-            # print(roll_angle)
 
         @on_trait_change('slider_i_angle, slider_betta_mu')
         def update_plot_view(self):
             global i_angle, betta_mu
             i_angle = self.slider_i_angle
             betta_mu = self.slider_betta_mu
+
             config.set_e_obs(self.slider_i_angle, 0)
             config.set_betta_mu(self.slider_betta_mu)
-            self.f()
+
+            omega_vector = [-np.sin(config.betta_mu_deg * config.grad_to_rad) * np.cos(0),
+                            np.sin(config.betta_mu_deg * config.grad_to_rad) * np.sin(0),
+                            np.cos(config.betta_mu_deg * config.grad_to_rad)]
+
+            self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
+                                                    z=[0, omega_vector[2]])
+
+            self.view_phase()
 
         @on_trait_change('slider_fi_0')
         def update_columns(self):
             x, y, z = get_data_for_columns(theta_range_column, phi_range_column, self.slider_fi_0)
             self.top_surf.mlab_source.trait_set(x=x, y=y, z=z, color=(1, 0, 0))
             self.bot_surf.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 1, 0))
+
+            x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0)
+            self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1))
+            self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1))
             # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
 
-        @on_trait_change('slider_phase')
+        @on_trait_change('slider_phase, slider_distance')
         def update_phase(self):
             phase = 360 * self.slider_phase
-            self.f(phase)
+            self.view_phase(phase)
             pass
 
         @on_trait_change('button_magnet_line')
         def update_magnet_lines(self):
-            pass
+            self.flag_draw_magnet_lines = not self.flag_draw_magnet_lines
+            if self.flag_draw_magnet_lines:
+                x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0)
+                self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1))
+                self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1))
+            else:
+                self.top_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
+                self.bot_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
 
         # the layout of the dialog created
 
@@ -334,7 +391,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
                         HGroup(
                             '_', 'slider_fi_0', 'slider_phase'
                         ),
-                        HGroup('button_magnet_line')
+                        HGroup('button_magnet_line', 'slider_distance')
                     )
                     )
 
