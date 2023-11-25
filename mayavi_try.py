@@ -272,7 +272,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
         slider_i_angle = Range(0, 90, i_angle)
         slider_betta_mu = Range(0, 90, betta_mu)
         slider_phase = Range(0., 2., 0.)
-        slider_distance = Range(0.1, 5, 1)
+        slider_distance = Range(0.1, 10, 1)
 
         button_magnet_line = Button('draw_magnet_lines')
 
@@ -296,22 +296,38 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             self.flag_draw_magnet_lines = True
             x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, config.phi_accretion_begin_deg)
             opacity_for_magnet_line = 0.1
-            self.top_magnet_lines = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line)
-            self.bot_magnet_lines = self.scene.mlab.mesh(-x, -y, -z, color=(0, 0, 1), opacity=opacity_for_magnet_line)
+            self.top_magnet_lines = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
+                                                         representation='wireframe')
+            # self.top_magnet_lines = self.scene.mlab.surf(x, y, z, color=(1, 0, 0), warp_scale=0.3,
+            #                                              representation='wireframe', line_width=0.5)
+            self.bot_magnet_lines = self.scene.mlab.mesh(-x, -y, -z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
+                                                         representation='wireframe')
 
-            mlab.plot3d([0, 0], [0, 0], [0, 0.6], color=(1, 0, 0), tube_radius=0.01, tube_sides=4)
+            mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=(1, 0, 0), tube_radius=0.005, tube_sides=4)
 
             omega_vector = [-np.sin(betta_mu * config.grad_to_rad) * np.cos(0),
                             np.sin(betta_mu * config.grad_to_rad) * np.sin(0),
                             np.cos(betta_mu * config.grad_to_rad)]
 
             self.omega_vector = mlab.plot3d([0, omega_vector[0]], [0, omega_vector[1]], [0, omega_vector[2]],
-                                            color=(0, 0, 0), tube_radius=0.01, tube_sides=4)
-            x1 = [0, 1]
-            y1 = [0, 1]
-            z1 = [0, 1]
+                                            color=(0, 0, 0), tube_radius=0.005, tube_sides=4)
+
+            # x1 = [0, 1]
+            # y1 = [0, 1]
+            # z1 = [0, 1]
             # self.omega_vec = self.scene.mlab.quiver3d(x1, y1, z1)
             # self.f()
+
+            color = (160, 82, 45)
+            color = tuple(rgb / 255 for rgb in color)
+
+            r, phi = np.mgrid[1:4:100j, 0:2 * np.pi:100j]
+            x = r * np.cos(phi)
+            y = r * np.sin(phi)
+            z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
+
+            self.accretion_disc = mlab.mesh(x, y, z, color=color)
+            self.accretion_disc.actor.actor.rotate_y(-config.betta_mu/config.grad_to_rad)
 
         def view_phase(self, phase=0):
             e_obs = config.e_obs
