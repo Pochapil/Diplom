@@ -275,6 +275,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
         slider_distance = Range(0.1, 10, 1)
 
         button_magnet_line = Button('draw_magnet_lines')
+        button_accr_disc = Button('accr_disc_omega_mu')
 
         scene = Instance(MlabSceneModel, ())
 
@@ -327,7 +328,10 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
 
             self.accretion_disc = mlab.mesh(x, y, z, color=color)
-            self.accretion_disc.actor.actor.rotate_y(-config.betta_mu/config.grad_to_rad)
+            self.accretion_disc_rotate_angle = -config.betta_mu / config.grad_to_rad
+            self.accretion_disc.actor.actor.rotate_y(self.accretion_disc_rotate_angle)
+
+            self.flag_accretion_disc_omega_mu = True  # True = omega
 
         def view_phase(self, phase=0):
             e_obs = config.e_obs
@@ -349,6 +353,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             # только здесь нашел про камеру https://docs.enthought.com/mayavi/mayavi/mlab_figures_decorations.html
             camera = self.scene.camera
             camera.roll(roll_angle)
+            # self.scene.background = (1, 1, 1)  # white background
 
         @on_trait_change('slider_i_angle, slider_betta_mu')
         def update_plot_view(self):
@@ -365,6 +370,10 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
 
             self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
                                                     z=[0, omega_vector[2]])
+
+            self.accretion_disc.actor.actor.rotate_y(-self.accretion_disc_rotate_angle)
+            self.accretion_disc_rotate_angle = -config.betta_mu / config.grad_to_rad
+            self.accretion_disc.actor.actor.rotate_y(self.accretion_disc_rotate_angle)
 
             self.view_phase()
 
@@ -396,6 +405,15 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
                 self.top_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
                 self.bot_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
 
+        @on_trait_change('button_accr_disc')
+        def update_acrr_disc(self):
+
+            if self.flag_accretion_disc_omega_mu:
+                self.accretion_disc.actor.actor.rotate_y(-self.accretion_disc_rotate_angle)
+            else:
+                self.accretion_disc.actor.actor.rotate_y(self.accretion_disc_rotate_angle)
+            self.flag_accretion_disc_omega_mu = not self.flag_accretion_disc_omega_mu
+
         # the layout of the dialog created
 
         view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
@@ -407,7 +425,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
                         HGroup(
                             '_', 'slider_fi_0', 'slider_phase'
                         ),
-                        HGroup('button_magnet_line', 'slider_distance')
+                        HGroup('button_magnet_line', 'button_accr_disc', 'slider_distance')
                     )
                     )
 
