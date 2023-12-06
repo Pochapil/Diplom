@@ -289,6 +289,120 @@ class AccretionColumn:
 
             return cos_psi_range
 
+        def fill_cos_psi_range_with_tau(self, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
+                                        bot_column_phi_range, e_obs, opacity):
+            # sum_intense изотропная светимость ( * 4 pi еще надо)
+            # для интеграла по simpson
+            cos_psi_range_final = []
+            for t in range(config.t_max):
+                cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+                # поворот
+                phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
+                # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+                A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                             config.betta_mu)
+                e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+                for i in range(config.N_phi_accretion):
+                    for j in range(config.N_theta_accretion):
+                        # умножать на N_theta
+                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        if cos_psi_range[i, j] > 0:
+                            # проверка на пересечения
+                            r = self.R_e / config.R_ns * np.sin(self.theta_range[j]) ** 2
+
+                            origin_x = np.sin(self.theta_range[j]) * np.cos(self.phi_range[i]) * r
+                            origin_y = np.sin(self.theta_range[j]) * np.sin(self.phi_range[i]) * r
+                            origin_z = np.cos(self.theta_range[j]) * r
+
+                            direction_x = e_obs_mu[0, 0]
+                            direction_y = e_obs_mu[0, 1]
+                            direction_z = e_obs_mu[0, 2]
+
+                            if accretionColumnService.check_intersection_with_sphere_and_columns(self.phi_range[i],
+                                                                                                 self.theta_range[j],
+                                                                                                 e_obs_mu,
+                                                                                                 self.ksi_shock,
+                                                                                                 theta_accretion_begin,
+                                                                                                 theta_accretion_end,
+                                                                                                 top_column_phi_range,
+                                                                                                 bot_column_phi_range,
+                                                                                                 self.surface_type,
+                                                                                                 self.R_e):
+                                cos_psi_range[i, j] = 0
+                            else:
+                                cos_psi_range[
+                                    i, j] = accretionColumnService.get_attenuation_coefficient_intersection_with_dipole_tau(
+                                    self.phi_range[i], self.theta_range[j],
+                                    e_obs_mu,
+                                    origin_x, origin_y,
+                                    origin_z,
+                                    direction_x,
+                                    direction_y,
+                                    direction_z,
+                                    self.ksi_shock,
+                                    theta_accretion_end,
+                                    top_column_phi_range,
+                                    bot_column_phi_range,
+                                    self.R_e, r)
+                        else:
+                            cos_psi_range[i, j] = 0
+                cos_psi_range_final.append(cos_psi_range)
+            self.cos_psi_range = cos_psi_range_final
+
+        def async_fill_cos_psi_range_with_tau(self, t_index, theta_accretion_begin, theta_accretion_end,
+                                              top_column_phi_range, bot_column_phi_range, e_obs, updated_betta_mu):
+            # распараллелил fill_cos_psi_range
+            cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+            # поворот
+            phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t_index
+            # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+            A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                         updated_betta_mu)
+            # print('config.betta_mu in fill cos = %f' % updated_betta_mu)
+            e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+            for i in range(config.N_phi_accretion):
+                for j in range(config.N_theta_accretion):
+                    # умножать на N_theta
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    if cos_psi_range[i, j] > 0:
+                        # проверка на пересечения
+
+                        r = self.R_e / config.R_ns * np.sin(self.theta_range[j]) ** 2
+
+                        origin_x = np.sin(self.theta_range[j]) * np.cos(self.phi_range[i]) * r
+                        origin_y = np.sin(self.theta_range[j]) * np.sin(self.phi_range[i]) * r
+                        origin_z = np.cos(self.theta_range[j]) * r
+
+                        direction_x = e_obs_mu[0, 0]
+                        direction_y = e_obs_mu[0, 1]
+                        direction_z = e_obs_mu[0, 2]
+
+                        if accretionColumnService.check_intersection_with_sphere_and_columns(self.phi_range[i],
+                                                                                             self.theta_range[j],
+                                                                                             e_obs_mu, self.ksi_shock,
+                                                                                             theta_accretion_begin,
+                                                                                             theta_accretion_end,
+                                                                                             top_column_phi_range,
+                                                                                             bot_column_phi_range,
+                                                                                             self.surface_type,
+                                                                                             self.R_e):
+                            cos_psi_range[i, j] = 0
+                        else:
+                            cos_psi_range[
+                                i, j] = accretionColumnService.get_attenuation_coefficient_intersection_with_dipole_tau(
+                                self.phi_range[i], self.theta_range[j],
+                                e_obs_mu,
+                                origin_x, origin_y, origin_z,
+                                direction_x, direction_y, direction_z,
+                                self.ksi_shock,
+                                theta_accretion_end,
+                                top_column_phi_range,
+                                bot_column_phi_range,
+                                self.R_e, r)
+                    else:
+                        cos_psi_range[i, j] = 0
+            return cos_psi_range
+
         def calculate_integral_distribution(self):
             # luminosity
             # для интеграла по simpson

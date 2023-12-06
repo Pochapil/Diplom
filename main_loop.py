@@ -29,14 +29,14 @@ if __name__ == '__main__':
     # a_portion = [0.65]
     # fi_0 = [20 * i for i in range(18)]
 
-    fi_0 = [60, 120]
+    fi_0 = [0]
     # i_angle = [60, 90]
     # betta_mu = [60, 90]
 
     # i_angle = [10 * i for i in range(1, 10)]
     # betta_mu = [10 * i for i in range(1, 10)]
     mc2 = [30]
-    a_portion = [0.65]
+    a_portion = [0.25]
     # fi_0 = [20 * i for i in range(10, 18)]
 
     i_angle = [60]
@@ -127,6 +127,16 @@ if __name__ == '__main__':
                         theta_accretion_end = top_column.outer_surface.theta_range[-1]
                         # ----------------- углы для нахождения пересечений -------------------------
 
+                        step_theta_accretion = (np.pi / 2 - top_column.outer_surface.theta_range[-1]) / (
+                                config.N_theta_accretion - 1)
+                        theta_range_for_tau = np.array(
+                            [top_column.outer_surface.theta_range[-1] + step_theta_accretion * j for j in
+                             range(config.N_theta_accretion)])
+
+                        tau_array = accretionColumnService.get_tau_for_opacity(theta_range_for_tau, R_e)
+                        file_name = "save_tau_range.txt"
+                        main_service.save_arr_as_txt(tau_array, full_file_folder, file_name)
+
                         # файл для значений параметров
                         file_name = 'save_values.txt'
                         f = open(full_file_folder + file_name, 'w')
@@ -177,7 +187,16 @@ if __name__ == '__main__':
                         # распараллелил
                         for key, surface in surfaces.items():
                             with mp.Pool(mp.cpu_count()) as pool:
-                                if config.opacity_above_shock == 0:
+                                if config.tau_flag:
+                                    result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range_with_tau,
+                                                                        zip(range(config.t_max),
+                                                                            repeat(theta_accretion_begin),
+                                                                            repeat(theta_accretion_end),
+                                                                            repeat(top_column.outer_surface.phi_range),
+                                                                            repeat(bot_column.outer_surface.phi_range),
+                                                                            repeat(e_obs),
+                                                                            repeat(config.betta_mu)))
+                                elif config.opacity_above_shock == 0:
                                     result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range,
                                                                         zip(range(config.t_max),
                                                                             repeat(theta_accretion_begin),

@@ -36,7 +36,7 @@ def set_config_params(mu_arg, opacity_above_shock_arg, i_angle_arg, betta_mu_arg
 
     update_project_dir()
     update_folder()
-    print(full_file_folder)
+    # print(full_file_folder)
 
 
 def update_folder():
@@ -49,14 +49,20 @@ def update_folder():
 def update_project_dir():
     global PROJECT_DIR
 
-    if opacity_above_shock != 0 or mu != 0.1e30:
+    if opacity_above_shock != 0 or mu != 0.1e30 or tau_flag:
         buf = mu
         count = 1
         while buf > 1:
             count += 1
             buf //= 10
         # PROJECT_DIR += 'mu=%d/opacity/%0.2f/' % (count, opacity_above_shock)
-        PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/opacity={opacity_above_shock:.2f}/'
+        if tau_flag:
+            if tau_cutoff > 0:
+                PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/' + 'tau_with_cutoff/'
+            else:
+                PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/' + 'tau/'
+        else:
+            PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/opacity={opacity_above_shock:.2f}/'
 
 
 def update():
@@ -132,7 +138,7 @@ grad_to_rad = pi / 180
 M_ns = 1.4 * M_Sun  # масса нз [г]
 R_ns = 1e6  # радиус нз [см]
 # H = 2 * 10 ** 13  # магнитное поле стр 19 над формулой 37
-mu = 0.1e30  # магнитный момент [Гаусс * см3]
+mu = 0.1e31  # магнитный момент [Гаусс * см3]
 H = 2 * mu / R_ns ** 3
 # p_spin = 3.62  # период вращения, [с]
 
@@ -142,7 +148,9 @@ dRe_div_Re = 0.25  # взял просто число
 ksi_rad = 3 / 2
 ksi_param = 0.5  # между 1 и 2 формулой в статье - размер магнитосферы
 k = 0.35  # opacity непрозрачность [см**2 / г]
-opacity_above_shock = 1.0  # непрозрачность вещества над ударной волной: 0 - полностью прозрачное, 1 - непрозрачное
+tau_flag = True
+tau_cutoff = 1
+opacity_above_shock = 0.6  # непрозрачность вещества над ударной волной: 0 - полностью прозрачное, 1 - непрозрачное
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
 
@@ -191,7 +199,7 @@ phi_mu_0 = 0 * grad_to_rad
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = PROJECT_DIR.replace('\\', '/') + '/'
 update_project_dir()
-#print(PROJECT_DIR)
+# print(PROJECT_DIR)
 
 file_folder = 'figs/loop/'
 file_folder_angle_args = 'i=%d betta_mu=%d/' % (obs_i_angle_deg, betta_mu_deg)
