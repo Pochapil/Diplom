@@ -127,6 +127,27 @@ def get_data_for_NS():
     return x, y, z
 
 
+def get_data_for_accretion_disc_side_surface(accretion_disc_con_val):
+    # cylinder
+    radius = 4
+    z = np.linspace(-accretion_disc_con_val * radius, accretion_disc_con_val * radius, config.N_theta_accretion)
+    phi = np.linspace(0, 2 * np.pi, config.N_phi_accretion)
+    phi_grid, z = np.meshgrid(phi, z)
+    x = radius * np.cos(phi_grid)
+    y = radius * np.sin(phi_grid)
+
+    return x, y, z
+
+
+def get_data_for_accretion_disc(accretion_disc_con_val):
+    r, phi = np.mgrid[1:4:100j, 0:2 * np.pi:100j]
+    x = r * np.cos(phi)
+    y = r * np.sin(phi)
+    z = accretion_disc_con_val * (x ** 2 + y ** 2) ** (1 / 2)
+    # z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
+    return x, y, z
+
+
 def plot_accr_columns_mayavi(phi_range_column, theta_range_column):
     # рисуем силовые линии
 
@@ -147,7 +168,7 @@ def plot_accr_columns_mayavi(phi_range_column, theta_range_column):
     mlab.mesh(-x, -y, -z, color=(0, 1, 0))
 
 
-def get_data_for_columns(theta_range_column, phi_range_column, fi_0):
+def get_data_for_accretion_columns(theta_range_column, phi_range_column, fi_0):
     step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
     phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
     theta_range = theta_range_column
@@ -182,6 +203,7 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
         for j in range(len(theta_range)):
             theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
             if theta_range[j] > theta_end:
+                # pass
                 mask[i][j] = True
 
     return x, y, z, mask
@@ -322,11 +344,12 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             self.NS = self.scene.mlab.mesh(x, y, z, color=(0, 0, 0))
 
             # рисуем колонки
-            x, y, z = get_data_for_columns(theta_range_column, phi_range_column, config.phi_accretion_begin_deg)
+            x, y, z = get_data_for_accretion_columns(theta_range_column, phi_range_column,
+                                                     config.phi_accretion_begin_deg)
             # верх
-            self.top_surf = self.scene.mlab.mesh(x, y, z, color=(1, 0, 0))
+            self.accretion_column_top = self.scene.mlab.mesh(x, y, z, color=(1, 0, 0))
             # низ
-            self.bot_surf = self.scene.mlab.mesh(-x, -y, -z, color=(0, 1, 0))
+            self.accretion_column_bot = self.scene.mlab.mesh(-x, -y, -z, color=(0, 1, 0))
 
             self.flag_draw_magnet_lines = True
             self.flag_cut_magnet_lines = False
@@ -360,18 +383,35 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             disc_color = (160, 82, 45)
             disc_color = tuple(rgb / 255 for rgb in disc_color)
 
-            r, phi = np.mgrid[1:4:100j, 0:2 * np.pi:100j]
-            x = r * np.cos(phi)
-            y = r * np.sin(phi)
-            z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
+            accretion_disc_con_val = 0.01
+            x, y, z = get_data_for_accretion_disc(accretion_disc_con_val)
 
-            # сначала отрисовали в betta_mu
-            self.accretion_disc = mlab.mesh(x, y, z, color=disc_color)
-            # потом повернули на -betta чтобы было перпендикулярно omega
-            self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
-            self.accretion_disc.actor.actor.rotate_y(-self.accretion_disc_rotate_angle)
+            # сначала отрисовали в СК betta_mu
+            self.accretion_disc_top = mlab.mesh(x, y, z, color=disc_color)
+            self.accretion_disc_bot = mlab.mesh(x, y, -z, color=disc_color)
 
             self.flag_accretion_disc_omega_mu = True  # True = omega
+
+            x, y, z = get_data_for_accretion_disc_side_surface(accretion_disc_con_val)
+
+            self.accretion_disc_side_surface = mlab.mesh(x, y, z, color=disc_color)
+
+            # поворачиваем диск на -betta чтобы было перпендикулярно omega -> переходим в СК omega
+            self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
+            self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
+
+        def rotate_accretion_disc(self, rotate_angle):
+            self.accretion_disc_top.actor.actor.rotate_y(rotate_angle)
+            self.accretion_disc_bot.actor.actor.rotate_y(rotate_angle)
+            self.accretion_disc_side_surface.actor.actor.rotate_y(rotate_angle)
+
+        def update_accretion_disc_rotate_angle(self):
+            if self.flag_accretion_disc_omega_mu:
+                self.rotate_accretion_disc(self.accretion_disc_rotate_angle)
+                self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
+                self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
+            else:
+                self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
 
         def view_phase(self, phase=0):
             e_obs = config.e_obs
@@ -411,25 +451,34 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
                                                     z=[0, omega_vector[2]])
 
-            if self.flag_accretion_disc_omega_mu:
-                self.accretion_disc.actor.actor.rotate_y(self.accretion_disc_rotate_angle)
-                self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
-                self.accretion_disc.actor.actor.rotate_y(-self.accretion_disc_rotate_angle)
-            else:
-                self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
+            self.update_accretion_disc_rotate_angle()
             self.view_phase()
+
+            if self.flag_draw_magnet_lines:
+                # x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0,
+                #                                     self.flag_cut_magnet_lines)
+
+                x, y, z, mask = get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column,
+                                                                    self.slider_fi_0)
+
+                self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1), mask=mask)
+                self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1), mask=mask)
 
         @on_trait_change('slider_fi_0')
         def update_columns(self):
-            x, y, z = get_data_for_columns(theta_range_column, phi_range_column, self.slider_fi_0)
-            self.top_surf.mlab_source.trait_set(x=x, y=y, z=z, color=(1, 0, 0))
-            self.bot_surf.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 1, 0))
+            x, y, z = get_data_for_accretion_columns(theta_range_column, phi_range_column, self.slider_fi_0)
+            self.accretion_column_top.mlab_source.trait_set(x=x, y=y, z=z, color=(1, 0, 0))
+            self.accretion_column_bot.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 1, 0))
 
             if self.flag_draw_magnet_lines:
-                x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0,
-                                                    self.flag_cut_magnet_lines)
-                self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1))
-                self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1))
+                # x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0,
+                #                                     self.flag_cut_magnet_lines)
+
+                x, y, z, mask = get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column,
+                                                                    self.slider_fi_0)
+
+                self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1), mask=mask)
+                self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1), mask=mask)
             # ax.plot_surface(x, y, z, cmap=plt.cm.YlGnBu_r)
 
         @on_trait_change('slider_phase, slider_distance')
@@ -453,14 +502,14 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
         @on_trait_change('button_cut_magnet_lines')
         def update_magnet_lines_cut(self):
             self.flag_cut_magnet_lines = not self.flag_cut_magnet_lines
-            if self.flag_draw_magnet_lines:
-                x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0,
-                                                    self.flag_cut_magnet_lines)
-                self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1))
-                self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1))
-            else:
-                self.top_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
-                self.bot_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
+            # if self.flag_draw_magnet_lines:
+            #     x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0,
+            #                                         self.flag_cut_magnet_lines)
+            #     self.top_magnet_lines.mlab_source.trait_set(x=x, y=y, z=z, color=(0, 0, 1))
+            #     self.bot_magnet_lines.mlab_source.trait_set(x=-x, y=-y, z=-z, color=(0, 0, 1))
+            # else:
+            #     self.top_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
+            #     self.bot_magnet_lines.mlab_source.trait_set(x=[0], y=[0], z=[0], color=(0, 0, 1))
 
             theta = np.pi / 2 - config.betta_mu
 
@@ -470,15 +519,15 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
 
             # сначала отрисовали в betta_mu
-            self.accretion_disc.mlab_source.trait_set(x=x, y=y, z=z)
+            self.accretion_disc_top.mlab_source.trait_set(x=x, y=y, z=z)
 
         @on_trait_change('button_accr_disc')
         def update_acrr_disc(self):
 
             if self.flag_accretion_disc_omega_mu:
-                self.accretion_disc.actor.actor.rotate_y(self.accretion_disc_rotate_angle)
+                self.rotate_accretion_disc(self.accretion_disc_rotate_angle)
             else:
-                self.accretion_disc.actor.actor.rotate_y(-self.accretion_disc_rotate_angle)
+                self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
             self.flag_accretion_disc_omega_mu = not self.flag_accretion_disc_omega_mu
 
         # the layout of the dialog created
