@@ -191,6 +191,7 @@ def get_data_for_accretion_columns(theta_range_column, phi_range_column, fi_0):
 def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi_0):
     '''смог реализовать только с помощью маски'''
     theta_array_end = np.pi / 2 + config.betta_mu
+    # ограничиваю колонкой
     theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
     theta_array_begin = theta_range_column[-1]
 
@@ -446,13 +447,30 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             camera.roll(roll_angle)
             # self.scene.background = (1, 1, 1)  # white background
 
-        @on_trait_change('slider_i_angle, slider_betta_mu')
-        def func_change_slider_i_angle_slider_betta_mu(self):
-            global i_angle, betta_mu
+        @on_trait_change('slider_i_angle')
+        def func_change_slider_i_angle_slider(self):
+            global betta_mu
             i_angle = self.slider_i_angle
-            betta_mu = self.slider_betta_mu
 
             config.set_e_obs(self.slider_i_angle, 0)
+
+            omega_vector = [-np.sin(config.betta_mu_deg * config.grad_to_rad) * np.cos(0),
+                            np.sin(config.betta_mu_deg * config.grad_to_rad) * np.sin(0),
+                            np.cos(config.betta_mu_deg * config.grad_to_rad)]
+
+            self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
+                                                    z=[0, omega_vector[2]])
+
+            self.update_accretion_disc_rotate_angle()
+
+            phase = 360 * self.slider_phase
+            self.view_phase(phase)
+
+        @on_trait_change('slider_betta_mu')
+        def func_change_slider_betta_mu(self):
+            global betta_mu
+            betta_mu = self.slider_betta_mu
+
             config.set_betta_mu(self.slider_betta_mu)
 
             omega_vector = [-np.sin(config.betta_mu_deg * config.grad_to_rad) * np.cos(0),
@@ -528,7 +546,7 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
 
             # сначала отрисовали в betta_mu
-            self.accretion_disc_top.mlab_source.trait_set(x=x, y=y, z=z)
+            self.accretion_disc_top.mlab_source.trait_set(x=x, y=y)
 
         @on_trait_change('button_accr_disc')
         def func_change_button_accr_disc(self):
