@@ -85,23 +85,27 @@ class AccretionColumn:
 
         def create_ds_for_integral(self):
             # для интеграла по simpson
-            dS_simps = []  # единичная площадка при интегрировании
+            dS_simps = np.zeros(config.N_theta_accretion)
+            # dS_simps = []  # единичная площадка при интегрировании
             for j in range(config.N_theta_accretion):
                 # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
                 dl_simps = self.R_e * (3 * np.cos(self.theta_range[j]) ** 2 + 1) ** (1 / 2) * np.sin(
                     self.theta_range[j])
                 dphi_simps = self.R_e * np.sin(self.theta_range[j]) ** 3
-                dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
+                # dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
+                dS_simps[j] = dphi_simps * dl_simps
             return dS_simps
 
         def create_array_normal(self, phi_range, theta_range, surface_type=True):
-            array_normal = []  # матрица нормалей
+            # array_normal = []  # матрица нормалей
+            array_normal = np.zeros((config.N_phi_accretion, config.N_theta_accretion), dtype=object)
             coefficient = -1
             if surface_type:  # True - внешняя поверхность, False - внутренняя
                 coefficient = 1
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
-                    array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
+                    # array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
+                    array_normal[i][j] = coefficient * matrix.newE_n(phi_range[i], theta_range[j])
             return array_normal
 
         def fill_cos_psi_range(self, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
@@ -120,7 +124,8 @@ class AccretionColumn:
                 for i in range(config.N_phi_accretion):
                     for j in range(config.N_theta_accretion):
                         # умножать на N_theta
-                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
                         if cos_psi_range[i, j] > 0:
                             # проверка на пересечения
                             if accretionColumnService.check_intersection_with_sphere_and_columns(self.phi_range[i],
@@ -153,7 +158,8 @@ class AccretionColumn:
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
                     # умножать на N_theta
-                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
                     if cos_psi_range[i, j] > 0:
                         # проверка на пересечения
                         if accretionColumnService.check_intersection_with_sphere_and_columns(self.phi_range[i],
@@ -187,7 +193,8 @@ class AccretionColumn:
                 for i in range(config.N_phi_accretion):
                     for j in range(config.N_theta_accretion):
                         # умножать на N_theta
-                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
                         if cos_psi_range[i, j] > 0:
                             # проверка на пересечения
                             r = self.R_e / config.R_ns * np.sin(self.theta_range[j]) ** 2
@@ -246,7 +253,8 @@ class AccretionColumn:
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
                     # умножать на N_theta
-                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
                     if cos_psi_range[i, j] > 0:
                         # проверка на пересечения
 
@@ -290,7 +298,7 @@ class AccretionColumn:
             return cos_psi_range
 
         def fill_cos_psi_range_with_tau(self, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
-                                        bot_column_phi_range, e_obs, opacity):
+                                        bot_column_phi_range, e_obs):
             # sum_intense изотропная светимость ( * 4 pi еще надо)
             # для интеграла по simpson
             cos_psi_range_final = []
@@ -305,7 +313,8 @@ class AccretionColumn:
                 for i in range(config.N_phi_accretion):
                     for j in range(config.N_theta_accretion):
                         # умножать на N_theta
-                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
                         if cos_psi_range[i, j] > 0:
                             # проверка на пересечения
                             r = self.R_e / config.R_ns * np.sin(self.theta_range[j]) ** 2
@@ -363,7 +372,8 @@ class AccretionColumn:
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
                     # умножать на N_theta
-                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
                     if cos_psi_range[i, j] > 0:
                         # проверка на пересечения
 
