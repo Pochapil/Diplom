@@ -295,6 +295,51 @@ def plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column):
     plot_NS_mayavi(phi_range_column, theta_range_column)
     plot_accr_columns_mayavi(phi_range_column, theta_range_column)
 
+    theta_array_end = np.pi / 2 + config.betta_mu
+    # ограничиваю колонкой
+    theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
+    theta_array_begin = theta_range_column[-1]
+
+    step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+    theta_range = np.array([theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+    phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    mask = np.zeros_like(x).astype(bool)
+    for i in range(len(phi_range)):
+        for j in range(len(theta_range)):
+            theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
+            if theta_range[j] > theta_end:
+                # pass
+                mask[i][j] = True
+
+    mlab.mesh(x, y, z, mask=mask, color=(1, 1, 0))
+
+    theta_array_end = np.pi - theta_array_end
+    theta_array_begin = np.pi - theta_array_begin
+
+    step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+    theta_range = np.array([theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+    phi_range = np.array(
+        [fi_0 * config.grad_to_rad + np.pi + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    mlab.mesh(x, y, z, mask=mask, color=(1, 0, 1))
+
     phase = 0
     A_matrix_analytic = matrix.newMatrixAnalytic(0, config.betta_rotate, phase * config.grad_to_rad,
                                                  config.betta_mu)
@@ -617,3 +662,5 @@ if __name__ == "__main__":
 
     # plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column)
     plot_m(i_angle, betta_mu, phi_range_column, theta_range_column)
+
+    # plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column)
