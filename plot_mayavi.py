@@ -1,4 +1,5 @@
 import numpy as np
+import math
 import matplotlib.pyplot as plt
 from mayavi import mlab
 
@@ -206,7 +207,6 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
     x = r1 * np.cos(p)
     y = r1 * np.sin(p)
     z = r * np.cos(theta_range)
-
     mask = np.zeros_like(x).astype(bool)
     for i in range(len(phi_range)):
         for j in range(len(theta_range)):
@@ -338,6 +338,14 @@ def plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column):
     y = r1 * np.sin(p)
     z = r * np.cos(theta_range)
 
+    mask = np.zeros_like(x).astype(bool)
+    for i in range(len(phi_range)):
+        for j in range(len(theta_range)):
+            theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
+            if theta_range[j] < theta_end:
+                # pass
+                mask[i][j] = True
+
     mlab.mesh(x, y, z, mask=mask, color=(1, 0, 1))
 
     phase = 0
@@ -370,7 +378,7 @@ def plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column):
     # mlab.mesh(x, y, z, colormap='cool', figure=fig)
 
 
-def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
+def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
     class Visualization(HasTraits):
         slider_fi_0 = Range(0, 360, config.phi_accretion_begin_deg)
         slider_i_angle = Range(0, 90, i_angle)
@@ -445,6 +453,8 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
             self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
 
+            # self.check_data()
+
         def rotate_accretion_disc(self, rotate_angle):
             self.accretion_disc_top.actor.actor.rotate_y(rotate_angle)
             self.accretion_disc_bot.actor.actor.rotate_y(rotate_angle)
@@ -462,8 +472,29 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             opacity_for_magnet_line = 0.1
             x, y, z, mask = get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column,
                                                                 self.slider_fi_0)
+
+            # mask_top = np.copy(mask)
+            #
+            # phase = (360 * self.slider_phase) % 360
+            # index = math.floor(phase // config.omega_ns)
+            # for i in range(config.N_phi_accretion):
+            #     for j in range(config.N_theta_accretion):
+            #         if self.cos_array_dict_magnet_lines[0][index][i][j] > 0:
+            #             pass
+            #         else:
+            #             mask_top[i][j] = True
+            #
+            # mask_bot = np.copy(mask)
+            # for i in range(config.N_phi_accretion):
+            #     for j in range(config.N_theta_accretion):
+            #         if self.cos_array_dict_magnet_lines[1][index][i][j] > 0:
+            #             pass
+            #         else:
+            #             mask_bot[i][j] = True
+
             # clear
             # self.magnet_lines_top.remove()
+            # self.magnet_lines_bot.remove()
             self.magnet_lines_top.mlab_source.trait_set(x=[0], y=[0], z=[0])
             self.magnet_lines_bot.mlab_source.trait_set(x=[0], y=[0], z=[0])
             # new
@@ -491,6 +522,65 @@ def plot_m(i_angle, betta_mu, phi_range_column, theta_range_column):
             camera = self.scene.camera
             camera.roll(roll_angle)
             # self.scene.background = (1, 1, 1)  # white background
+
+        def check_data(self):
+            # columns = {0: top_column, 1: bot_column}
+
+            def get_cos_magnet_lines():
+                # magnet_lines
+                top_column_cos_array, bot_column_cos_array = [], []
+                magnet_lines_cos_file_folder = 'data/magnet_cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
+                file_name_for_magnet_lines_cos_of_columns = {0: 'top_column', 1: 'bot_column'}
+                cos_array_dict = {0: top_column_cos_array, 1: bot_column_cos_array}
+                for key, column_name in file_name_for_magnet_lines_cos_of_columns.items():
+                    full_magnet_line_cos_file_folder = magnet_lines_cos_file_folder + \
+                                                       file_name_for_magnet_lines_cos_of_columns[key] + '/'
+                    for cos_index in range(config.t_max):
+                        file_name = 'save_magnet_lines_cos_' + column_name + ('_%d_phase' % cos_index) + '.txt'
+                        cos_range = main_service.load_arr_from_txt(full_magnet_line_cos_file_folder, file_name)
+                        cos_array_dict[key].append(cos_range)
+                return cos_array_dict
+
+            def get_cos_surfaces():
+                # accret_columns
+                top_column_outer_surface_cos_array, top_column_inner_surface_cos_array = [], []
+                bot_column_outer_surface_cos_array, bot_column_inner_surface_cos_array = [], []
+
+                cos_array_dict = {0: top_column_outer_surface_cos_array, 1: top_column_inner_surface_cos_array,
+                                  2: bot_column_outer_surface_cos_array, 3: bot_column_inner_surface_cos_array}
+
+                file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner', 2: 'bot_outer', 3: 'bot_inner'}
+                cos_file_folder = 'data/cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
+                for key, surface_name in file_name_for_cos_of_surfaces.items():
+                    full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
+                    for cos_index in range(config.t_max):
+                        file_name = 'save_cos_' + surface_name + ('_%d_phase' % cos_index) + '.txt'
+
+                        cos_range = main_service.load_arr_from_txt(full_cos_file_folder, file_name)
+                        cos_array_dict[key].append(cos_range)
+                return cos_array_dict
+
+            self.cos_array_dict_magnet_lines = get_cos_magnet_lines()
+            self.cos_array_dict_surfaces = get_cos_surfaces()
+
+        def try_check_data(self):
+            '''получить фазу, по нужной фазе достать косинусы, закрасить те участки которые не видны (или наоборот)'''
+            phase = (360 * self.slider_phase) % 360
+            index = math.floor(phase // config.omega_ns)
+
+            for i in range(config.N_phi_accretion):
+                for j in range(config.N_theta_accretion):
+                    if self.cos_array_dict_magnet_lines[0][index][i][j] > 0:
+                        pass
+                        # self.scene.mlab.points3d(
+                        #     self.magnet_lines_top.mlab_source.x[i][j],
+                        #     self.magnet_lines_top.mlab_source.y[i][j],
+                        #     self.magnet_lines_top.mlab_source.z[i][j],
+                        #     color=(1, 0, 1),
+                        #     scale_factor=0.01
+                        # )
+
+            # smth.mlab_source.x[i][j] = 0
 
         @on_trait_change('slider_i_angle')
         def func_change_slider_i_angle_slider(self):
@@ -661,6 +751,6 @@ if __name__ == "__main__":
     # theta_range_column = np.loadtxt(file_name)
 
     # plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column)
-    plot_m(i_angle, betta_mu, phi_range_column, theta_range_column)
+    plot_main(i_angle, betta_mu, phi_range_column, theta_range_column)
 
     # plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column)
