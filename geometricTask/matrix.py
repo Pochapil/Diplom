@@ -53,6 +53,7 @@ def newMatrixAnalytic(fi_rotate, betta_rotate, fi_mu, betta_mu):
 
     a_33 = np.cos(betta_rotate) * np.cos(betta_mu) - np.cos(fi_mu) * np.sin(betta_rotate) * np.sin(betta_mu)
 
+    # return np.array([[a_11, a_12, a_13], [a_21, a_22, a_23], [a_31, a_32, a_33]])
     return np.matrix([[a_11, a_12, a_13], [a_21, a_22, a_23], [a_31, a_32, a_33]])
 
 
