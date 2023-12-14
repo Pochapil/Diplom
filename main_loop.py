@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
 
     save_cos_flag = False
-
+    save_magnet_line_cos_flag = False
     # mc2 = [10, 30, 100]
     # a_portion = [0.25, 0.65]
     # a_portion = [0.65]
@@ -36,7 +36,7 @@ if __name__ == '__main__':
     # i_angle = [10 * i for i in range(1, 10)]
     # betta_mu = [10 * i for i in range(1, 10)]
     mc2 = [30]
-    a_portion = [0.25]
+    a_portion = [0.65]
     # fi_0 = [20 * i for i in range(10, 18)]
 
     i_angle = [60]
@@ -92,6 +92,7 @@ if __name__ == '__main__':
                         top_column = AccretionColumn(R_e_outer_surface, theta_accretion_begin_outer_surface,
                                                      R_e_inner_surface,
                                                      theta_accretion_begin_inner_surface, True)
+                        # print(top_column.outer_surface.R_e)
                         # ----------------- конец инициализации верхней колонки ------------------------
 
                         # ----------------- начало инициализации нижней колонки ------------------------
@@ -174,7 +175,11 @@ if __name__ == '__main__':
 
                         # ------------------ начало заполнения матриц косинусов ---------------------------
                         # for key, surface in surfaces.items():
-                        #     if config.opacity_above_shock == 0:
+                        #     if config.new_magnet_lines_flag:
+                        #         surface.get_values(top_column.outer_surface.phi_range,
+                        #                            bot_column.outer_surface.phi_range)
+                        #
+                        #     elif config.opacity_above_shock == 0:
                         #         surface.fill_cos_psi_range(theta_accretion_begin, theta_accretion_end,
                         #                                    top_column.outer_surface.phi_range,
                         #                                    bot_column.outer_surface.phi_range, e_obs)
@@ -187,7 +192,14 @@ if __name__ == '__main__':
                         # распараллелил
                         for key, surface in surfaces.items():
                             with mp.Pool(mp.cpu_count()) as pool:
-                                if config.tau_flag:
+                                if config.new_magnet_lines_flag:
+                                    result_cos_psi_range = pool.starmap(surface.get_values_async,
+                                                                        zip(range(config.t_max),
+                                                                            repeat(top_column.outer_surface.phi_range),
+                                                                            repeat(bot_column.outer_surface.phi_range),
+                                                                            repeat(e_obs),
+                                                                            repeat(config.betta_mu)))
+                                elif config.tau_flag:
                                     result_cos_psi_range = pool.starmap(surface.async_fill_cos_psi_range_with_tau,
                                                                         zip(range(config.t_max),
                                                                             repeat(theta_accretion_begin),
@@ -228,7 +240,8 @@ if __name__ == '__main__':
                         if save_cos_flag:
                             file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
                                                              2: 'bot_outer', 3: 'bot_inner'}
-                            cos_file_folder = 'data/cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
+                            cos_file_folder = 'data/cos/' + config.file_folder_angle_args + \
+                                              config.file_folder_accretion_args
                             for key, surface_name in file_name_for_cos_of_surfaces.items():
                                 full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
                                 for cos_index in range(config.t_max):
@@ -419,6 +432,56 @@ if __name__ == '__main__':
                         #         time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
 
                         plot_all()
+
+                        # print(bot_column.outer_surface.phi_range)
+                        folder = 'scattered_on_magnet_lines/'
+                        # рассеяние от магнитных линий
+                        top_column.fill_magnet_lines_cos_array(top_column.outer_surface.phi_range,
+                                                               bot_column.outer_surface.phi_range, e_obs,
+                                                               config.betta_mu)
+
+                        bot_column.fill_magnet_lines_cos_array(top_column.outer_surface.phi_range,
+                                                               bot_column.outer_surface.phi_range, e_obs,
+                                                               config.betta_mu)
+
+                        scattered_energy = []
+                        scattered_energy_top = top_column.calculate_scattered_energy()
+                        file_name = "scattered_energy_top.txt"
+                        main_service.save_arr_as_txt(scattered_energy_top, full_file_folder + folder, file_name)
+
+                        scattered_energy.append(scattered_energy_top)
+
+                        scattered_energy_bot = bot_column.calculate_scattered_energy()
+                        file_name = "scattered_energy_bot.txt"
+                        main_service.save_arr_as_txt(scattered_energy_bot, full_file_folder + folder, file_name)
+
+                        scattered_energy.append(scattered_energy_bot)
+
+                        scattered_energy.append(scattered_energy_top + scattered_energy_bot)
+
+                        # for count, arr in enumerate(top_column.magnet_lines_cos_psi_range):
+                        #     file_name = f"top_magnet_lines_cos_psi_range_phase={count}.txt"
+                        #     main_service.save_arr_as_txt(arr, full_file_folder + folder, file_name)
+
+                        # file_name = "bot_magnet_lines_cos_psi_range.txt"
+                        # main_service.save_arr_as_txt(bot_column.magnet_lines_cos_psi_range, full_file_folder + folder,
+                        #                              file_name)
+
+                        file_name = "scattered_energy.txt"
+                        # main_service.save_arr_as_txt(scattered_energy, full_file_folder + folder, file_name)
+                        if save_magnet_line_cos_flag:
+                            columns = {0: top_column, 1: bot_column}
+                            magnet_lines_cos_file_folder = 'data/magnet_cos/' + config.file_folder_angle_args + \
+                                                           config.file_folder_accretion_args
+                            file_name_for_magnet_lines_cos_of_columns = {0: 'top_column', 1: 'bot_column'}
+                            for key, column_name in file_name_for_magnet_lines_cos_of_columns.items():
+                                full_magnet_line_cos_file_folder = magnet_lines_cos_file_folder + \
+                                                                   file_name_for_magnet_lines_cos_of_columns[key] + '/'
+                                for cos_index in range(config.t_max):
+                                    file_name = 'save_magnet_lines_cos_' + column_name + (
+                                            '_%d_phase' % cos_index) + '.txt'
+                                    main_service.save_arr_as_txt(columns[key].magnet_lines_cos_psi_range[cos_index],
+                                                                 full_magnet_line_cos_file_folder, file_name)
 
                         time_calculate_nu_L_nu_on_energy = time.time()
                         print("execution time of program: %f s" % (
