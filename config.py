@@ -49,6 +49,9 @@ def update_folder():
 def update_project_dir():
     global PROJECT_DIR
 
+    if new_magnet_lines_flag:
+        PROJECT_DIR += 'new_magnet_lines/'
+
     if opacity_above_shock != 0 or mu != 0.1e30 or tau_flag:
         buf = mu
         count = 1
@@ -148,8 +151,9 @@ dRe_div_Re = 0.25  # взял просто число
 ksi_rad = 3 / 2
 ksi_param = 0.5  # между 1 и 2 формулой в статье - размер магнитосферы
 k = 0.35  # opacity непрозрачность [см**2 / г]
+new_magnet_lines_flag = True
 tau_flag = True
-tau_cutoff = 1
+tau_cutoff = 0
 opacity_above_shock = 0.6  # непрозрачность вещества над ударной волной: 0 - полностью прозрачное, 1 - непрозрачное
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
