@@ -23,6 +23,26 @@ def get_angles_from_vector(vector):
     return phi, theta
 
 
+def get_angles_2d(vector):
+    x = vector[0, 0]
+    y = vector[0, 1]
+    z = vector[0, 2]
+    r = (x ** 2 + y ** 2 + z ** 2) ** (1 / 2)
+    theta = np.arccos(z / r)
+    phi = np.arctan2(y, x)
+    return phi, theta
+
+
+def get_angles(vector):
+    x = vector[0]
+    y = vector[1]
+    z = vector[2]
+    r = (x ** 2 + y ** 2 + z ** 2) ** (1 / 2)
+    theta = np.arccos(z / r)
+    phi = np.arctan2(y, x)
+    return phi, theta
+
+
 def get_angles_from_vector_one_dimension(vector):
     x = vector[0]
     y = vector[1]
