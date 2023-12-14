@@ -18,6 +18,168 @@ class AccretionColumn:
         self.inner_surface = self.Surface(theta_accretion_begin_inner_surface, R_e_inner_surface, False,
                                           self.column_type)
 
+        self.magnet_lines_phi_range, self.magnet_lines_theta_range, self.magnet_lines_mask_array = \
+            self.get_magnet_lines(self.outer_surface.theta_range)
+
+        self.magnet_lines_cos_psi_range = []
+
+        # self.fill_magnet_lines_cos_array()
+
+    def get_magnet_lines(self, theta_range_column):
+
+        theta_array_end = np.pi / 2 + config.betta_mu
+        # ограничиваю колонкой
+        theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
+        theta_array_begin = theta_range_column[-1]
+
+        step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+        theta_range = np.array([theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+        step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+        phi_range = np.array([config.phi_accretion_begin_deg * config.grad_to_rad +
+                              step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+        mask_array = np.zeros((config.N_phi_accretion, config.N_theta_accretion)).astype(bool)
+        # mask = np.zeros_like(x).astype(bool)
+        for i in range(len(phi_range)):
+            for j in range(len(theta_range)):
+                theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
+                if theta_range[j] > theta_end:
+                    mask_array[i][j] = True
+
+        if not self.column_type:
+            # для нижней колонки меняем phi, theta. mask_array будет такой же
+            theta_array_end = np.pi - theta_array_end
+            theta_array_begin = np.pi - theta_array_begin
+
+            step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+            theta_range = np.array(
+                [theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+            step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+            # добавляем pi в phi_range
+            phi_range = np.array([config.phi_accretion_begin_deg * config.grad_to_rad + np.pi +
+                                  step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+        return phi_range, theta_range, mask_array
+
+    def fill_magnet_lines_cos_array(self, top_column_phi_range, bot_column_phi_range, e_obs, updated_betta_mu):
+        # False - т.к. мне нужны внутренние нормали
+        normal_array = self.outer_surface.create_array_normal(self.magnet_lines_phi_range,
+                                                              self.magnet_lines_theta_range, False)
+        # sum_intense изотропная светимость ( * 4 pi еще надо)
+        # для интеграла по simpson
+        cos_psi_range_final = []
+        for t in range(config.t_max):
+            cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+            # поворот
+            phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
+            # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+            A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                         updated_betta_mu)
+            e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+            for i in range(config.N_phi_accretion):
+                for j in range(config.N_theta_accretion):
+                    # умножать на N_theta
+                    # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, normal_array[i][j])
+                    if self.magnet_lines_mask_array[i, j]:
+                        cos_psi_range[i, j] = 0
+                    elif cos_psi_range[i, j] > 0:
+                        # проверка на пересечения
+                        r = self.outer_surface.R_e / config.R_ns * np.sin(self.magnet_lines_theta_range[j]) ** 2
+
+                        origin_x = np.sin(self.magnet_lines_theta_range[j]) * np.cos(self.magnet_lines_phi_range[i]) * r
+                        origin_y = np.sin(self.magnet_lines_theta_range[j]) * np.sin(self.magnet_lines_phi_range[i]) * r
+                        origin_z = np.cos(self.magnet_lines_theta_range[j]) * r
+
+                        direction_x = e_obs_mu[0, 0]
+                        direction_y = e_obs_mu[0, 1]
+                        direction_z = e_obs_mu[0, 2]
+
+                        if accretionColumnService.intersection_with_sphere(origin_x, origin_y, origin_z, direction_x,
+                                                                           direction_y, direction_z):
+                            cos_psi_range[i, j] = 0
+                        else:
+                            cos_psi_range[i, j] = accretionColumnService.get_vals(self.magnet_lines_phi_range[i],
+                                                                                  self.magnet_lines_theta_range[j],
+                                                                                  e_obs_mu, origin_x, origin_y,
+                                                                                  origin_z, direction_x, direction_y,
+                                                                                  direction_z,
+                                                                                  self.outer_surface.ksi_shock,
+                                                                                  top_column_phi_range,
+                                                                                  bot_column_phi_range,
+                                                                                  self.outer_surface.R_e,
+                                                                                  r, updated_betta_mu)
+                    else:
+                        cos_psi_range[i, j] = 0
+            cos_psi_range_final.append(cos_psi_range)
+        self.magnet_lines_cos_psi_range = cos_psi_range_final
+
+    # def get_values_for_magnet_lines_cos_array(self, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
+    #                                           bot_column_phi_range, e_obs):
+    #     # sum_intense изотропная светимость ( * 4 pi еще надо)
+    #     # для интеграла по simpson
+    #     cos_psi_range_final = []
+    #     for t in range(config.t_max):
+    #         cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+    #         # поворот
+    #         phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
+    #         # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+    #         A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+    #                                                      config.betta_mu)
+    #         e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+    #         for i in range(config.N_phi_accretion):
+    #             for j in range(config.N_theta_accretion):
+    #                 # умножать на N_theta
+    #                 # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+    #                 cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
+    #                 if cos_psi_range[i, j] > 0:
+    #                     # проверка на пересечения
+    #                     if accretionColumnService.check_intersection_with_sphere_and_columns(self.phi_range[i],
+    #                                                                                          self.theta_range[j],
+    #                                                                                          e_obs_mu,
+    #                                                                                          self.ksi_shock,
+    #                                                                                          theta_accretion_begin,
+    #                                                                                          theta_accretion_end,
+    #                                                                                          top_column_phi_range,
+    #                                                                                          bot_column_phi_range,
+    #                                                                                          self.surface_type,
+    #                                                                                          self.R_e):
+    #                         cos_psi_range[i, j] = 0
+    #                 else:
+    #                     cos_psi_range[i, j] = 0
+    #         cos_psi_range_final.append(cos_psi_range)
+    #     self.cos_psi_range = cos_psi_range_final
+
+    def calculate_scattered_energy(self):
+        dS_simps = self.create_ds_for_integral()
+
+        integrate_step = [0] * config.N_phi_accretion
+        integrate_sum = [0] * config.t_max
+        for rotation_index in range(config.t_max):
+            for phi_index in range(config.N_phi_accretion):
+                r = self.outer_surface.R_e * np.sin(self.magnet_lines_theta_range) ** 2
+                integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                    self.outer_surface.L_x / (4 * np.pi * np.array(r) ** 2) * np.array(dS_simps) * np.array(
+                        self.magnet_lines_cos_psi_range[rotation_index][phi_index][:]), self.magnet_lines_theta_range))
+            integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.magnet_lines_phi_range))
+
+        return integrate_sum
+
+    def create_ds_for_integral(self):
+        # для интеграла по simpson
+        dS_simps = np.zeros(config.N_theta_accretion)
+        # dS_simps = []  # единичная площадка при интегрировании
+        for j in range(config.N_theta_accretion):
+            # R=R_e * sin_theta ** 2; R_phi = R * sin_theta
+            dl_simps = self.outer_surface.R_e * (3 * np.cos(self.magnet_lines_theta_range[j]) ** 2 + 1) ** (1 / 2) \
+                       * np.sin(self.magnet_lines_theta_range[j])
+            dphi_simps = self.outer_surface.R_e * np.sin(self.magnet_lines_theta_range[j]) ** 3
+            # dS_simps.append(dphi_simps * dl_simps)  # единичная площадка при интегрировании
+            dS_simps[j] = dphi_simps * dl_simps
+        return dS_simps
+
     class Surface:
         def __init__(self, theta_accretion_begin, R_e, surface_type, column_type):
             self.R_e = R_e
@@ -105,7 +267,7 @@ class AccretionColumn:
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
                     # array_normal.append(coefficient * matrix.newE_n(phi_range[i], theta_range[j]))
-                    array_normal[i][j] = coefficient * matrix.newE_n(phi_range[i], theta_range[j])
+                    array_normal[i, j] = coefficient * matrix.newE_n(phi_range[i], theta_range[j])
             return array_normal
 
         def fill_cos_psi_range(self, theta_accretion_begin, theta_accretion_end, top_column_phi_range,
@@ -413,6 +575,99 @@ class AccretionColumn:
                         cos_psi_range[i, j] = 0
             return cos_psi_range
 
+        def get_values(self, top_column_phi_range, bot_column_phi_range):
+            '''если использовать этот метод асинхронно, то надо заменить config.betta_mu в вызове'''
+            # sum_intense изотропная светимость ( * 4 pi еще надо)
+            # для интеграла по simpson
+            cos_psi_range_final = []
+            for t in range(config.t_max):
+                cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+                # поворот
+                phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t
+                # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+                A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                             config.betta_mu)
+                e_obs_mu = np.dot(A_matrix_analytic, config.e_obs)  # переход в магнитную СК
+                for i in range(config.N_phi_accretion):
+                    for j in range(config.N_theta_accretion):
+                        # умножать на N_theta
+                        # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                        cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
+                        if cos_psi_range[i, j] > 0:
+                            # проверка на пересечения
+                            r = self.R_e / config.R_ns * np.sin(self.theta_range[j]) ** 2
+
+                            origin_x = np.sin(self.theta_range[j]) * np.cos(self.phi_range[i]) * r
+                            origin_y = np.sin(self.theta_range[j]) * np.sin(self.phi_range[i]) * r
+                            origin_z = np.cos(self.theta_range[j]) * r
+
+                            direction_x = e_obs_mu[0, 0]
+                            direction_y = e_obs_mu[0, 1]
+                            direction_z = e_obs_mu[0, 2]
+
+                            if accretionColumnService.intersection_with_sphere(origin_x, origin_y, origin_z,
+                                                                               direction_x, direction_y, direction_z):
+                                cos_psi_range[i, j] = 0
+                            else:
+                                cos_psi_range[i, j] = accretionColumnService.get_vals(self.phi_range[i],
+                                                                                      self.theta_range[j],
+                                                                                      e_obs_mu,
+                                                                                      origin_x, origin_y, origin_z,
+                                                                                      direction_x, direction_y,
+                                                                                      direction_z,
+                                                                                      self.ksi_shock,
+                                                                                      top_column_phi_range,
+                                                                                      bot_column_phi_range,
+                                                                                      self.R_e, r, config.betta_mu)
+                        else:
+                            cos_psi_range[i, j] = 0
+                cos_psi_range_final.append(cos_psi_range)
+            self.cos_psi_range = cos_psi_range_final
+
+        def get_values_async(self, t_index, top_column_phi_range, bot_column_phi_range, e_obs, updated_betta_mu):
+            # распараллелил fill_cos_psi_range
+            cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
+            # поворот
+            phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t_index
+            # расчет матрицы поворота в магнитную СК и вектора на наблюдателя
+            A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu,
+                                                         updated_betta_mu)
+            # print('config.betta_mu in fill cos = %f' % updated_betta_mu)
+            e_obs_mu = np.dot(A_matrix_analytic, e_obs)  # переход в магнитную СК
+            for i in range(config.N_phi_accretion):
+                for j in range(config.N_theta_accretion):
+                    # умножать на N_theta
+                    # cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i * config.N_theta_accretion + j])
+                    cos_psi_range[i, j] = np.dot(e_obs_mu, self.array_normal[i][j])
+                    if cos_psi_range[i, j] > 0:
+                        # проверка на пересечения
+                        r = self.R_e / config.R_ns * np.sin(self.theta_range[j]) ** 2
+
+                        origin_x = np.sin(self.theta_range[j]) * np.cos(self.phi_range[i]) * r
+                        origin_y = np.sin(self.theta_range[j]) * np.sin(self.phi_range[i]) * r
+                        origin_z = np.cos(self.theta_range[j]) * r
+
+                        direction_x = e_obs_mu[0, 0]
+                        direction_y = e_obs_mu[0, 1]
+                        direction_z = e_obs_mu[0, 2]
+
+                        if accretionColumnService.intersection_with_sphere(origin_x, origin_y, origin_z, direction_x,
+                                                                           direction_y, direction_z):
+                            cos_psi_range[i, j] = 0
+                        else:
+                            cos_psi_range[i, j] = accretionColumnService.get_vals(self.phi_range[i],
+                                                                                  self.theta_range[j],
+                                                                                  e_obs_mu,
+                                                                                  origin_x, origin_y, origin_z,
+                                                                                  direction_x, direction_y, direction_z,
+                                                                                  self.ksi_shock,
+                                                                                  top_column_phi_range,
+                                                                                  bot_column_phi_range,
+                                                                                  self.R_e, r, updated_betta_mu)
+                    else:
+                        cos_psi_range[i, j] = 0
+            return cos_psi_range
+
         def calculate_integral_distribution(self):
             # luminosity
             # для интеграла по simpson
@@ -548,6 +803,21 @@ class AccretionColumn:
                 for phi_index in range(config.N_phi_accretion):
                     integrate_step[phi_index] = 4 * np.pi * np.abs(scipy.integrate.simps(
                         plank_func * np.array(dS_simps) * np.array(
+                            self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
+                integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
+
+            return integrate_sum
+
+        def calculate_scattered_energy(self):
+            dS_simps = self.create_ds_for_integral()
+
+            integrate_step = [0] * config.N_phi_accretion
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                for phi_index in range(config.N_phi_accretion):
+                    r = self.R_e * np.sin(self.theta_range) ** 2
+                    integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                        self.L_x / (4 * np.pi * np.array(r)) * np.array(dS_simps) * np.array(
                             self.cos_psi_range[rotation_index][phi_index][:]), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 

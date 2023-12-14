@@ -287,6 +287,141 @@ def intersection_with_dipole_lines_with_opacity(origin_phi, origin_theta, direct
     return False
 
 
+def get_solutions_for_dipole_magnet_lines(origin_phi, origin_theta, direction_vector):
+    # для 0 угла наблюдателя по фи. поэтому находим phi_delta
+    direction_phi, direction_theta = vectors.get_angles_2d(direction_vector)
+    # get_angles_from_vector(direction_vector)
+    if direction_phi < 0:
+        direction_phi += 2 * np.pi
+    # вспомогательные переменные, были введены для упрощения аналитического вывода
+    phi_delta = origin_phi - direction_phi
+    eta = np.sin(direction_theta) / np.sin(origin_theta)
+    cos_alpha = np.sin(origin_theta) * np.cos(phi_delta) * np.sin(direction_theta) + np.cos(origin_theta) * np.cos(
+        direction_theta)
+
+    c_x_5 = 1
+    c_x_4 = 6 * cos_alpha
+    c_x_3 = 3 + 12 * cos_alpha ** 2 - eta ** 4
+    c_x_2 = 12 * cos_alpha + 8 * cos_alpha ** 3 - 4 * np.cos(phi_delta) * eta ** 3
+    c_x_1 = 3 + 12 * cos_alpha ** 2 - 2 * eta ** 2 - 4 * np.cos(phi_delta) ** 2 * eta ** 2
+    c_x_0 = 6 * cos_alpha - 4 * np.cos(phi_delta) * eta
+
+    coefficients = [c_x_5, c_x_4, c_x_3, c_x_2, c_x_1, c_x_0]
+    solutions = np.roots(coefficients)
+
+    return solutions
+
+
+def get_vals(origin_phi, origin_theta, direction_vector, origin_x, origin_y,
+             origin_z, direction_x, direction_y, direction_z, ksi_shock,
+             top_column_phi_range, bot_column_phi_range, R_e, r, betta_mu):
+    '''
+    есть аналитическое уравнение для полинома дипольной линии 5 степени
+    находим уравнение в сферических координатах.
+
+    достаем корни
+    ищем положительные
+    находим пересечение с колонками
+        если пересекается то истина
+        если нет то ложь
+
+    корни в магнитной СК - betta_mu
+    '''
+
+    solutions = get_solutions_for_dipole_magnet_lines(origin_phi, origin_theta, direction_vector)
+
+    '''думаю что нужно только phi theta для нахождения правильных пересечений. r,z нужно было раньше когда проверял на 
+    пересечение с колонкой'''
+    for solution in solutions:
+        if solution.real > 0 and solution.imag == 0:
+            direction_t = solution.real * r
+            intersect_point = np.array([origin_x, origin_y, origin_z]) + direction_t * np.array(
+                [direction_x, direction_y, direction_z])
+
+            intersect_phi, intersect_theta = vectors.get_angles(intersect_point)
+            if intersect_phi < 0:
+                intersect_phi += 2 * np.pi
+
+            intersect_r = (intersect_point[0] ** 2 + intersect_point[1] ** 2 + intersect_point[2] ** 2) ** (1 / 2)
+
+            if not (abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r) < 0.001):
+                print(abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r))
+            # curr = abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r)
+            # новые линии магнитосферы
+            theta_end = np.pi / 2 - betta_mu * np.cos(intersect_phi)
+            # для верхней колонки:
+            top_column_intersect_phi_correct = (top_column_phi_range[0] <= intersect_phi <= top_column_phi_range[
+                -1]) or (0 <= intersect_phi <= top_column_phi_range[-1] - 2 * np.pi)
+            top_column_intersect_theta_correct = intersect_theta < theta_end
+
+            # для нижней колонки:
+            bot_column_intersect_phi_correct = (bot_column_phi_range[0] <= intersect_phi <= bot_column_phi_range[
+                -1]) or (0 <= intersect_phi <= bot_column_phi_range[-1] - 2 * np.pi)
+            bot_column_intersect_theta_correct = intersect_theta > theta_end
+
+            # проверяем на пересечение с колонками
+            intersect_r_correct = intersect_r > ksi_shock
+            if not intersect_r_correct and (top_column_intersect_phi_correct or bot_column_intersect_phi_correct):
+                return 0
+
+            intersection_condition = (top_column_intersect_phi_correct and top_column_intersect_theta_correct) or (
+                    bot_column_intersect_phi_correct and bot_column_intersect_theta_correct)
+
+            # if not (top_column_intersect_phi_correct and top_column_intersect_theta_correct) and (
+            #         bot_column_intersect_phi_correct and bot_column_intersect_theta_correct):
+            #     print('пересекли bot в точке')
+            #     print(intersect_phi / config.grad_to_rad, intersect_theta / config.grad_to_rad)
+            #     print(f'theta_end={theta_end / config.grad_to_rad}')
+
+            if config.tau_flag:
+                if intersection_condition:
+                    tau = get_tau_for_opacity(intersect_theta, R_e)
+                    if tau > config.tau_cutoff:
+                        return np.exp(-1 * tau)
+                    else:
+                        return 1
+
+            elif config.opacity_above_shock > 0:
+                if intersection_condition:
+                    return 1 - config.opacity_above_shock
+
+            else:
+                return 1
+    return 1
+
+
+def get_data_for_magnet_lines(theta_range_column, phi_range_column, fi_0):
+    '''смог реализовать только с помощью маски'''
+    theta_array_end = np.pi / 2 + config.betta_mu
+    # ограничиваю колонкой
+    theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
+    theta_array_begin = theta_range_column[-1]
+
+    step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+    theta_range = np.array(
+        [theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+    phi_range = np.array(
+        [fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    mask = np.zeros_like(x).astype(bool)
+    for i in range(len(phi_range)):
+        for j in range(len(theta_range)):
+            theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
+            if theta_range[j] > theta_end:
+                # pass
+                mask[i][j] = True
+
+    return x, y, z, mask
+
+
 def get_attenuation_coefficient_intersection_with_dipole_tau(origin_phi, origin_theta, direction_vector, origin_x,
                                                              origin_y, origin_z, direction_x, direction_y, direction_z,
                                                              ksi_shock, theta_accretion_end, top_column_phi_range,
