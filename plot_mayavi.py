@@ -210,7 +210,7 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
     mask = np.zeros_like(x).astype(bool)
     for i in range(len(phi_range)):
         for j in range(len(theta_range)):
-            theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
+            theta_end = np.pi / 2 - np.arctan(np.tan(config.betta_mu) * np.cos(phi_range[i]))
             if theta_range[j] > theta_end:
                 # pass
                 mask[i][j] = True
@@ -417,10 +417,23 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             opacity_for_magnet_line = 0.1
             self.magnet_lines_top = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
                                                          representation='wireframe', mask=mask)
+
+            self.magnet_lines_top_outer = self.scene.mlab.mesh(x * (1 + config.dRe_div_Re),
+                                                               y * (1 + config.dRe_div_Re),
+                                                               z * (1 + config.dRe_div_Re), color=(0, 0, 1),
+                                                               opacity=opacity_for_magnet_line,
+                                                               representation='wireframe', mask=mask)
+
             # self.magnet_lines_top = self.scene.mlab.surf(x, y, z, color=(1, 0, 0), warp_scale=0.3,
             #                                              representation='wireframe', line_width=0.5)
             self.magnet_lines_bot = self.scene.mlab.mesh(-x, -y, -z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
                                                          representation='wireframe', mask=mask)
+
+            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x * (1 + config.dRe_div_Re),
+                                                               -y * (1 + config.dRe_div_Re),
+                                                               -z * (1 + config.dRe_div_Re), color=(0, 0, 1),
+                                                               opacity=opacity_for_magnet_line,
+                                                               representation='wireframe', mask=mask)
 
             mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=(1, 0, 0), tube_radius=0.005, tube_sides=4)
 
@@ -502,6 +515,26 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                                          representation='wireframe', mask=mask)
             self.magnet_lines_bot = self.scene.mlab.mesh(-x, -y, -z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
                                                          representation='wireframe', mask=mask)
+
+
+            self.magnet_lines_top_outer.mlab_source.trait_set(x=[0], y=[0], z=[0])
+            self.magnet_lines_bot_outer.mlab_source.trait_set(x=[0], y=[0], z=[0])
+            # new
+            self.magnet_lines_top_outer = self.scene.mlab.mesh(x * (1 + config.dRe_div_Re),
+                                                               y * (1 + config.dRe_div_Re),
+                                                               z * (1 + config.dRe_div_Re), color=(0, 0, 1),
+                                                               opacity=opacity_for_magnet_line,
+                                                               representation='wireframe', mask=mask)
+
+            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x * (1 + config.dRe_div_Re),
+                                                               -y * (1 + config.dRe_div_Re),
+                                                               -z * (1 + config.dRe_div_Re), color=(0, 0, 1),
+                                                               opacity=opacity_for_magnet_line,
+                                                               representation='wireframe', mask=mask)
+
+
+
+
 
         def view_phase(self, phase=0):
             e_obs = config.e_obs
@@ -722,11 +755,11 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 60
-    betta_mu = 40
+    i_angle = 40
+    betta_mu = 60
 
     mc2 = 30
-    a_portion = 0.65
+    a_portion = 0.25
     fi_0 = 0
 
     config.set_e_obs(i_angle, 0)
