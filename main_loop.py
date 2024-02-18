@@ -11,7 +11,7 @@ from accretionColumn import AccretionColumn
 import vectors
 import main_service
 
-from plot_scripts import plot_from_main, plot_luminosity_in_range, plot_nu_L_nu, plot_L_nu
+from plot_scripts import plot_from_main, plot_luminosity_in_range, plot_nu_L_nu, plot_L_nu, plot_scattered
 
 if __name__ == '__main__':
     def plot_all():
@@ -19,6 +19,7 @@ if __name__ == '__main__':
         plot_luminosity_in_range.plot_figs()
         plot_L_nu.plot_figs()
         plot_nu_L_nu.plot_figs()
+        plot_scattered.plot_figs()
         plt.close('all')  # чтобы очистить память от fig из предыдущих вызовов
 
 
@@ -53,6 +54,8 @@ if __name__ == '__main__':
             for i in range(len(mc2)):
                 for j in range(len(a_portion)):
                     for k in range(len(fi_0)):
+
+                        # fi_0[k] = 360 - 180 * a_portion[j]
 
                         config.set_e_obs(i_angle[i_angle_index], 0)
                         config.set_betta_mu(betta_mu[betta_mu_index])
@@ -163,6 +166,9 @@ if __name__ == '__main__':
 
                         f.write('difference L_x / L_calc - 1 : %f ' % (
                                 (top_column.inner_surface.L_x / (4 * number) - 1) * 100) + '%\n')
+
+                        # print('L_x_on_freq:')
+                        # print(top_column.outer_surface.calculate_total_luminosity_freq())
 
                         while number > 10:
                             number = number / 10
@@ -415,6 +421,21 @@ if __name__ == '__main__':
                         main_service.save_arr_as_txt(data_array, full_file_folder + folder, file_name)
 
                         freq_array = accretionColumnService.get_frequency_from_energy(np.array(energy_arr))
+
+                        L_nu_data = np.array(data_array.copy())
+                        L_data = top_column.outer_surface.calculate_L_avg_from_L_nu(L_nu_data, freq_array)
+                        
+                        number = L_data
+                        power_index = 0
+                        while number > 10:
+                            number = number / 10
+                            power_index += 1
+
+                        file_name = 'save_values.txt'
+                        f = open(full_file_folder + file_name, 'a')
+                        f.write(f'L_data = {number} * 10**{power_index}\n')
+                        f.close()
+
                         for index_freq in range(len(data_array)):
                             data_array[index_freq] = data_array[index_freq] * freq_array[index_freq]
 
@@ -431,8 +452,6 @@ if __name__ == '__main__':
                         # print("execution time of calculate_nu_L_nu_on_energy: %f s" % (
                         #         time_calculate_nu_L_nu_on_energy - time_calculate_L_nu_on_energy))
 
-                        plot_all()
-
                         # print(bot_column.outer_surface.phi_range)
                         folder = 'scattered_on_magnet_lines/'
                         # рассеяние от магнитных линий
@@ -445,19 +464,22 @@ if __name__ == '__main__':
                                                                config.betta_mu)
 
                         scattered_energy = []
-                        scattered_energy_top = top_column.calculate_scattered_energy()
+
+                        top_column.calculate_geometric_feature_for_scatter()
+                        bot_column.calculate_geometric_feature_for_scatter()
+
+                        scattered_energy_top = top_column.geometric_feature_for_scatter * top_column.outer_surface.L_x
                         file_name = "scattered_energy_top.txt"
                         main_service.save_arr_as_txt(scattered_energy_top, full_file_folder + folder, file_name)
 
-                        scattered_energy.append(scattered_energy_top)
-
-                        scattered_energy_bot = bot_column.calculate_scattered_energy()
+                        # scattered_energy_bot = bot_column.calculate_scattered_energy()
+                        scattered_energy_bot = bot_column.geometric_feature_for_scatter * top_column.outer_surface.L_x
                         file_name = "scattered_energy_bot.txt"
                         main_service.save_arr_as_txt(scattered_energy_bot, full_file_folder + folder, file_name)
 
-                        scattered_energy.append(scattered_energy_bot)
-
-                        scattered_energy.append(scattered_energy_top + scattered_energy_bot)
+                        # scattered_energy.append(scattered_energy_top)
+                        # scattered_energy.append(scattered_energy_bot)
+                        # scattered_energy.append(scattered_energy_top + scattered_energy_bot)
 
                         # for count, arr in enumerate(top_column.magnet_lines_cos_psi_range):
                         #     file_name = f"top_magnet_lines_cos_psi_range_phase={count}.txt"
@@ -482,6 +504,84 @@ if __name__ == '__main__':
                                             '_%d_phase' % cos_index) + '.txt'
                                     main_service.save_arr_as_txt(columns[key].magnet_lines_cos_psi_range[cos_index],
                                                                  full_magnet_line_cos_file_folder, file_name)
+
+                        print('L_nu_scatter')
+                        PF = [0] * config.N_energy
+
+                        bot_column_scattered_data_array = [0] * config.N_energy
+                        top_column_scattered_data_array = [0] * config.N_energy
+
+                        folder = 'scattered_on_magnet_lines/' + 'L_nu/'
+
+                        # ------------------ цикл для Spectrum Distribution ------------------
+                        for energy_index in range(config.N_energy):
+                            current_energy = energy_arr[energy_index]
+                            # ------------------ начало заполнения массивов Spectral Energy -----------------------
+                            arr_simps_integrate = [0] * 4
+                            sum_simps_integrate = 0
+
+                            freq = accretionColumnService.get_frequency_from_energy(current_energy)
+
+                            for key, surface in surfaces.items():
+                                # берем только внутренние поверхности
+                                if key % 2 == 1:
+                                    arr_simps_integrate[key] = surface.calculate_full_L_nu_on_energy_for_scatter(
+                                        current_energy)
+                                    # (1 - beta) как и в L_x ??
+                                    sum_simps_integrate += np.array(arr_simps_integrate[key])
+                                else:
+                                    pass
+                            # ------------------ конец заполнения массивов Spectral Energy -----------------------
+                            top_column_L_nu_scatter = sum_simps_integrate * top_column.geometric_feature_for_scatter
+                            bot_column_L_nu_scatter = sum_simps_integrate * bot_column.geometric_feature_for_scatter
+
+                            # file_name = "top_column_scatter_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
+                            # main_service.save_arr_as_txt(top_column_L_nu_scatter, full_file_folder + folder + 'txt/',
+                            #                              file_name)
+                            top_column_scattered_data_array[energy_index] = top_column_L_nu_scatter
+
+                            # file_name = "bot_column_scatter_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
+                            # main_service.save_arr_as_txt(bot_column_L_nu_scatter, full_file_folder + folder + 'txt/',
+                            #                              file_name)
+                            bot_column_scattered_data_array[energy_index] = bot_column_L_nu_scatter
+
+                            file_name = "nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt" % current_energy
+                            main_service.save_arr_as_txt(sum_simps_integrate * freq,
+                                                         full_file_folder + 'scattered_on_magnet_lines/' + 'nu_L_nu/'
+                                                         + 'txt/', file_name)
+
+                            # arr_surf_on_energy = np.append(arr_simps_integrate, [sum_simps_integrate], 0)
+                            # file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % current_energy
+                            # main_service.save_arr_as_txt(arr_surf_on_energy, full_file_folder + folder + 'surfs/',
+                            #                              file_name)
+
+                            # ------------------ цикл для Spectrum Distribution ------------------
+
+                        file_name = "top_column_scatter_L_nu.txt"
+                        main_service.save_arr_as_txt(top_column_scattered_data_array, full_file_folder + folder,
+                                                     file_name)
+
+                        file_name = "bot_column_scatter_L_nu.txt"
+                        main_service.save_arr_as_txt(bot_column_scattered_data_array, full_file_folder + folder,
+                                                     file_name)
+
+                        freq_array = accretionColumnService.get_frequency_from_energy(np.array(energy_arr))
+                        for index_freq in range(len(top_column_scattered_data_array)):
+                            top_column_scattered_data_array[index_freq] = top_column_scattered_data_array[index_freq] * \
+                                                                          freq_array[index_freq]
+                            bot_column_scattered_data_array[index_freq] = bot_column_scattered_data_array[index_freq] * \
+                                                                          freq_array[index_freq]
+
+                        folder = 'scattered_on_magnet_lines/' + 'nu_L_nu/'
+                        file_name = "top_column_scatter_nu_L_nu.txt"
+                        main_service.save_arr_as_txt(top_column_scattered_data_array, full_file_folder + folder,
+                                                     file_name)
+
+                        file_name = "bot_column_scatter_nu_L_nu.txt"
+                        main_service.save_arr_as_txt(bot_column_scattered_data_array, full_file_folder + folder,
+                                                     file_name)
+
+                        plot_all()
 
                         time_calculate_nu_L_nu_on_energy = time.time()
                         print("execution time of program: %f s" % (
