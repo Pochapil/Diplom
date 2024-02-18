@@ -348,7 +348,9 @@ def get_vals(origin_phi, origin_theta, direction_vector, origin_x, origin_y,
                 print(abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r))
             # curr = abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r)
             # новые линии магнитосферы
-            theta_end = np.pi / 2 - betta_mu * np.cos(intersect_phi)
+            # theta_end = np.pi / 2 - betta_mu * np.cos(intersect_phi) - ОШИБКА !!
+            theta_end = np.pi / 2 - np.arctan(np.tan(betta_mu) * np.cos(intersect_phi))
+
             # для верхней колонки:
             top_column_intersect_phi_correct = (top_column_phi_range[0] <= intersect_phi <= top_column_phi_range[
                 -1]) or (0 <= intersect_phi <= top_column_phi_range[-1] - 2 * np.pi)
