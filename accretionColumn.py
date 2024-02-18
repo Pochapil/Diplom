@@ -22,7 +22,7 @@ class AccretionColumn:
             self.get_magnet_lines(self.outer_surface.theta_range)
 
         self.magnet_lines_cos_psi_range = []
-
+        self.geometric_feature_for_scatter = None
         # self.fill_magnet_lines_cos_array()
 
     def get_magnet_lines(self, theta_range_column):
@@ -166,6 +166,27 @@ class AccretionColumn:
             integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.magnet_lines_phi_range))
 
         return integrate_sum
+
+    def calculate_L_x_scattered(self):
+        return self.outer_surface.L_x * self.calculate_geometric_feature_for_scatter()
+
+    def calculate_geometric_feature_for_scatter(self):
+        '''один раз посчитать интеграл с геометрией на разных фазах и потом везде использовать как коэффициент -
+        просто домножать на полное количество энергии которое рассеивается'''
+
+        dS_simps = self.create_ds_for_integral()
+
+        integrate_step = [0] * config.N_phi_accretion
+        integrate_sum = [0] * config.t_max
+        for rotation_index in range(config.t_max):
+            for phi_index in range(config.N_phi_accretion):
+                r = self.outer_surface.R_e * np.sin(self.magnet_lines_theta_range) ** 2
+                integrate_step[phi_index] = np.abs(scipy.integrate.simps(
+                    1 / (4 * np.pi * np.array(r) ** 2) * np.array(dS_simps) * np.array(
+                        self.magnet_lines_cos_psi_range[rotation_index][phi_index][:]), self.magnet_lines_theta_range))
+            integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.magnet_lines_phi_range))
+        self.geometric_feature_for_scatter = np.array(integrate_sum)
+        # return integrate_sum
 
     def create_ds_for_integral(self):
         # для интеграла по simpson
@@ -712,6 +733,22 @@ class AccretionColumn:
 
             return total_luminosity
 
+        def calculate_total_luminosity_freq(self):
+            dS_simps = self.create_ds_for_integral()
+
+            total_luminosity_step = [0] * config.N_phi_accretion
+            for i in range(config.N_phi_accretion):
+                energy_step = [0] * config.N_energy
+                for j in range(config.N_energy):
+                    freq = accretionColumnService.get_frequency_from_energy(config.energy_arr[j])
+                    energy_step[j] = accretionColumnService.plank_energy_on_frequency(freq, self.T_eff)
+                energy_arr = np.reshape(config.energy_arr, (config.N_energy, 1))
+                cur_step = scipy.integrate.simps(np.transpose(energy_step), energy_arr)
+                total_luminosity_step[i] = 4 * np.pi * scipy.integrate.simps(cur_step * dS_simps, self.theta_range)
+            total_luminosity = scipy.integrate.simps(total_luminosity_step, self.phi_range)
+
+            return total_luminosity
+
         def calculate_integral_distribution_in_range(self, energy_bot, energy_top):
             # КэВ
             '''
@@ -822,3 +859,65 @@ class AccretionColumn:
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
             return integrate_sum
+
+        def calculate_full_L_nu_on_energy_for_scatter(self, energy):
+            # КэВ
+            ''' распределение L_nu от фазы на какой-то энергии излучения '''
+            frequency = accretionColumnService.get_frequency_from_energy(energy)
+
+            dS_simps = self.create_ds_for_integral()
+            plank_func = accretionColumnService.plank_energy_on_frequency(frequency, self.T_eff)
+
+            integrate_step = [0] * config.N_phi_accretion
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                for phi_index in range(config.N_phi_accretion):
+                    integrate_step[phi_index] = 4 * np.pi * np.abs(
+                        scipy.integrate.simps(plank_func * np.array(dS_simps), self.theta_range))
+                integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
+
+            return integrate_sum
+
+        def calculate_full_L_nu_on_energy_for_scatter_integr_energy(self, energy, energy_index):
+
+            dS_simps = self.create_ds_for_integral()
+
+            integrate_step = [0] * config.N_phi_accretion
+            integrate_sum = [0] * config.t_max
+
+            if energy_index > 0:
+                prev_energy = config.energy_arr[energy_index - 1]
+            else:
+                prev_energy = 0
+
+            for rotation_index in range(config.t_max):
+
+                p_frequency = accretionColumnService.get_frequency_from_energy(prev_energy)
+                p_plank_func = accretionColumnService.plank_energy_on_frequency(p_frequency, self.T_eff)
+
+                frequency = accretionColumnService.get_frequency_from_energy(energy)
+                plank_func = (accretionColumnService.plank_energy_on_frequency(frequency, self.T_eff) - p_plank_func) \
+                             * (frequency - p_frequency)
+
+                for phi_index in range(config.N_phi_accretion):
+                    integrate_step[phi_index] = 4 * np.pi * np.abs(
+                        scipy.integrate.simps(plank_func * np.array(dS_simps), self.theta_range))
+
+                integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
+
+            return integrate_sum
+
+        def calculate_full_nu_L_nu_on_energy_for_scatter(self, energy):
+            frequency = accretionColumnService.get_frequency_from_energy(energy)
+            return np.array(self.calculate_full_L_nu_on_energy_for_scatter(energy)) * frequency
+
+        def calculate_L_from_L_nu(self, L_nu_data, freq_arr):
+            return scipy.integrate.simps(L_nu_data, freq_arr)
+
+        def calculate_L_avg_from_L_nu(self, L_nu_data, freq_arr):
+            L_nu_data = np.array(L_nu_data)
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                integrate_step = self.calculate_L_from_L_nu(L_nu_data[:, rotation_index], freq_arr)
+                integrate_sum[rotation_index] = integrate_step
+            return np.mean(integrate_sum)
