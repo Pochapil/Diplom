@@ -185,6 +185,12 @@ N_energy = 20
 energy_min = 1  # [КэВ]
 energy_max = 40  # [КэВ]
 
+# лог сетка по энергии: e_n+1 = e_n * const
+energy_step = (energy_max / energy_min) ** (1 / (N_energy - 1))
+energy_arr = list(energy_min * energy_step ** i for i in range(N_energy - 1))
+# чтобы убрать погрешности и закрыть массив точным числом
+energy_arr.append(energy_max)
+
 obs_i_angle_deg = 30
 obs_i_angle = obs_i_angle_deg * grad_to_rad  # угол между нормалью к двойной системе и наблюдателем
 obs_phi_angle = 0 * grad_to_rad
@@ -218,4 +224,9 @@ energy_indexes = [0, 12, 15, 17, 19]
 # меньше на 1 т.к. в диапазоне энергий => меньше на 1 чем точек разбиения
 energy_indexes_luminosity = [0, 12, 14, 16, 18]
 
+# val_ksi = 100
+# val_n = 1e15
+# # val = 2 ** (1 / 2) * (G * M_ns) ** (3 / 2) / (val_ksi * R_ns ** (7 / 2) * M_accretion_rate)
+# val = G * M_ns * M_accretion_rate / ((val_ksi * R_ns) ** 3 * val_n)
+# print(val)
 # print(H/10**11)
