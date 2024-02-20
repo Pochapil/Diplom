@@ -101,16 +101,16 @@ class AccretionColumn:
                                                                            direction_y, direction_z):
                             cos_psi_range[i, j] = 0
                         else:
-                            cos_psi_range[i, j] = accretionColumnService.get_vals(self.magnet_lines_phi_range[i],
-                                                                                  self.magnet_lines_theta_range[j],
-                                                                                  e_obs_mu, origin_x, origin_y,
-                                                                                  origin_z, direction_x, direction_y,
-                                                                                  direction_z,
-                                                                                  self.outer_surface.ksi_shock,
-                                                                                  top_column_phi_range,
-                                                                                  bot_column_phi_range,
-                                                                                  self.outer_surface.R_e,
-                                                                                  r, updated_betta_mu)
+                            cos_psi_range[i, j] *= accretionColumnService.get_vals(self.magnet_lines_phi_range[i],
+                                                                                   self.magnet_lines_theta_range[j],
+                                                                                   e_obs_mu, origin_x, origin_y,
+                                                                                   origin_z, direction_x, direction_y,
+                                                                                   direction_z,
+                                                                                   self.outer_surface.ksi_shock,
+                                                                                   top_column_phi_range,
+                                                                                   bot_column_phi_range,
+                                                                                   self.outer_surface.R_e,
+                                                                                   r, updated_betta_mu)
                     else:
                         cos_psi_range[i, j] = 0
             cos_psi_range_final.append(cos_psi_range)
@@ -676,15 +676,16 @@ class AccretionColumn:
                                                                            direction_y, direction_z):
                             cos_psi_range[i, j] = 0
                         else:
-                            cos_psi_range[i, j] = accretionColumnService.get_vals(self.phi_range[i],
-                                                                                  self.theta_range[j],
-                                                                                  e_obs_mu,
-                                                                                  origin_x, origin_y, origin_z,
-                                                                                  direction_x, direction_y, direction_z,
-                                                                                  self.ksi_shock,
-                                                                                  top_column_phi_range,
-                                                                                  bot_column_phi_range,
-                                                                                  self.R_e, r, updated_betta_mu)
+                            cos_psi_range[i, j] *= accretionColumnService.get_vals(self.phi_range[i],
+                                                                                   self.theta_range[j],
+                                                                                   e_obs_mu,
+                                                                                   origin_x, origin_y, origin_z,
+                                                                                   direction_x, direction_y,
+                                                                                   direction_z,
+                                                                                   self.ksi_shock,
+                                                                                   top_column_phi_range,
+                                                                                   bot_column_phi_range,
+                                                                                   self.R_e, r, updated_betta_mu)
                     else:
                         cos_psi_range[i, j] = 0
             return cos_psi_range
@@ -862,7 +863,14 @@ class AccretionColumn:
 
         def calculate_full_L_nu_on_energy_for_scatter(self, energy):
             # КэВ
-            ''' распределение L_nu от фазы на какой-то энергии излучения '''
+            ''' распределение L_nu от фазы на какой-то энергии излучения
+            1/2 - так как при расчете L_nu ы брали 4 pi чтобы из потока F_nu получить светимость L_nu (предполагая
+            изотропность источника). Теперь же надо посчитать поток F_nu для рассеяния и отражения - поэтому так как
+            площадка излучает в полуплоскость надо взять 1/2 от интеграла
+
+            поток, который должен быть отражен на самом деле в 2 раза меньше, так как излучает только в полуплоскость,
+            а мы считаем L_nu как изотропное и поэтому умножали на 4 pi. надо на 2 pi'''
+
             frequency = accretionColumnService.get_frequency_from_energy(energy)
 
             dS_simps = self.create_ds_for_integral()
@@ -872,7 +880,7 @@ class AccretionColumn:
             integrate_sum = [0] * config.t_max
             for rotation_index in range(config.t_max):
                 for phi_index in range(config.N_phi_accretion):
-                    integrate_step[phi_index] = 4 * np.pi * np.abs(
+                    integrate_step[phi_index] = 1 / 2 * 4 * np.pi * np.abs(
                         scipy.integrate.simps(plank_func * np.array(dS_simps), self.theta_range))
                 integrate_sum[rotation_index] = np.abs(scipy.integrate.simps(integrate_step, self.phi_range))
 
