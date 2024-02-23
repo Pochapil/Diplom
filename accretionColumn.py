@@ -43,7 +43,7 @@ class AccretionColumn:
         # mask = np.zeros_like(x).astype(bool)
         for i in range(len(phi_range)):
             for j in range(len(theta_range)):
-                theta_end = np.pi / 2 - config.betta_mu * np.cos(phi_range[i])
+                theta_end = np.pi / 2 - np.arctan(np.tan(config.betta_mu) * np.cos(phi_range[i]))
                 if theta_range[j] > theta_end:
                     mask_array[i][j] = True
 
@@ -929,3 +929,11 @@ class AccretionColumn:
                 integrate_step = self.calculate_L_from_L_nu(L_nu_data[:, rotation_index], freq_arr)
                 integrate_sum[rotation_index] = integrate_step
             return np.mean(integrate_sum)
+
+        def get_L_from_L_nu(self, L_nu_data, freq_arr):
+            L_nu_data = np.array(L_nu_data)
+            integrate_sum = [0] * config.t_max
+            for rotation_index in range(config.t_max):
+                integrate_step = self.calculate_L_from_L_nu(L_nu_data[:, rotation_index], freq_arr)
+                integrate_sum[rotation_index] = integrate_step
+            return integrate_sum
