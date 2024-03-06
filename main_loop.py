@@ -23,6 +23,7 @@ if __name__ == '__main__':
         plt.close('all')  # чтобы очистить память от fig из предыдущих вызовов
 
 
+    check_flag = False
     save_cos_flag = False
     save_magnet_line_cos_flag = False
     # mc2 = [10, 30, 100]
@@ -30,24 +31,24 @@ if __name__ == '__main__':
     # a_portion = [0.65]
     # fi_0 = [20 * i for i in range(18)]
 
-    fi_0 = [0]
+    fi_0 = [200]
     # i_angle = [60, 90]
     # betta_mu = [60, 90]
 
-    # i_angle = [10 * i for i in range(1, 10)]
-    # betta_mu = [10 * i for i in range(1, 10)]
-    mc2 = [30]
-    a_portion = [0.65]
+    #i_angle = [10 * i for i in range(6, 10)]
+    #betta_mu = [10 * i for i in range(1, 10)]
+    mc2 = [100]
+    a_portion = [0.25, 0.65]
     # fi_0 = [20 * i for i in range(10, 18)]
 
-    i_angle = [60]
-    betta_mu = [40]
+    i_angle = [70]
+    betta_mu = [60]
 
     # i_angle = [30]
     # betta_mu = [60, 90]
 
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
-    print('to calculate %d loops need about %f hours' % (N_big, 57 * N_big / 3600))
+    print('to calculate %d loops need about %f hours' % (N_big, 100 * N_big / 3600))
 
     for i_angle_index in range(len(i_angle)):
         for betta_mu_index in range(len(betta_mu)):
@@ -424,7 +425,7 @@ if __name__ == '__main__':
 
                         L_nu_data = np.array(data_array.copy())
                         L_data = top_column.outer_surface.calculate_L_avg_from_L_nu(L_nu_data, freq_array)
-                        
+
                         number = L_data
                         power_index = 0
                         while number > 10:
@@ -433,7 +434,7 @@ if __name__ == '__main__':
 
                         file_name = 'save_values.txt'
                         f = open(full_file_folder + file_name, 'a')
-                        f.write(f'L_data = {number} * 10**{power_index}\n')
+                        f.write(f'L_data = {number:.6f} * 10**{power_index}\n')
                         f.close()
 
                         for index_freq in range(len(data_array)):
@@ -476,6 +477,19 @@ if __name__ == '__main__':
                         scattered_energy_bot = bot_column.geometric_feature_for_scatter * top_column.outer_surface.L_x
                         file_name = "scattered_energy_bot.txt"
                         main_service.save_arr_as_txt(scattered_energy_bot, full_file_folder + folder, file_name)
+
+                        number = avg_L_on_phase + np.mean(scattered_energy_top + scattered_energy_bot)
+                        power_index = 0
+                        while number > 10:
+                            number = number / 10
+                            power_index += 1
+                        file_name = 'save_values.txt'
+                        f = open(full_file_folder + file_name, 'a')
+                        f.write(f'avg L with scatter = {number:.6f} * 10**{power_index}\n')
+                        number = (avg_L_on_phase + np.mean(
+                            scattered_energy_top + scattered_energy_bot)) / top_column.outer_surface.L_x
+                        f.write(f'avg L with scatter / L_x = {number:.6f}\n')
+                        f.close()
 
                         # scattered_energy.append(scattered_energy_top)
                         # scattered_energy.append(scattered_energy_bot)
@@ -564,6 +578,27 @@ if __name__ == '__main__':
                         file_name = "bot_column_scatter_L_nu.txt"
                         main_service.save_arr_as_txt(bot_column_scattered_data_array, full_file_folder + folder,
                                                      file_name)
+
+                        if check_flag:
+                            file_name = "L_nu.txt"
+                            folder = 'L_nu/'
+                            L_nu_data = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+                            L_data = top_column.outer_surface.get_L_from_L_nu(L_nu_data, freq_array)
+                            folder = 'scattered_on_magnet_lines/' + 'L_check/'
+                            file_name = "L.txt"
+                            main_service.save_arr_as_txt(L_data, full_file_folder + folder, file_name)
+
+                            top_column_L_scatter = top_column.outer_surface.get_L_from_L_nu(
+                                top_column_scattered_data_array,
+                                freq_array)
+                            file_name = "top_column_L_scatter.txt"
+                            main_service.save_arr_as_txt(top_column_L_scatter, full_file_folder + folder, file_name)
+
+                            bot_column_L_scatter = top_column.outer_surface.get_L_from_L_nu(
+                                bot_column_scattered_data_array,
+                                freq_array)
+                            file_name = "bot_column_L_scatter.txt"
+                            main_service.save_arr_as_txt(bot_column_L_scatter, full_file_folder + folder, file_name)
 
                         freq_array = accretionColumnService.get_frequency_from_energy(np.array(energy_arr))
                         for index_freq in range(len(top_column_scattered_data_array)):
