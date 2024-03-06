@@ -112,7 +112,7 @@ def get_Teff_distribution(R_e, delta_ns, A_normal):
     def fThetabs(x):
         return -2 / 3 * e * x ** (3 / 2) * u(x) * v(x)
 
-    # ro = 1  # плотность падающего газа
+    # ro = 1 # плотность падающего газа
     # Fr(ksi) 30 формула 17 стр
     def fr(x):
         return 4 / 3 * u(x) * v(x) + s * config.G * config.M_ns / config.R_ns * x ** (-4)
