@@ -8,6 +8,8 @@ import accretionColumnService
 
 
 def plot_figs():
+    check_flag = False
+
     plt.style.use(['science', 'notebook', 'grid'])
     working_folder = config.full_file_folder
 
@@ -145,6 +147,49 @@ def plot_figs():
         #                                  is_y_2d=False)
 
         file_name = 'L_nu_of_energy_%0.2f_KeV_of_surfaces.png' % energy_arr[energy_i]
+        main_service.save_figure(fig, working_folder, file_name)
+    # ------------------------------------------------------------------------------------------------------------------
+
+    if check_flag:
+
+        folder = 'scattered_on_magnet_lines/' + 'L_check/'
+        working_folder = config.full_file_folder + folder
+
+        file_name = "L.txt"
+        L_data = main_service.load_arr_from_txt(working_folder, file_name)
+        L_data = main_service.extend_arr_for_phase(L_data)
+
+        file_name = "top_column_L_scatter.txt"
+        top_column_L_scatter = main_service.load_arr_from_txt(working_folder, file_name)
+        top_column_L_scatter = main_service.extend_arr_for_phase(top_column_L_scatter)
+
+        file_name = "bot_column_L_scatter.txt"
+        bot_column_L_scatter = main_service.load_arr_from_txt(working_folder, file_name)
+        bot_column_L_scatter = main_service.extend_arr_for_phase(bot_column_L_scatter)
+
+        fig = plt.figure(figsize=(21, 10))
+        ax = fig.add_subplot(111)
+
+        ax.plot(phi_for_plot, arr_to_plt[-1], label='sum', color='black')
+        ax.plot(phi_for_plot, top_scatter, label='top_scatter', color='purple')
+        ax.plot(phi_for_plot, bot_scatter, label='bot_scatter', color='blue')
+        ax.plot(phi_for_plot, arr_to_plt[-1] - bot_scatter - top_scatter, label='without_scatter', color='green')
+
+        ax.plot(phi_for_plot, L_data, label='L_integral_from_L_nu', color='green', marker='*', markersize=12)
+        ax.plot(phi_for_plot, top_column_L_scatter, label='top_scatter_integral', color='purple', marker='*', markersize=12)
+        ax.plot(phi_for_plot, bot_column_L_scatter, label='bot_scatter_integral', color='blue', marker='*', markersize=12)
+
+        ax.plot(phi_for_plot, L_data + top_column_L_scatter + bot_column_L_scatter, label='sum_L_integral', color='black',
+                marker='*', markersize=12)
+
+        x_axis_label = r'$\Phi$'
+        y_axis_label = r'$L_{\rm{iso}}$' + ' [erg/s]'
+        ax.set_xlabel(x_axis_label, fontsize=24)
+        ax.set_ylabel(y_axis_label, fontsize=24)
+
+        ax.legend()
+
+        file_name = 'check_with_scatter.png'
         main_service.save_figure(fig, working_folder, file_name)
 
 
