@@ -189,8 +189,45 @@ def get_data_for_accretion_columns(theta_range_column, phi_range_column, fi_0):
     return x, y, z
 
 
+def get_data_for_accretion_columns_outer(theta_range_column, phi_range_column, fi_0):
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+    phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    theta_array_begin = np.arcsin(np.sin(theta_range_column[0]) / (1 + config.dRe_div_Re) ** (1 / 2))
+    theta_array_end = np.arcsin(np.sin(theta_range_column[-1]) / (1 + config.dRe_div_Re) ** (1 / 2))
+    step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+    theta_range = np.array([theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+
+    return x * (1 + config.dRe_div_Re), y * (1 + config.dRe_div_Re), z * (1 + config.dRe_div_Re)
+
+
+def get_data_for_accretion_columns_hat(theta_range_column, phi_range_column, fi_0):
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+
+    theta_range = np.array([theta_range_column[-1]] * config.N_theta_accretion)
+    phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    r1 = np.sin(theta_range_column[-1]) ** 3
+    r2 = (np.sin(theta_range_column[-1]) / (1 + config.dRe_div_Re) ** (1 / 2)) ** 3 * (1 + config.dRe_div_Re)
+    r = np.linspace(r1, r2, 100)
+
+    r, phi = np.meshgrid(r, phi_range)
+    x = r * np.cos(phi)
+    y = r * np.sin(phi)
+    z = np.full_like(y, np.sin(theta_range_column[-1]) ** 2 * np.cos(theta_range_column[-1]))
+    # z, z1 = np.mgrid[-0.003:0.003:100j, -0.003:0.003:100j]
+    return x, y, z
+
+
 def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi_0):
-    '''смог реализовать только с помощью маски'''
+    '''смог реализовать только с помощью маски
+    -1 индекс так как начало магнитных линий = конец колонки'''
     theta_array_end = np.pi / 2 + config.betta_mu
     # ограничиваю колонкой
     theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
@@ -216,6 +253,35 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
                 mask[i][j] = True
 
     return x, y, z, mask
+
+
+def get_data_for_magnet_lines_outer_with_mask(theta_range_column, phi_range_column, fi_0):
+    '''смог реализовать только с помощью маски'''
+    theta_array_end = np.pi / 2 + config.betta_mu
+    # ограничиваю колонкой
+    theta_array_begin = np.arcsin(np.sin(theta_range_column[-1]) / (1 + config.dRe_div_Re) ** (1 / 2))
+    theta_array_end = min((np.pi - theta_array_begin), theta_array_end)
+
+    step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
+    theta_range = np.array([theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
+
+    step_phi_accretion = config.lim_phi_accretion / (config.N_phi_accretion - 1)
+    phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
+
+    r, p = np.meshgrid(np.sin(theta_range) ** 2, phi_range)
+    r1 = r * np.sin(theta_range)
+    x = r1 * np.cos(p)
+    y = r1 * np.sin(p)
+    z = r * np.cos(theta_range)
+    mask = np.zeros_like(x).astype(bool)
+    for i in range(len(phi_range)):
+        for j in range(len(theta_range)):
+            theta_end = np.pi / 2 - np.arctan(np.tan(config.betta_mu) * np.cos(phi_range[i]))
+            if theta_range[j] > theta_end:
+                # pass
+                mask[i][j] = True
+
+    return x * (1 + config.dRe_div_Re), y * (1 + config.dRe_div_Re), z * (1 + config.dRe_div_Re), mask
 
 
 def get_data_for_magnet_lines(theta_range_column, phi_range_column, fi_0, cut_flag=False):
@@ -416,6 +482,18 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             # низ
             self.accretion_column_bot = self.scene.mlab.mesh(-x, -y, -z, color=self.color_accretion_column_bot)
 
+            x, y, z = get_data_for_accretion_columns_outer(theta_range_column, phi_range_column,
+                                                           config.phi_accretion_begin_deg)
+            # верх
+            self.accretion_column_top_outer = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top)
+            # низ
+            self.accretion_column_bot_outer = self.scene.mlab.mesh(-x, -y, -z, color=self.color_accretion_column_bot)
+
+            x, y, z = get_data_for_accretion_columns_hat(theta_range_column, phi_range_column,
+                                                         config.phi_accretion_begin_deg)
+
+            self.accretion_column_top_outer_hat = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top)
+
             self.flag_draw_magnet_lines = True
             self.flag_cut_magnet_lines = False
             # x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, config.phi_accretion_begin_deg)
@@ -426,27 +504,25 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             self.magnet_lines_top = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
                                                          representation='wireframe', mask=mask)
 
-            self.magnet_lines_top_outer = self.scene.mlab.mesh(x * (1 + config.dRe_div_Re),
-                                                               y * (1 + config.dRe_div_Re),
-                                                               z * (1 + config.dRe_div_Re),
-                                                               color=self.color_magnet_lines_top_outer,
-                                                               opacity=opacity_for_magnet_line,
-                                                               representation='wireframe', mask=mask)
-
             # self.magnet_lines_top = self.scene.mlab.surf(x, y, z, color=(1, 0, 0), warp_scale=0.3,
             #                                              representation='wireframe', line_width=0.5)
             self.magnet_lines_bot = self.scene.mlab.mesh(-x, -y, -z, color=self.color_magnet_lines_bot,
                                                          opacity=opacity_for_magnet_line,
                                                          representation='wireframe', mask=mask)
 
-            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x * (1 + config.dRe_div_Re),
-                                                               -y * (1 + config.dRe_div_Re),
-                                                               -z * (1 + config.dRe_div_Re),
+            x, y, z, mask = get_data_for_magnet_lines_outer_with_mask(theta_range_column, phi_range_column,
+                                                                      config.phi_accretion_begin_deg)
+            self.magnet_lines_top_outer = self.scene.mlab.mesh(x, y, z,
+                                                               color=self.color_magnet_lines_top_outer,
+                                                               opacity=opacity_for_magnet_line,
+                                                               representation='wireframe', mask=mask)
+
+            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x, -y, -z,
                                                                color=self.color_magnet_lines_bot_outer,
                                                                opacity=opacity_for_magnet_line,
                                                                representation='wireframe', mask=mask)
 
-            mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=(1, 0, 0), tube_radius=0.005, tube_sides=4)  # mu_vector
+            mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=(1, 0, 0), tube_radius=0.0005, tube_sides=6)  # mu_vector
 
             omega_vector = [-np.sin(betta_mu * config.grad_to_rad) * np.cos(0),
                             np.sin(betta_mu * config.grad_to_rad) * np.sin(0),
@@ -454,7 +530,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
 
             # omega_vector
             self.omega_vector = mlab.plot3d([0, omega_vector[0]], [0, omega_vector[1]], [0, omega_vector[2]],
-                                            color=(0, 0, 0), tube_radius=0.005, tube_sides=4)
+                                            color=(0, 0, 0), tube_radius=0.0005, tube_sides=4)
 
             # рисуем аккреционный диск
             disc_color = (160, 82, 45)
@@ -530,19 +606,19 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                                          opacity=opacity_for_magnet_line,
                                                          representation='wireframe', mask=mask)
 
+            x, y, z, mask = get_data_for_magnet_lines_outer_with_mask(theta_range_column, phi_range_column,
+                                                                      config.phi_accretion_begin_deg)
+
             self.magnet_lines_top_outer.mlab_source.trait_set(x=[0], y=[0], z=[0])
             self.magnet_lines_bot_outer.mlab_source.trait_set(x=[0], y=[0], z=[0])
             # new
-            self.magnet_lines_top_outer = self.scene.mlab.mesh(x * (1 + config.dRe_div_Re),
-                                                               y * (1 + config.dRe_div_Re),
-                                                               z * (1 + config.dRe_div_Re),
+
+            self.magnet_lines_top_outer = self.scene.mlab.mesh(x, y, z,
                                                                color=self.color_magnet_lines_top_outer,
                                                                opacity=opacity_for_magnet_line,
                                                                representation='wireframe', mask=mask)
 
-            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x * (1 + config.dRe_div_Re),
-                                                               -y * (1 + config.dRe_div_Re),
-                                                               -z * (1 + config.dRe_div_Re),
+            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x, -y, -z,
                                                                color=self.color_magnet_lines_top_outer,
                                                                opacity=opacity_for_magnet_line,
                                                                representation='wireframe', mask=mask)
@@ -766,8 +842,8 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 40
-    betta_mu = 60
+    i_angle = 60
+    betta_mu = 40
 
     mc2 = 30
     a_portion = 0.65
