@@ -23,6 +23,7 @@ if __name__ == '__main__':
         plt.close('all')  # чтобы очистить память от fig из предыдущих вызовов
 
 
+    plot_flag = False
     check_flag = False
     save_cos_flag = False
     save_magnet_line_cos_flag = False
@@ -31,24 +32,26 @@ if __name__ == '__main__':
     # a_portion = [0.65]
     # fi_0 = [20 * i for i in range(18)]
 
-    fi_0 = [200]
+    fi_0 = [0]
     # i_angle = [60, 90]
     # betta_mu = [60, 90]
 
-    #i_angle = [10 * i for i in range(6, 10)]
-    #betta_mu = [10 * i for i in range(1, 10)]
-    mc2 = [100]
-    a_portion = [0.25, 0.65]
+    # i_angle = [10 * i for i in range(1, 10)]
+    # betta_mu = [10 * i for i in range(8, 10)]
+    mc2 = [30, 100]
+    a_portion = [0.25]
     # fi_0 = [20 * i for i in range(10, 18)]
 
-    i_angle = [70]
-    betta_mu = [60]
+    # i_angle = [90]
+    # betta_mu = [90]
 
-    # i_angle = [30]
-    # betta_mu = [60, 90]
+    # i_angle = [90]
+    betta_mu = [20]
+
+    i_angle = [10 * i for i in range(10, 19)]
 
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
-    print('to calculate %d loops need about %f hours' % (N_big, 100 * N_big / 3600))
+    print('to calculate %d loops need about %f hours' % (N_big, 60 * N_big / 3600))
 
     for i_angle_index in range(len(i_angle)):
         for betta_mu_index in range(len(betta_mu)):
@@ -616,7 +619,8 @@ if __name__ == '__main__':
                         main_service.save_arr_as_txt(bot_column_scattered_data_array, full_file_folder + folder,
                                                      file_name)
 
-                        plot_all()
+                        if plot_flag:
+                            plot_all()
 
                         time_calculate_nu_L_nu_on_energy = time.time()
                         print("execution time of program: %f s" % (
