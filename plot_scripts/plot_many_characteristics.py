@@ -26,7 +26,10 @@ marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
 def get_PF_data(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8):
     '''достаю массивы PF для указанных входных аргументов'''
 
-    folder = 'nu_L_nu/'
+    folder = 'L_nu/'
+    if config.new_magnet_lines_flag:
+        folder = 'scattered_on_magnet_lines/' + folder
+
     file_name = 'PF.txt'
     # такой порядок: a, mc2, i, beta, fi - для того, чтобы делать colormesh x = beta, y=i; по fi делаем усреднение
     final_final_array = np.zeros((len(a_portion_arr), len(mc2_arr), len(i_angle_arr), len(betta_mu_arr), len(fi_0_arr)))
@@ -634,5 +637,14 @@ fi_0_arr = [20 * i for i in range(18)]
 # a_portion_arr = [0.25]
 # fi_0_arr = [0]
 
-plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
-plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
+
+i_angle_arr = [10 * i for i in range(3, 10)]
+betta_mu_arr = [10 * i for i in range(1, 10)]
+mc2_arr = [30, 100]
+a_portion_arr = [0.25, 0.65]
+fi_0_arr = [20 * i for i in range(18)]
+
+plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
+
+# plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
+# plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
