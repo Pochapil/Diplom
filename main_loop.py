@@ -36,19 +36,20 @@ if __name__ == '__main__':
     # i_angle = [60, 90]
     # betta_mu = [60, 90]
 
-    # i_angle = [10 * i for i in range(1, 10)]
+    i_angle = [10 * i for i in range(1, 10)]
     # betta_mu = [10 * i for i in range(8, 10)]
-    mc2 = [30, 100]
-    a_portion = [0.25]
+    #  mc2 = [10, 30, 50, 100, 150]
+    mc2 = [10, 50, 200]
+    a_portion = [0.25, 0.65]
     # fi_0 = [20 * i for i in range(10, 18)]
 
     # i_angle = [90]
     # betta_mu = [90]
 
-    # i_angle = [90]
-    betta_mu = [20]
+    # i_angle = [40]
+    betta_mu = [60]
 
-    i_angle = [10 * i for i in range(10, 19)]
+    # i_angle = [10 * i for i in range(10, 19)]
 
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
     print('to calculate %d loops need about %f hours' % (N_big, 60 * N_big / 3600))
@@ -523,7 +524,6 @@ if __name__ == '__main__':
                                                                  full_magnet_line_cos_file_folder, file_name)
 
                         print('L_nu_scatter')
-                        PF = [0] * config.N_energy
 
                         bot_column_scattered_data_array = [0] * config.N_energy
                         top_column_scattered_data_array = [0] * config.N_energy
@@ -581,6 +581,20 @@ if __name__ == '__main__':
                         file_name = "bot_column_scatter_L_nu.txt"
                         main_service.save_arr_as_txt(bot_column_scattered_data_array, full_file_folder + folder,
                                                      file_name)
+
+                        file_name = "L_nu.txt"
+                        data_array = main_service.load_arr_from_txt(full_file_folder + 'L_nu/', file_name)
+
+                        sum_scattered_array = np.array(top_column_scattered_data_array) + np.array(
+                            bot_column_scattered_data_array) + data_array
+
+                        PF = [0] * config.N_energy
+                        for energy_index in range(config.N_energy):
+                            PF[energy_index] = accretionColumnService.get_pulsed_fraction(
+                                sum_scattered_array[energy_index])
+
+                        file_name = "PF.txt"
+                        main_service.save_arr_as_txt(PF, full_file_folder + folder, file_name)
 
                         if check_flag:
                             file_name = "L_nu.txt"
