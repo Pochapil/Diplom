@@ -230,6 +230,8 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
     -1 индекс так как начало магнитных линий = конец колонки'''
     theta_array_end = np.pi / 2 + config.betta_mu
     # ограничиваю колонкой
+
+    # if phi_range_column[-1] - phi_range_column[0] > np.pi / 2:
     theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
     theta_array_begin = theta_range_column[-1]
 
@@ -842,12 +844,12 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 60
-    betta_mu = 40
+    i_angle = 40
+    betta_mu = 20
 
     mc2 = 30
     a_portion = 0.65
-    fi_0 = 0
+    fi_0 = 300
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
