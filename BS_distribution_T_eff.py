@@ -54,7 +54,7 @@ def get_Teff_distribution(R_e, delta_ns, A_normal):
             return x - f(x) / df(x)
 
         delta = 0.001  # точность для метода ньютона
-        ksi1 = 14.3  # начальное предположение
+        ksi1 = 34.3  # начальное предположение
         ksi2 = nuton(ksi1)
         while np.abs((ksi1 - ksi2)) > delta:
             ksi1 = ksi2
@@ -62,6 +62,7 @@ def get_Teff_distribution(R_e, delta_ns, A_normal):
         return ksi2  # rs/R - находим радиус ударной волны
 
     ksiShock = findKsiShock()
+    # print(ksiShock)
     # 31 формула - значения функций в точке ksiShock - граничные значения для численных расчетов
     # зависит от n размера пространства !!! взял n=3 везде
     v1 = -1 / 7 * (2 * config.G * config.M_ns / config.R_ns) ** (1 / 2) * ksiShock ** (-1 / 2)
