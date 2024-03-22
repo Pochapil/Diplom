@@ -231,8 +231,8 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
     theta_array_end = np.pi / 2 + config.betta_mu
     # ограничиваю колонкой
 
-    # if phi_range_column[-1] - phi_range_column[0] > np.pi / 2:
-    theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
+    if phi_range_column[-1] - phi_range_column[0] > np.pi / 2:
+        theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
     theta_array_begin = theta_range_column[-1]
 
     step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
@@ -463,8 +463,11 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
         color_accretion_column_top = (1, 0, 0)
         color_accretion_column_bot = (0, 1, 0)
 
+        color_accretion_column_top_outer = (1, 1, 0)
+        color_accretion_column_bot_outer = (0, 1, 1)
+
         color_magnet_lines_top = (0, 0, 1)
-        color_magnet_lines_top_outer = (0, 0, 1)
+        color_magnet_lines_top_outer = (0, 0.5, 1)
         color_magnet_lines_bot = (0, 0, 1)
         color_magnet_lines_bot_outer = (0, 0, 1)
 
@@ -487,9 +490,9 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             x, y, z = get_data_for_accretion_columns_outer(theta_range_column, phi_range_column,
                                                            config.phi_accretion_begin_deg)
             # верх
-            self.accretion_column_top_outer = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top)
+            self.accretion_column_top_outer = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top_outer)
             # низ
-            self.accretion_column_bot_outer = self.scene.mlab.mesh(-x, -y, -z, color=self.color_accretion_column_bot)
+            self.accretion_column_bot_outer = self.scene.mlab.mesh(-x, -y, -z, color=self.color_accretion_column_bot_outer)
 
             x, y, z = get_data_for_accretion_columns_hat(theta_range_column, phi_range_column,
                                                          config.phi_accretion_begin_deg)
@@ -621,7 +624,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                                                representation='wireframe', mask=mask)
 
             self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x, -y, -z,
-                                                               color=self.color_magnet_lines_top_outer,
+                                                               color=self.color_magnet_lines_bot_outer,
                                                                opacity=opacity_for_magnet_line,
                                                                representation='wireframe', mask=mask)
 
@@ -844,12 +847,12 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 40
-    betta_mu = 20
+    i_angle = 10
+    betta_mu = 30
 
-    mc2 = 30
-    a_portion = 0.65
-    fi_0 = 300
+    mc2 = 100
+    a_portion = 0.25
+    fi_0 = 180
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
