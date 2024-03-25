@@ -471,6 +471,12 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
         color_magnet_lines_bot = (0, 0, 1)
         color_magnet_lines_bot_outer = (0, 0, 1)
 
+        mu_vector_tube_radius = 0.005
+        omega_vector_tube_radius = 0.005
+
+        mu_vector_color = (1, 0, 0)
+        omega_vector_color = (0, 0, 0)
+
         def __init__(self):
             # Do not forget to call the parent's __init__
             HasTraits.__init__(self)
@@ -492,7 +498,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             # верх
             self.accretion_column_top_outer = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top_outer)
             # низ
-            self.accretion_column_bot_outer = self.scene.mlab.mesh(-x, -y, -z, color=self.color_accretion_column_bot_outer)
+            self.accretion_column_bot_outer = self.scene.mlab.mesh(-x, -y, -z,
+                                                                   color=self.color_accretion_column_bot_outer)
 
             x, y, z = get_data_for_accretion_columns_hat(theta_range_column, phi_range_column,
                                                          config.phi_accretion_begin_deg)
@@ -527,15 +534,26 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                                                opacity=opacity_for_magnet_line,
                                                                representation='wireframe', mask=mask)
 
-            mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=(1, 0, 0), tube_radius=0.0005, tube_sides=6)  # mu_vector
+            # mu_vector
+            # mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=self.mu_vector_color, tube_radius=self.mu_vector_tube_radius,
+            #             tube_sides=6)
+
+            self.mu_vector = mlab.quiver3d(0, 0, 1, mode='2ddash', scale_factor=1, color=self.mu_vector_color)
+            self.mu_vector_1 = mlab.quiver3d(0, 0, -1, mode='2ddash', scale_factor=1, color=self.mu_vector_color)
 
             omega_vector = [-np.sin(betta_mu * config.grad_to_rad) * np.cos(0),
                             np.sin(betta_mu * config.grad_to_rad) * np.sin(0),
                             np.cos(betta_mu * config.grad_to_rad)]
 
             # omega_vector
-            self.omega_vector = mlab.plot3d([0, omega_vector[0]], [0, omega_vector[1]], [0, omega_vector[2]],
-                                            color=(0, 0, 0), tube_radius=0.0005, tube_sides=4)
+            # self.omega_vector = mlab.plot3d([0, omega_vector[0]], [0, omega_vector[1]], [0, omega_vector[2]],
+            #                                 color=self.omega_vector_color, tube_radius=self.omega_vector_tube_radius,
+            #                                 tube_sides=4)
+
+            self.omega_vector = mlab.quiver3d(omega_vector[0], omega_vector[1], omega_vector[2], mode='2ddash',
+                                              scale_factor=1, color=self.omega_vector_color)
+            self.omega_vector_1 = mlab.quiver3d(-omega_vector[0], -omega_vector[1], -omega_vector[2], mode='2ddash',
+                                                scale_factor=1, color=self.omega_vector_color)
 
             # рисуем аккреционный диск
             disc_color = (160, 82, 45)
@@ -737,8 +755,10 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                             np.sin(config.betta_mu_deg * config.grad_to_rad) * np.sin(0),
                             np.cos(config.betta_mu_deg * config.grad_to_rad)]
 
-            self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
-                                                    z=[0, omega_vector[2]])
+            self.omega_vector.mlab_source.vectors = np.reshape([omega_vector[0], omega_vector[1], omega_vector[2]],
+                                                               (1, 3))
+            self.omega_vector_1.mlab_source.vectors = np.reshape([-omega_vector[0], -omega_vector[1], -omega_vector[2]],
+                                                                 (1, 3))
 
             self.update_accretion_disc_rotate_angle()
 
@@ -848,11 +868,11 @@ if __name__ == "__main__":
         lim_coeff_for_axis = 0.14
 
     i_angle = 10
-    betta_mu = 30
+    betta_mu = 10
 
-    mc2 = 100
-    a_portion = 0.25
-    fi_0 = 180
+    mc2 = 30
+    a_portion = 0.65
+    fi_0 = 0
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
