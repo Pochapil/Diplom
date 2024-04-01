@@ -54,7 +54,7 @@ def get_Teff_distribution(R_e, delta_ns, A_normal):
             return x - f(x) / df(x)
 
         delta = 0.001  # точность для метода ньютона
-        ksi1 = 34.3  # начальное предположение
+        ksi1 = 84.3  # начальное предположение
         ksi2 = nuton(ksi1)
         while np.abs((ksi1 - ksi2)) > delta:
             ksi1 = ksi2
