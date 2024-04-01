@@ -149,6 +149,8 @@ def try_sky_map(obs_i_angle_arr):
     file_name = 'total_luminosity_of_surfaces.txt'
     data_array = [0] * 17
 
+    # roll -- циклическая перестановка - делаем так как симметрическая задача и для угла 180 - theta будет симметрично
+    # для сдвига на полфазы -- можно расчитать только до 90 а потом для других переставить и получить для до 180
     for i in range(len(obs_i_angle_arr)):
         config.set_e_obs(obs_i_angle_arr[i], 0)
         data_array[i] = main_service.load_arr_from_txt(config.full_file_folder, file_name)[4]
@@ -209,7 +211,7 @@ def try_sky_map(obs_i_angle_arr):
     clb.set_label(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
     # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
 
-    ax.axhline(config.betta_mu_deg, c='r', linestyle="--")
+    # ax.axhline(config.betta_mu_deg, c='r', linestyle="--")
 
     working_folder = file_folder + config.file_folder_accretion_args
     file_name = 'try_map_contour' + '.png'
@@ -220,8 +222,8 @@ def try_sky_map(obs_i_angle_arr):
 if __name__ == '__main__':
 
     mc2 = [30, 100]
-    a_portion = [0.25, 0.65]
-    fi_0 = [0, 60, 120, 180, 240, 300]
+    a_portion = [0.11, 0.33, 0.44]
+    fi_0 = [0, 90]
     betta_mu = [10 * i for i in range(1, 10)]
     # betta_mu = [10]
     # obs_i_angle_arr = np.linspace(10, 180, 18)
