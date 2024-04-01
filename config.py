@@ -51,21 +51,22 @@ def update_project_dir():
 
     if new_magnet_lines_flag:
         PROJECT_DIR += 'new_magnet_lines/'
+    else:
+        PROJECT_DIR += 'old_magnet_lines/'
 
-    if opacity_above_shock != 0 or mu != 0.1e30 or tau_flag:
-        buf = mu
-        count = 1
-        while buf > 1:
-            count += 1
-            buf //= 10
-        # PROJECT_DIR += 'mu=%d/opacity/%0.2f/' % (count, opacity_above_shock)
-        if tau_flag:
-            if tau_cutoff > 0:
-                PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/' + 'tau_with_cutoff/'
-            else:
-                PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/' + 'tau/'
+    buf = mu
+    count = 1
+    while buf > 1:
+        count += 1
+        buf //= 10
+    # PROJECT_DIR += 'mu=%d/opacity/%0.2f/' % (count, opacity_above_shock)
+    if tau_flag:
+        if tau_cutoff > 0:
+            PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/' + 'tau_with_cutoff/'
         else:
-            PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/opacity={opacity_above_shock:.2f}/'
+            PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/' + 'tau/'
+    else:
+        PROJECT_DIR += 'new_data/' + f'mu=0.1e{count}/opacity={opacity_above_shock:.2f}/'
 
 
 def update():
@@ -154,7 +155,7 @@ k = 0.35  # opacity непрозрачность [см**2 / г]
 new_magnet_lines_flag = True
 tau_flag = True
 tau_cutoff = 0
-opacity_above_shock = 0.6  # непрозрачность вещества над ударной волной: 0 - полностью прозрачное, 1 - непрозрачное
+opacity_above_shock = 0  # непрозрачность вещества над ударной волной: 0 - полностью прозрачное, 1 - непрозрачное
 # L_ed = M_ns / MSun * 10 ** 38
 L_edd = 4 * pi * G * M_ns * c / k
 
