@@ -480,7 +480,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
         def __init__(self):
             # Do not forget to call the parent's __init__
             HasTraits.__init__(self)
-
+            self.scene.background = (1, 1, 1)
             # NS
             x, y, z = get_data_for_NS()
             self.NS = self.scene.mlab.mesh(x, y, z, color=(0, 0, 0))
@@ -504,7 +504,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             x, y, z = get_data_for_accretion_columns_hat(theta_range_column, phi_range_column,
                                                          config.phi_accretion_begin_deg)
 
-            self.accretion_column_top_outer_hat = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top)
+            # self.accretion_column_top_outer_hat = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top)
 
             self.flag_draw_magnet_lines = True
             self.flag_cut_magnet_lines = False
@@ -664,7 +664,6 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             # только здесь нашел про камеру https://docs.enthought.com/mayavi/mayavi/mlab_figures_decorations.html
             camera = self.scene.camera
             camera.roll(roll_angle)
-            # self.scene.background = (1, 1, 1)  # white background
 
         def check_data(self):
             # columns = {0: top_column, 1: bot_column}
@@ -867,12 +866,12 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 10
-    betta_mu = 10
+    i_angle = 40
+    betta_mu = 30
 
-    mc2 = 30
-    a_portion = 0.65
-    fi_0 = 0
+    mc2 = 100
+    a_portion = 0.25
+    fi_0 = 180
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
