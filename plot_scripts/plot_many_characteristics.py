@@ -2,6 +2,7 @@ import numpy as np
 import multiprocessing as mp
 from itertools import repeat
 import time
+import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib as mpl
@@ -606,6 +607,185 @@ def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi
         main_service.save_figure(fig1, save_folder, save_file_name)
 
 
+def plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0):
+    save_folder = config.PROJECT_DIR + 'figs/L_to_a/' + f'i={i_angle} betta_mu={betta_mu}/' + f'mc2={mc2}/' f'fi_0={fi_0}/'
+
+    data_array = [0] * len(a_portion_arr)
+
+    for i in range(len(a_portion_arr)):
+        file_path = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion_arr[i], fi_0)
+
+        file_name = "total_luminosity_of_surfaces.txt"
+        data_array[i] = main_service.load_arr_from_txt(file_path, file_name)[4]
+
+        file_path = file_path + 'scattered_on_magnet_lines/'
+
+        file_name = "scattered_energy_bot.txt"
+        buf = main_service.load_arr_from_txt(file_path, file_name)
+        data_array[i] += buf
+
+        file_name = "scattered_energy_top.txt"
+        buf = main_service.load_arr_from_txt(file_path, file_name)
+        data_array[i] += buf
+
+    phase = np.linspace(0, 2, 2 * config.t_max)
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+
+    # нормировка на L_nu_avg
+    data_to_plot = [0] * len(a_portion_arr)
+
+    for i, arr in enumerate(data_array):
+        data_to_plot[i] = (arr / max(arr))
+        data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
+
+    im = ax.pcolormesh(phase, np.linspace(0, 1, len(a_portion_arr)), data_to_plot)
+    ax.set_yticks(np.linspace(0, 1, len(a_portion_arr)), a_portion_arr)
+
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$a$'
+
+    ax.set_xlabel(x_axis_label, fontsize=24)
+    ax.set_ylabel(y_axis_label, fontsize=24)
+
+    clb = plt.colorbar(im)
+    clb.set_label(r'$L_{iso} \cdot max(L_{iso})^{-1}$', fontsize=24)
+
+    file_name = 'map_contour' + '.png'
+    main_service.save_figure(fig, save_folder, file_name)
+
+
+def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
+    save_folder = config.PROJECT_DIR + 'figs/L_to_mass/' + f'i={i_angle} betta_mu={betta_mu}/' + f'a={a_portion} fi_0={fi_0}/'
+
+    working_folder = config.full_file_folder
+
+    L_x_arr = [0] * len(mc2_arr)
+    for i, mc2 in enumerate(mc2_arr):
+        with open(working_folder + 'save_values.txt') as f:
+            lines = f.readlines()
+            L_x_arr[i] = float(lines[3][12:20]) * 10 ** float(lines[3][27:29])
+            # total L_x = 4.396383 * 10**38 - 12 это индекс начала числа, 27-29 это степень 10
+
+    data_array = [0] * len(mc2_arr)
+    for i in range(len(mc2_arr)):
+        file_path = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[i], a_portion, fi_0)
+
+        file_name = "total_luminosity_of_surfaces.txt"
+        data_array[i] = main_service.load_arr_from_txt(file_path, file_name)[4]
+
+        file_path = file_path + 'scattered_on_magnet_lines/'
+
+        file_name = "scattered_energy_bot.txt"
+        buf = main_service.load_arr_from_txt(file_path, file_name)
+        data_array[i] += buf
+
+        file_name = "scattered_energy_top.txt"
+        buf = main_service.load_arr_from_txt(file_path, file_name)
+        data_array[i] += buf
+
+    phase = np.linspace(0, 2, 2 * config.t_max)
+
+    # fig, ax = plt.subplots()
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+
+    # нормировка на L_nu_avg
+    data_to_plot = [0] * len(mc2_arr)
+    L_x = max(L_x_arr)
+    for i, arr in enumerate(data_array):
+        data_to_plot[i] = (arr / max(arr))
+        data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
+
+    im = ax.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
+    ax.set_yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
+    # ax.plot_surface(phase, mc2_arr, data_to_plot)
+    # triang = tri.Triangulation(phase, mc2_arr)
+    # im = ax.tricontour(triang, data_to_plot, levels=14, linewidths=0.5, colors='k')
+
+    # im = ax.contourf(phase, mc2_arr, data_to_plot, levels=30)
+    # cmap = 'cividis', cmap='Spectral', cmap='Spectral_r'
+
+    # ax.set_yticks([80, 100, 120], labels=['really, really, really', 'long', 'labels'])
+
+    # plt.yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
+
+    # ratio = 1.0
+    # x_left, x_right = ax.get_xlim()
+    # y_low, y_high = ax.get_ylim()
+    # ax.set_aspect(abs((x_right - x_left) / (y_low - y_high)) * ratio)
+
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$\dot{m}$'
+
+    ax.set_xlabel(x_axis_label, fontsize=24)
+    ax.set_ylabel(y_axis_label, fontsize=24)
+
+    # fig_title = 'L_iso/L_x'
+    # fig.suptitle(fig_title, fontsize=14)
+
+    # fig_title = r'$L_{iso}/L_{x}$ ' + title
+    # fig.suptitle(fig_title, fontsize=14)
+
+    clb = plt.colorbar(im)
+    clb.set_label(r'$L_{iso} \cdot max(L_{iso})^{-1}$', fontsize=24)
+    # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
+
+    file_name = 'map_contour' + '.png'
+    main_service.save_figure(fig, save_folder, file_name)
+
+
+def plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0, mu_power=31, opacity_above_shock=0):
+    var_path = f'i={i_angle} betta_mu={betta_mu}/' + f'mc2={mc2}/' + f'a={a_portion} fi_0={fi_0}/'
+    save_folder = config.PROJECT_DIR + 'figs/geom_contr/' + var_path
+
+    file_path = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion, fi_0)
+
+    file_name = "total_luminosity_of_surfaces.txt"
+    data_array_tau = main_service.load_arr_from_txt(file_path, file_name)[4]
+
+    folder = 'scattered_on_magnet_lines/'
+
+    file_name = 'scattered_energy_bot.txt'
+    bot_scatter = main_service.load_arr_from_txt(file_path + folder, file_name)
+    bot_scatter = main_service.extend_arr_for_phase(bot_scatter)
+
+    file_name = 'scattered_energy_top.txt'
+    top_scatter = main_service.load_arr_from_txt(file_path + folder, file_name)
+    top_scatter = main_service.extend_arr_for_phase(top_scatter)
+
+    file_path = config.PROJECT_DIR_ORIGIN + 'new_magnet_lines/' + 'new_data/' + f'mu=0.1e{mu_power}/opacity={opacity_above_shock:.2f}/' + 'figs/loop/' + var_path
+    file_name = "total_luminosity_of_surfaces.txt"
+    data_array = main_service.load_arr_from_txt(file_path, file_name)[4]
+
+    fig = plt.figure(figsize=(21, 10))
+    ax = fig.add_subplot(111)
+
+    phase = np.linspace(0, 2, 2 * config.t_max)
+
+    arr_to_plt = [0] * 3
+    arr_to_plt[0] = main_service.extend_arr_for_phase(data_array)
+    arr_to_plt[1] = main_service.extend_arr_for_phase(data_array_tau)
+    arr_to_plt[2] = main_service.extend_arr_for_phase(data_array_tau) + bot_scatter + top_scatter
+
+    labels_arr = [r'$opacity=0$', r'$with \tau$', r'$with \tau \, and \, scatter$']
+
+    for i in range(3):
+        ax.plot(phase, arr_to_plt[i], label=labels_arr[i])
+
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$L_{\rm{iso}}$' + ' [erg/s]'
+    ax.set_xlabel(x_axis_label, fontsize=24)
+    ax.set_ylabel(y_axis_label, fontsize=24)
+
+    ax.legend()
+
+    file_name = 'geometric_contribution.png'
+    main_service.save_figure(fig, save_folder, file_name)
+
+
 energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
 energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
 energy_arr.append(config.energy_max)
@@ -637,14 +817,45 @@ fi_0_arr = [20 * i for i in range(18)]
 # a_portion_arr = [0.25]
 # fi_0_arr = [0]
 
+# ---------------------------------------------------------
+# i_angle_arr = [10 * i for i in range(1, 10)]
+# betta_mu_arr = [10 * i for i in range(1, 10)]
+# mc2_arr = [30, 100]
+# a_portion_arr = [0.25, 0.65]
+# fi_0_arr = [20 * i for i in range(18)]
+#
+# plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
 
-i_angle_arr = [10 * i for i in range(3, 10)]
-betta_mu_arr = [10 * i for i in range(1, 10)]
-mc2_arr = [30, 100]
-a_portion_arr = [0.25, 0.65]
-fi_0_arr = [20 * i for i in range(18)]
+# ---------------------------------------------------------
+# i_angle = 10
+# betta_mu = 60
+# mc2_arr = [10, 30, 50, 100]
+# a_portion = 0.65
+# fi_0 = 0
+#
+# plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 
-plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
+# ---------------------------------------------------------------
+
+
+i_angle = 40
+betta_mu = 60
+mc2 = 100
+a_portion_arr = [0.25, 0.33, 0.44, 0.65]
+fi_0 = 0
+plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0)
+
+# ---------------------------------------------------------
+# i_angle = 40
+# betta_mu = 70
+# mc2 = 30
+# a_portion = 0.65
+# fi_0 = 0
+#
+# plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0)
+
+# plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
+
 
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
 # plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
