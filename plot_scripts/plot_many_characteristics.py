@@ -613,6 +613,8 @@ def plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0):
     data_array = [0] * len(a_portion_arr)
 
     for i in range(len(a_portion_arr)):
+        # fi_0 = config.fi_0_dict[a_portion_arr[i]]
+        fi_0 = (config.fi_0_dict[a_portion_arr[i]] + 90) % 360
         file_path = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion_arr[i], fi_0)
 
         file_name = "total_luminosity_of_surfaces.txt"
@@ -689,15 +691,15 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
 
     # fig, ax = plt.subplots()
 
-    fig = plt.figure(figsize=(8, 6))
-    ax = fig.add_subplot(111)
-
     # нормировка на L_nu_avg
     data_to_plot = [0] * len(mc2_arr)
     L_x = max(L_x_arr)
     for i, arr in enumerate(data_array):
         data_to_plot[i] = (arr / max(arr))
         data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
 
     im = ax.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
     ax.set_yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
@@ -734,6 +736,30 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
     # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
 
     file_name = 'map_contour' + '.png'
+    main_service.save_figure(fig, save_folder, file_name)
+
+    L_x = max(L_x_arr)
+    for i, arr in enumerate(data_array):
+        data_to_plot[i] = (arr / L_x)
+        data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
+
+    fig = plt.figure(figsize=(8, 6))
+    ax = fig.add_subplot(111)
+
+    im = ax.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
+    ax.set_yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
+
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$\dot{m}$'
+
+    ax.set_xlabel(x_axis_label, fontsize=24)
+    ax.set_ylabel(y_axis_label, fontsize=24)
+
+    clb = plt.colorbar(im)
+    clb.set_label(r'$L_{iso} \cdot L_x^{-1}$', fontsize=24)
+    # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
+
+    file_name = 'map_contour_L_x' + '.png'
     main_service.save_figure(fig, save_folder, file_name)
 
 
@@ -827,33 +853,48 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
 
 # ---------------------------------------------------------
-# i_angle = 10
-# betta_mu = 60
-# mc2_arr = [10, 30, 50, 100]
-# a_portion = 0.65
-# fi_0 = 0
-#
-# plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
+a_portion_arr = [0.11, 0.25, 0.33, 0.44, 0.55, 0.65, 0.77]
+i_angle_arr = [20, 40, 60]
+betta_mu_arr = [40, 60]
+for i_angle in i_angle_arr:
+    for betta_mu in betta_mu_arr:
+        for a_portion in a_portion_arr:
+            if a_portion == 0.11:
+                mc2_arr = np.linspace(10, 60, 6)
+                mc2_arr = list(map(int, mc2_arr))
+            elif a_portion == 0.25:
+                mc2_arr = np.linspace(10, 120, 12)
+                mc2_arr = list(map(int, mc2_arr))
+            else:
+                mc2_arr = np.linspace(10, 130, 13)
+                mc2_arr = list(map(int, mc2_arr))
+            fi_0 = (config.fi_0_dict[a_portion] + 90) % 360
+            # fi_0 = config.fi_0_dict[a_portion]
+            plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 
 # ---------------------------------------------------------------
 
+a_portion_arr = [0.11, 0.25, 0.33, 0.44, 0.55, 0.65, 0.77]
+i_angle_arr = [20, 40, 60]
+betta_mu_arr = [40, 60]
+mc2_arr = [60]
+fi_0 = 'new'
 
-i_angle = 40
-betta_mu = 60
-mc2 = 100
-a_portion_arr = [0.25, 0.33, 0.44, 0.65]
-fi_0 = 0
-plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0)
+for i_angle in i_angle_arr:
+    for betta_mu in betta_mu_arr:
+        for mc2 in mc2_arr:
+            plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0)
 
 # ---------------------------------------------------------
-# i_angle = 40
-# betta_mu = 70
-# mc2 = 30
-# a_portion = 0.65
+# i_angle = 20
+# betta_mu = 0
+# mc2 = 100
+# a_portion = 0.25
 # fi_0 = 0
 #
 # plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0)
 
+# -------------------------------------------------------
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
 
