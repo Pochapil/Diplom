@@ -230,9 +230,10 @@ def get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column, fi
     -1 индекс так как начало магнитных линий = конец колонки'''
     theta_array_end = np.pi / 2 + config.betta_mu
     # ограничиваю колонкой
-
-    if phi_range_column[-1] - phi_range_column[0] > np.pi / 2:
+    if a_portion > 0.5:
         theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
+    # if phi_range_column[-1] - phi_range_column[0] > np.pi / 2:
+    #     theta_array_end = min((np.pi - theta_range_column[-1]), theta_array_end)
     theta_array_begin = theta_range_column[-1]
 
     step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
@@ -262,7 +263,8 @@ def get_data_for_magnet_lines_outer_with_mask(theta_range_column, phi_range_colu
     theta_array_end = np.pi / 2 + config.betta_mu
     # ограничиваю колонкой
     theta_array_begin = np.arcsin(np.sin(theta_range_column[-1]) / (1 + config.dRe_div_Re) ** (1 / 2))
-    theta_array_end = min((np.pi - theta_array_begin), theta_array_end)
+    if a_portion > 0.5:
+        theta_array_end = min((np.pi - theta_array_begin), theta_array_end)
 
     step_theta_accretion = (theta_array_end - theta_array_begin) / (config.N_theta_accretion - 1)
     theta_range = np.array([theta_array_begin + step_theta_accretion * j for j in range(config.N_theta_accretion)])
@@ -867,7 +869,7 @@ if __name__ == "__main__":
         lim_coeff_for_axis = 0.14
 
     i_angle = 40
-    betta_mu = 30
+    betta_mu = 20
 
     mc2 = 100
     a_portion = 0.25
