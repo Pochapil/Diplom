@@ -37,19 +37,20 @@ if __name__ == '__main__':
     # betta_mu = [60, 90]
 
     i_angle = [10 * i for i in range(1, 10)]
-    # betta_mu = [10 * i for i in range(8, 10)]
-    #  mc2 = [10, 30, 50, 100, 150]
-    mc2 = [10, 50, 200]
-    a_portion = [0.25, 0.65]
-    # fi_0 = [20 * i for i in range(10, 18)]
+    betta_mu = [10 * i for i in range(1, 10)]
+    # mc2 = [10, 50, 200]
+    # mc2 = [30, 100]
+    a_portion = [0.11, 0.25, 0.33, 0.44, 0.55, 0.65, 0.77]
+    # a_portion = [0.11, 0.33, 0.44, 0.55]
 
-    # i_angle = [90]
-    # betta_mu = [90]
-
-    # i_angle = [40]
-    betta_mu = [60]
-
+    i_angle = [20, 40, 60]
+    betta_mu = [20]
+    # mc2 = [30]
+    # a_portion = [0.25]
     # i_angle = [10 * i for i in range(10, 19)]
+    fi_0_dict = {0.11: 340, 0.22: 320, 0.33: 300, 0.44: 280, 0.55: 260, 0.66: 240, 0.77: 220, 0.25: 320, 0.65: 240}
+    mc2 = np.linspace(10, 130, 13)
+    mc2 = list(map(int, mc2))
 
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
     print('to calculate %d loops need about %f hours' % (N_big, 60 * N_big / 3600))
@@ -61,6 +62,9 @@ if __name__ == '__main__':
                     for k in range(len(fi_0)):
 
                         # fi_0[k] = 360 - 180 * a_portion[j]
+
+                        # fi_0[k] = (fi_0_dict[a_portion[j]] + 90) % 360
+                        fi_0[k] = fi_0_dict[a_portion[j]]
 
                         config.set_e_obs(i_angle[i_angle_index], 0)
                         config.set_betta_mu(betta_mu[betta_mu_index])
