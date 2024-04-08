@@ -11,7 +11,8 @@ import numpy as np
 import config
 
 fi_0 = 0
-betta_mu = 70 * config.grad_to_rad
+betta_mu_deg = 70
+betta_mu = betta_mu_deg * config.grad_to_rad
 
 step_phi_accretion = 2 * np.pi / (config.N_phi_accretion - 1)
 phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i in range(config.N_phi_accretion)])
@@ -19,7 +20,8 @@ phi_range = np.array([fi_0 * config.grad_to_rad + step_phi_accretion * i for i i
 theta_range = np.zeros_like(phi_range)
 
 for i in range(len(phi_range)):
-    theta_range[i] = np.pi / 2 - betta_mu * np.cos(phi_range[i])
+    theta_range[i] = np.pi / 2 - np.arctan(np.tan(betta_mu) * np.cos(phi_range[i]))
+    # theta_range[i] = np.pi / 2 - betta_mu * np.cos(phi_range[i])
 
 R_alfven = (config.mu ** 2 / (2 * config.M_accretion_rate * (2 * config.G * config.M_ns) ** (1 / 2))) ** (2 / 7)
 R_alfven = R_alfven / config.R_ns
@@ -31,14 +33,16 @@ ax = fig.add_subplot(111)
 
 # внутренний радиус колонки
 r = R_e * np.sin(theta_range) ** 2
-r1 = r * np.sin(theta_range)
+r1 = r
+# r1 = r * np.sin(theta_range)
 x = r1 * np.cos(phi_range)
 y = r1 * np.sin(phi_range)
 ax.plot(x, y, 'blue', label='inner R')
 
 # внешний радиус колонки
 r = (1 + config.dRe_div_Re) * R_e * np.sin(theta_range) ** 2
-r1 = r * np.sin(theta_range)
+r1 = r
+# r1 = r * np.sin(theta_range)
 x = r1 * np.cos(phi_range)
 y = r1 * np.sin(phi_range)
 ax.plot(x, y, 'green', label='outer R')
@@ -76,8 +80,9 @@ ax.legend()
 ax.set_xlabel('r/R_ns', fontsize=24)
 ax.set_ylabel('r/R_ns', fontsize=24)
 
-plt.title(r'$\beta_{\mu}$' + f'={betta_mu / config.grad_to_rad}')
+plt.title(r'$\beta_{\mu}$' + f'={betta_mu_deg}')
 plt.axis('equal')
+# plt.axis('scaled')
 plt.show()
 
 crit_betta_mu = np.arctan((1 / 12) ** (1 / 2)) / config.grad_to_rad
