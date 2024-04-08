@@ -459,6 +459,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
         button_magnet_line = Button('draw_magnet_lines')
         button_accr_disc = Button('accr_disc_omega_mu')
         button_cut_magnet_lines = Button('cut_magnet_lines')
+        button_hide_accr_disc = Button('hide_accr_disc')
+        button_check_data = Button('check_data')
 
         scene = Instance(MlabSceneModel, ())
 
@@ -478,6 +480,29 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
 
         mu_vector_color = (1, 0, 0)
         omega_vector_color = (0, 0, 0)
+
+        def draw_accretion_disc(self):
+            self.flag_accretion_disc_hide = False
+            disc_color = (160, 82, 45)
+            disc_color = tuple(rgb / 255 for rgb in disc_color)
+
+            accretion_disc_con_val = 0.01
+            x, y, z = get_data_for_accretion_disc(accretion_disc_con_val)
+
+            # сначала отрисовали в СК betta_mu
+            self.accretion_disc_top = mlab.mesh(x, y, z, color=disc_color)
+            self.accretion_disc_bot = mlab.mesh(x, y, -z, color=disc_color)
+
+            self.flag_accretion_disc_omega_mu = True  # True = omega
+
+            x, y, z = get_data_for_accretion_disc_side_surface(accretion_disc_con_val)
+
+            # боковая поверхность диска (как боковая поверхность цилиндра)
+            self.accretion_disc_side_surface = mlab.mesh(x, y, z, color=disc_color)
+
+            # поворачиваем диск на -betta чтобы было перпендикулярно omega -> переходим в СК omega
+            self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
+            self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
 
         def __init__(self):
             # Do not forget to call the parent's __init__
@@ -558,26 +583,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                                 scale_factor=1, color=self.omega_vector_color)
 
             # рисуем аккреционный диск
-            disc_color = (160, 82, 45)
-            disc_color = tuple(rgb / 255 for rgb in disc_color)
-
-            accretion_disc_con_val = 0.01
-            x, y, z = get_data_for_accretion_disc(accretion_disc_con_val)
-
-            # сначала отрисовали в СК betta_mu
-            self.accretion_disc_top = mlab.mesh(x, y, z, color=disc_color)
-            self.accretion_disc_bot = mlab.mesh(x, y, -z, color=disc_color)
-
-            self.flag_accretion_disc_omega_mu = True  # True = omega
-
-            x, y, z = get_data_for_accretion_disc_side_surface(accretion_disc_con_val)
-
-            # боковая поверхность диска (как боковая поверхность цилиндра)
-            self.accretion_disc_side_surface = mlab.mesh(x, y, z, color=disc_color)
-
-            # поворачиваем диск на -betta чтобы было перпендикулярно omega -> переходим в СК omega
-            self.accretion_disc_rotate_angle = config.betta_mu / config.grad_to_rad
-            self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
+            self.draw_accretion_disc()
 
             # self.check_data()
 
@@ -669,7 +675,6 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
 
         def check_data(self):
             # columns = {0: top_column, 1: bot_column}
-
             def get_cos_magnet_lines():
                 # magnet_lines
                 top_column_cos_array, bot_column_cos_array = [], []
@@ -694,7 +699,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                   2: bot_column_outer_surface_cos_array, 3: bot_column_inner_surface_cos_array}
 
                 file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner', 2: 'bot_outer', 3: 'bot_inner'}
-                cos_file_folder = 'data/cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
+                # cos_file_folder = 'data/cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
+                cos_file_folder = config.PROJECT_DIR + 'data/cos/' + config.file_folder_angle_args + config.file_folder_accretion_args
                 for key, surface_name in file_name_for_cos_of_surfaces.items():
                     full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
                     for cos_index in range(config.t_max):
@@ -704,7 +710,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                         cos_array_dict[key].append(cos_range)
                 return cos_array_dict
 
-            self.cos_array_dict_magnet_lines = get_cos_magnet_lines()
+            # self.cos_array_dict_magnet_lines = get_cos_magnet_lines()
             self.cos_array_dict_surfaces = get_cos_surfaces()
 
         def try_check_data(self):
@@ -712,10 +718,16 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             phase = (360 * self.slider_phase) % 360
             index = math.floor(phase // config.omega_ns)
 
+            x, y, z = get_data_for_accretion_columns(theta_range_column, phi_range_column,
+                                                     config.phi_accretion_begin_deg)
+            mask = np.zeros_like(x).astype(bool)
             for i in range(config.N_phi_accretion):
                 for j in range(config.N_theta_accretion):
-                    if self.cos_array_dict_magnet_lines[0][index][i][j] > 0:
-                        pass
+
+                    # if self.cos_array_dict_magnet_lines[0][index][i][j] > 0:
+                    if self.cos_array_dict_surfaces[0][index][i][j] < 0.15:
+                        mask[i][j] = True
+
                         # self.scene.mlab.points3d(
                         #     self.magnet_lines_top.mlab_source.x[i][j],
                         #     self.magnet_lines_top.mlab_source.y[i][j],
@@ -723,7 +735,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                         #     color=(1, 0, 1),
                         #     scale_factor=0.01
                         # )
-
+            self.accretion_column_top.mlab_source.trait_set(x=[0], y=[0], z=[0])
+            self.accretion_column_top = self.scene.mlab.mesh(x, y, z, color=self.color_accretion_column_top, mask=mask)
             # smth.mlab_source.x[i][j] = 0
 
         @on_trait_change('slider_i_angle')
@@ -838,8 +851,22 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                 self.rotate_accretion_disc(-self.accretion_disc_rotate_angle)
             self.flag_accretion_disc_omega_mu = not self.flag_accretion_disc_omega_mu
 
-        # the layout of the dialog created
+        @on_trait_change('button_hide_accr_disc')
+        def func_change_button_hide_accr_disc(self):
 
+            if self.flag_accretion_disc_hide:
+                self.draw_accretion_disc()
+            else:
+                self.flag_accretion_disc_hide = not self.flag_accretion_disc_hide
+                self.accretion_disc_top.mlab_source.trait_set(x=[0], y=[0], z=[0])
+                self.accretion_disc_bot.mlab_source.trait_set(x=[0], y=[0], z=[0])
+                self.accretion_disc_side_surface.mlab_source.trait_set(x=[0], y=[0], z=[0])
+
+        @on_trait_change('button_check_data')
+        def func_change_button_check_data(self):
+            self.try_check_data()
+
+        # the layout of the dialog created
         view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
                          height=250, width=300, show_label=False),
                     VGroup(
@@ -849,7 +876,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                         HGroup(
                             '_', 'slider_fi_0', 'slider_phase'
                         ),
-                        HGroup('button_magnet_line', 'button_accr_disc', 'button_cut_magnet_lines', 'slider_distance')
+                        HGroup('button_magnet_line', 'button_accr_disc', 'button_cut_magnet_lines',
+                               'button_hide_accr_disc', 'slider_distance')
                     )
                     )
 
@@ -868,12 +896,12 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 40
-    betta_mu = 20
+    i_angle = 60
+    betta_mu = 40
 
     mc2 = 100
     a_portion = 0.25
-    fi_0 = 180
+    fi_0 = 0
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
