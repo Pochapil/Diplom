@@ -209,6 +209,7 @@ phi_mu_0 = 0 * grad_to_rad
 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_DIR = PROJECT_DIR.replace('\\', '/') + '/'
+PROJECT_DIR_ORIGIN = PROJECT_DIR
 update_project_dir()
 # print(PROJECT_DIR)
 
@@ -224,6 +225,8 @@ N_column_plot = 5
 energy_indexes = [0, 12, 15, 17, 19]
 # меньше на 1 т.к. в диапазоне энергий => меньше на 1 чем точек разбиения
 energy_indexes_luminosity = [0, 12, 14, 16, 18]
+
+fi_0_dict = {0.11: 340, 0.22: 320, 0.33: 300, 0.44: 280, 0.55: 260, 0.66: 240, 0.77: 220, 0.25: 320, 0.65: 240}
 
 # val_ksi = 100
 # val_n = 1e15
