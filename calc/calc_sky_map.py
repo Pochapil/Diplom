@@ -157,7 +157,7 @@ def try_sky_map(obs_i_angle_arr):
         if i != 8:
             data_array[-i - 1] = np.roll(data_array[i], len(data_array[i]) // 2)
 
-    phase = np.linspace(0, 1, config.t_max)
+    phase = np.linspace(0, 2, 2 * config.t_max)
 
     # fig, ax = plt.subplots()
 
@@ -168,6 +168,9 @@ def try_sky_map(obs_i_angle_arr):
     data_to_plot = []
     for arr in data_array:
         data_to_plot.append(arr / L_x)
+
+    for i in range(len(data_to_plot)):
+        data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
 
     obs_i_angle_arr_to_plot = np.linspace(0, 180, 17)
 
@@ -222,10 +225,10 @@ def try_sky_map(obs_i_angle_arr):
 if __name__ == '__main__':
 
     mc2 = [30, 100]
-    a_portion = [0.11, 0.33, 0.44]
-    fi_0 = [0, 90]
+    a_portion = [0.25, 0.65]
+    fi_0 = [60, 120, 180, 220, 240, 300]
     betta_mu = [10 * i for i in range(1, 10)]
-    # betta_mu = [10]
+    # betta_mu = [60]
     # obs_i_angle_arr = np.linspace(10, 180, 18)
     obs_i_angle_arr = np.linspace(10, 90, 9)
 
@@ -245,7 +248,10 @@ if __name__ == '__main__':
     #                 plot_save_sky_map_contour(obs_i_angle_arr)
 
     obs_i_angle_arr = np.linspace(10, 90, 9)
-
+    mc2 = [30, 100]
+    a_portion = [0.25, 0.65]
+    fi_0 = [0]
+    betta_mu = [0]
     for betta_mu_index in range(len(betta_mu)):
         for mc_index in range(len(mc2)):
             for j in range(len(a_portion)):
