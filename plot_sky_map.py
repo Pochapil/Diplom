@@ -8,7 +8,7 @@ import main_service
 
 def plot_save_sky_map(obs_i_angle_arr):
     file_folder = config.PROJECT_DIR + 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
-    working_folder = file_folder + config.file_folder_accretion_args
+    working_folder = config.full_file_folder
 
     print('beta_mu=%d' % config.betta_mu_deg)
 
@@ -19,8 +19,14 @@ def plot_save_sky_map(obs_i_angle_arr):
             ('=%d ' % config.M_rate_c2_Led) + ('a=%0.2f ' % config.a_portion) + (r'$\phi_0$') + \
             ('=%d' % config.phi_accretion_begin_deg) + (r'$^\circ$')
 
-    file_name = "L_x.txt"
-    L_x = main_service.load_arr_from_txt(working_folder, file_name)
+    with open(working_folder + 'save_values.txt') as f:
+        lines = f.readlines()
+        L_x = float(lines[3][12:20]) * 10 ** float(lines[3][27:29])
+        # total L_x = 4.396383 * 10**38 - 12 это индекс начала числа, 27-29 это степень 10
+
+
+    # file_name = "L_x.txt"
+    # L_x = main_service.load_arr_from_txt(working_folder, file_name)
 
     data_array = [0] * len(obs_i_angle_arr)
     for i in range(len(obs_i_angle_arr)):
@@ -52,13 +58,15 @@ def plot_save_sky_map(obs_i_angle_arr):
 
     plt.colorbar(im)
 
+    working_folder = file_folder + config.file_folder_accretion_args
     file_name = 'map' + '.png'
     main_service.save_figure(fig, working_folder, file_name)
 
 
 def plot_save_sky_map_contour(obs_i_angle_arr):
     file_folder = config.PROJECT_DIR + 'figs/sky_map/betta_mu=%d/' % config.betta_mu_deg
-    working_folder = file_folder + config.file_folder_accretion_args
+
+    working_folder = config.full_file_folder
 
     # title = 'beta_mu=%d mc2=%d a=%0.2f fi_0=%d' % (
     #     config.betta_mu_deg, config.M_rate_c2_Led, config.a_portion, config.phi_accretion_begin_deg)
@@ -67,8 +75,13 @@ def plot_save_sky_map_contour(obs_i_angle_arr):
             ('=%d ' % config.M_rate_c2_Led) + ('a=%0.2f ' % config.a_portion) + (r'$\phi_0$') + \
             ('=%d' % config.phi_accretion_begin_deg) + (r'$^\circ$')
 
-    file_name = "L_x.txt"
-    L_x = main_service.load_arr_from_txt(working_folder, file_name)
+    with open(working_folder + 'save_values.txt') as f:
+        lines = f.readlines()
+        L_x = float(lines[3][12:20]) * 10 ** float(lines[3][27:29])
+        # total L_x = 4.396383 * 10**38 - 12 это индекс начала числа, 27-29 это степень 10
+
+    # file_name = "L_x.txt"
+    # L_x = main_service.load_arr_from_txt(working_folder, file_name)
 
     data_array = [0] * len(obs_i_angle_arr)
     for i in range(len(obs_i_angle_arr)):
@@ -104,8 +117,9 @@ def plot_save_sky_map_contour(obs_i_angle_arr):
 
     clb = plt.colorbar(im)
     clb.set_label(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
-    #clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
+    # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
 
+    working_folder = file_folder + config.file_folder_accretion_args
     file_name = 'map_contour' + '.png'
     main_service.save_figure(fig, working_folder, file_name)
 
