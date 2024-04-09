@@ -314,7 +314,8 @@ def get_solutions_for_dipole_magnet_lines(origin_phi, origin_theta, direction_ve
 
 def get_vals(origin_phi, origin_theta, direction_vector, origin_x, origin_y,
              origin_z, direction_x, direction_y, direction_z, ksi_shock,
-             top_column_phi_range, bot_column_phi_range, R_e, r, betta_mu):
+             top_column_phi_range, bot_column_phi_range, top_column_theta_range, bot_column_theta_range,
+             R_e, r, betta_mu):
     '''
     есть аналитическое уравнение для полинома дипольной линии 5 степени
     находим уравнение в сферических координатах.
@@ -332,6 +333,7 @@ def get_vals(origin_phi, origin_theta, direction_vector, origin_x, origin_y,
 
     '''думаю что нужно только phi theta для нахождения правильных пересечений. r,z нужно было раньше когда проверял на 
     пересечение с колонкой'''
+    # мб добавить условие на минимум t.real -- and solution.real > 1e-2
     for solution in solutions:
         if solution.real > 0 and solution.imag == 0:
             direction_t = solution.real * r
@@ -344,8 +346,9 @@ def get_vals(origin_phi, origin_theta, direction_vector, origin_x, origin_y,
 
             intersect_r = (intersect_point[0] ** 2 + intersect_point[1] ** 2 + intersect_point[2] ** 2) ** (1 / 2)
 
-            if not (abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r) < 0.001):
-                print(abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r))
+            # if not (abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r) < 0.001):
+            #     print(abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r))
+
             # curr = abs(R_e / config.R_ns * np.sin(intersect_theta) ** 2 - intersect_r)
             # новые линии магнитосферы
             # theta_end = np.pi / 2 - betta_mu * np.cos(intersect_phi) - ОШИБКА !!
@@ -362,8 +365,12 @@ def get_vals(origin_phi, origin_theta, direction_vector, origin_x, origin_y,
             bot_column_intersect_theta_correct = intersect_theta > theta_end
 
             # проверяем на пересечение с колонками
-            intersect_r_correct = intersect_r > ksi_shock
-            if not intersect_r_correct and (top_column_intersect_phi_correct or bot_column_intersect_phi_correct):
+            # intersect_r_correct = intersect_r > ksi_shock
+            # if not intersect_r_correct and (top_column_intersect_phi_correct or bot_column_intersect_phi_correct):
+            #     return 0
+
+            if (intersect_theta < top_column_theta_range[-1] and top_column_intersect_phi_correct) or (
+                    intersect_theta > bot_column_theta_range[-1] and bot_column_intersect_phi_correct):
                 return 0
 
             intersection_condition = (top_column_intersect_phi_correct and top_column_intersect_theta_correct) or (

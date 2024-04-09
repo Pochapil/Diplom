@@ -165,7 +165,7 @@ M_accretion_rate = M_rate_c2_Led * L_edd / c ** 2  # таблица 1
 a_portion = 0.65  # a - в азимутальном направлении поток занимает фиксированную долю a полного круга 2πR sinθ
 
 lim_phi_accretion = 2 * pi * a_portion  # верхний предел по phi
-phi_accretion_begin_deg = 0  # нижний предел по phi
+phi_accretion_begin_deg = 0  # нижний предел по phi - phi_0 !!!!
 phi_accretion_begin = phi_accretion_begin_deg * grad_to_rad  # нижний предел по phi
 
 # цикл для поворотов, сколько точек на графике интегралов - для фазы от 0 до 2 - с перекрытием чтобы форму макс

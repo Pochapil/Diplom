@@ -23,7 +23,7 @@ if __name__ == '__main__':
         plt.close('all')  # чтобы очистить память от fig из предыдущих вызовов
 
 
-    plot_flag = False
+    plot_flag = True
     check_flag = False
     save_cos_flag = False
     save_magnet_line_cos_flag = False
@@ -52,6 +52,11 @@ if __name__ == '__main__':
     mc2 = np.linspace(10, 130, 13)
     mc2 = list(map(int, mc2))
 
+    i_angle = [40]
+    betta_mu = [60]
+    mc2 = [30]
+    a_portion = [0.65]
+
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
     print('to calculate %d loops need about %f hours' % (N_big, 60 * N_big / 3600))
 
@@ -64,7 +69,7 @@ if __name__ == '__main__':
                         # fi_0[k] = 360 - 180 * a_portion[j]
 
                         # fi_0[k] = (fi_0_dict[a_portion[j]] + 90) % 360
-                        fi_0[k] = fi_0_dict[a_portion[j]]
+                        # fi_0[k] = fi_0_dict[a_portion[j]]
 
                         config.set_e_obs(i_angle[i_angle_index], 0)
                         config.set_betta_mu(betta_mu[betta_mu_index])
@@ -203,7 +208,6 @@ if __name__ == '__main__':
                         #                                                 top_column.outer_surface.phi_range,
                         #                                                 bot_column.outer_surface.phi_range, e_obs,
                         #                                                 config.opacity_above_shock)
-
                         # распараллелил
                         for key, surface in surfaces.items():
                             with mp.Pool(mp.cpu_count()) as pool:
@@ -212,6 +216,10 @@ if __name__ == '__main__':
                                                                         zip(range(config.t_max),
                                                                             repeat(top_column.outer_surface.phi_range),
                                                                             repeat(bot_column.outer_surface.phi_range),
+                                                                            repeat(
+                                                                                top_column.outer_surface.theta_range),
+                                                                            repeat(
+                                                                                bot_column.outer_surface.theta_range),
                                                                             repeat(e_obs),
                                                                             repeat(config.betta_mu)))
                                 elif config.tau_flag:
@@ -249,13 +257,13 @@ if __name__ == '__main__':
                             surface.cos_psi_range = cos_psi_range_final
                         # ------------------ конец заполнения матриц косинусов ---------------------------
 
-                        time_cos = time.time()
-
+                        # time_cos = time.time()
+                        # print(f'cos calculations : {time_cos - time_start}')
                         # попытка сохранять массив косинусов, но там 3 мерный массив из за фазы
                         if save_cos_flag:
                             file_name_for_cos_of_surfaces = {0: 'top_outer', 1: 'top_inner',
                                                              2: 'bot_outer', 3: 'bot_inner'}
-                            cos_file_folder = 'data/cos/' + config.file_folder_angle_args + \
+                            cos_file_folder = config.PROJECT_DIR + 'data/cos/' + config.file_folder_angle_args + \
                                               config.file_folder_accretion_args
                             for key, surface_name in file_name_for_cos_of_surfaces.items():
                                 full_cos_file_folder = cos_file_folder + file_name_for_cos_of_surfaces[key] + '/'
@@ -465,12 +473,16 @@ if __name__ == '__main__':
                         folder = 'scattered_on_magnet_lines/'
                         # рассеяние от магнитных линий
                         top_column.fill_magnet_lines_cos_array(top_column.outer_surface.phi_range,
-                                                               bot_column.outer_surface.phi_range, e_obs,
-                                                               config.betta_mu)
+                                                               bot_column.outer_surface.phi_range,
+                                                               top_column.outer_surface.theta_range,
+                                                               bot_column.outer_surface.theta_range,
+                                                               e_obs, config.betta_mu)
 
                         bot_column.fill_magnet_lines_cos_array(top_column.outer_surface.phi_range,
-                                                               bot_column.outer_surface.phi_range, e_obs,
-                                                               config.betta_mu)
+                                                               bot_column.outer_surface.phi_range,
+                                                               top_column.outer_surface.theta_range,
+                                                               bot_column.outer_surface.theta_range,
+                                                               e_obs, config.betta_mu)
 
                         scattered_energy = []
 

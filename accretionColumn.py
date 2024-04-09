@@ -63,7 +63,8 @@ class AccretionColumn:
 
         return phi_range, theta_range, mask_array
 
-    def fill_magnet_lines_cos_array(self, top_column_phi_range, bot_column_phi_range, e_obs, updated_betta_mu):
+    def fill_magnet_lines_cos_array(self, top_column_phi_range, bot_column_phi_range, top_column_theta_range,
+                                    bot_column_theta_range, e_obs, updated_betta_mu):
         # False - т.к. мне нужны внутренние нормали
         normal_array = self.outer_surface.create_array_normal(self.magnet_lines_phi_range,
                                                               self.magnet_lines_theta_range, False)
@@ -109,6 +110,8 @@ class AccretionColumn:
                                                                                    self.outer_surface.ksi_shock,
                                                                                    top_column_phi_range,
                                                                                    bot_column_phi_range,
+                                                                                   top_column_theta_range,
+                                                                                   bot_column_theta_range,
                                                                                    self.outer_surface.R_e,
                                                                                    r, updated_betta_mu)
                     else:
@@ -217,6 +220,7 @@ class AccretionColumn:
 
             if (config.R_ns * self.ksi_shock / R_e) >= 1:
                 # есть набор параметров при которых модель не работает и ударная волна дальше магнитосферы, берем 90
+                '''вопрос - мб нужна формула с arctan...'''
                 theta_accretion_end = np.pi / 2
             else:
                 # из усл силовой линии МП : r = R_e sin**2; end: ksi_shock = R_e sin**2
@@ -224,6 +228,7 @@ class AccretionColumn:
 
             if not column_type:  # column_type: True - top, False - bot
                 # для нижней сместить углы
+                # theta_begin было смещено в main_loop 116 строка!!
                 theta_accretion_end = np.pi - theta_accretion_end
                 phi_delta = np.pi
 
@@ -596,7 +601,8 @@ class AccretionColumn:
                         cos_psi_range[i, j] = 0
             return cos_psi_range
 
-        def get_values(self, top_column_phi_range, bot_column_phi_range):
+        def get_values(self, top_column_phi_range, bot_column_phi_range, top_column_theta_range,
+                       bot_column_theta_range, ):
             '''если использовать этот метод асинхронно, то надо заменить config.betta_mu в вызове'''
             # sum_intense изотропная светимость ( * 4 pi еще надо)
             # для интеграла по simpson
@@ -639,13 +645,16 @@ class AccretionColumn:
                                                                                       self.ksi_shock,
                                                                                       top_column_phi_range,
                                                                                       bot_column_phi_range,
+                                                                                      top_column_theta_range,
+                                                                                      bot_column_theta_range,
                                                                                       self.R_e, r, config.betta_mu)
                         else:
                             cos_psi_range[i, j] = 0
                 cos_psi_range_final.append(cos_psi_range)
             self.cos_psi_range = cos_psi_range_final
 
-        def get_values_async(self, t_index, top_column_phi_range, bot_column_phi_range, e_obs, updated_betta_mu):
+        def get_values_async(self, t_index, top_column_phi_range, bot_column_phi_range, top_column_theta_range,
+                             bot_column_theta_range, e_obs, updated_betta_mu):
             # распараллелил fill_cos_psi_range
             cos_psi_range = np.empty([config.N_phi_accretion, config.N_theta_accretion])
             # поворот
@@ -685,6 +694,8 @@ class AccretionColumn:
                                                                                    self.ksi_shock,
                                                                                    top_column_phi_range,
                                                                                    bot_column_phi_range,
+                                                                                   top_column_theta_range,
+                                                                                   bot_column_theta_range,
                                                                                    self.R_e, r, updated_betta_mu)
                     else:
                         cos_psi_range[i, j] = 0
