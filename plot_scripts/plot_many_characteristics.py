@@ -17,8 +17,15 @@ import main_service
 
 plt.style.use(['science', 'notebook', 'grid'])  # для красивых графиков
 
+
 # jet =  mpl.colormaps['jet']
 # energy_index = 8 - 4.7 keV
+
+
+def make_new_phi(a_portion, fi_0_arr):
+    # new_phi_0
+    for k in range(len(fi_0_arr)):
+        fi_0_arr[k] = (config.fi_0_dict[a_portion] + 20 * (k)) % 360
 
 
 marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
@@ -368,10 +375,12 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
     final_final_array = np.zeros((len(a_portion_arr), len(mc2_arr), len(fi_0_arr)))
 
-    folder = 'nu_L_nu/'
+    folder = 'L_nu/'
     file_name = 'PF.txt'
 
     for a_index in range(len(a_portion_arr)):
+        make_new_phi(a_portion_arr[a_index], fi_0_arr)
+        # new_phi_0
         for mc2_index in range(len(mc2_arr)):
             final_array = []
             for fi_0_index in range(len(fi_0_arr)):
@@ -403,12 +412,20 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
         for mc2_index in range(len(mc2_arr)):
             L_nu_data_dict = {}
             color_dict = {}
+            # new_phi_0
+            make_new_phi(a_portion_arr[a_index], fi_0_arr)
+
             for fi_0_index in range(len(fi_0_arr)):
                 full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
                                                                a_portion_arr[a_index],
                                                                fi_0_arr[fi_0_index])
 
                 L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+
+                L_nu_array += main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/nu_L_nu/',
+                                                             'bot_column_scatter_nu_L_nu.txt')[energy_index]
+                L_nu_array += main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/nu_L_nu/',
+                                                             'top_column_scatter_nu_L_nu.txt')[energy_index]
 
                 L_nu_data_dict[np.mean(L_nu_array)] = final_final_array[a_index][mc2_index][fi_0_index]
 
@@ -611,10 +628,12 @@ def plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0):
     save_folder = config.PROJECT_DIR + 'figs/L_to_a/' + f'i={i_angle} betta_mu={betta_mu}/' + f'mc2={mc2}/' f'fi_0={fi_0}/'
 
     data_array = [0] * len(a_portion_arr)
-
+    buf_fi_0 = fi_0
     for i in range(len(a_portion_arr)):
-        # fi_0 = config.fi_0_dict[a_portion_arr[i]]
-        fi_0 = (config.fi_0_dict[a_portion_arr[i]] + 90) % 360
+        if buf_fi_0 == 'new':
+            fi_0 = config.fi_0_dict[a_portion_arr[i]]
+        else:
+            fi_0 = (config.fi_0_dict[a_portion_arr[i]] + 90) % 360
         file_path = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion_arr[i], fi_0)
 
         file_name = "total_luminosity_of_surfaces.txt"
@@ -782,7 +801,7 @@ def plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0, mu_powe
     top_scatter = main_service.load_arr_from_txt(file_path + folder, file_name)
     top_scatter = main_service.extend_arr_for_phase(top_scatter)
 
-    file_path = config.PROJECT_DIR_ORIGIN + 'new_magnet_lines/' + 'new_data/' + f'mu=0.1e{mu_power}/opacity={opacity_above_shock:.2f}/' + 'figs/loop/' + var_path
+    file_path = config.PROJECT_DIR_ORIGIN + 'new_data/' + f'mu=0.1e{mu_power}/opacity={opacity_above_shock:.2f}/' + 'figs/loop/' + var_path
     file_name = "total_luminosity_of_surfaces.txt"
     data_array = main_service.load_arr_from_txt(file_path, file_name)[4]
 
@@ -811,6 +830,120 @@ def plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0, mu_powe
     file_name = 'geometric_contribution.png'
     main_service.save_figure(fig, save_folder, file_name)
 
+
+def plot_L_nu_iso_for_new_phi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8):
+    """2 мерный график nu_L_nu от fi_0, Phi (фазы)"""
+
+    file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % energy_arr[energy_index]
+    folder = 'nu_L_nu/txt/'
+
+    phase = np.linspace(0, 1, config.t_max)
+
+    for i_angle_index in range(len(i_angle_arr)):
+        for betta_mu_index in range(len(betta_mu_arr)):
+            for a_index in range(len(a_portion_arr)):
+
+                make_new_phi(a_portion_arr[a_index], fi_0_arr)
+                for mc2_index in range(len(mc2_arr)):
+                    fig = plt.figure(figsize=(12, 6))
+                    ax = fig.add_subplot(111)
+
+                    L_nu_data = [0] * 18
+                    for fi_0_index in range(len(fi_0_arr)):
+                        full_file_folder = config.get_folder_with_args(i_angle_arr[i_angle_index],
+                                                                       betta_mu_arr[betta_mu_index],
+                                                                       mc2_arr[mc2_index], a_portion_arr[a_index],
+                                                                       fi_0_arr[fi_0_index])
+
+                        L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+
+                        L_nu_array += \
+                            main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/nu_L_nu/',
+                                                           'bot_column_scatter_nu_L_nu.txt')[energy_index]
+                        L_nu_array += \
+                            main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/nu_L_nu/',
+                                                           'top_column_scatter_nu_L_nu.txt')[energy_index]
+
+                        L_nu_data[fi_0_index] = L_nu_array
+
+                    for i in range(8):
+                        L_nu_data[9 + i + 1] = L_nu_data[9 - i - 1][::-1]
+
+                    fi_0_arr_for_plot = [20 * i for i in range(18)]
+
+                    for i in range(18):
+                        L_nu_data[i] = main_service.extend_arr_for_phase(L_nu_data[i])
+
+                    phase = np.linspace(0, 2, 2 * config.t_max)
+                    im = ax.contourf(phase, fi_0_arr_for_plot, L_nu_data, levels=30)
+                    clb = plt.colorbar(im)
+                    clb.set_label(r'$\nu L_{\nu}$' + ' [erg/s]', fontsize=26)
+
+                    figure_title = r'$L_{\nu}$ ' + 'i=%d betta_mu=%d a=%0.2f m=%d' % (
+                        i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index], a_portion_arr[a_index],
+                        mc2_arr[mc2_index])
+
+                    save_folder = config.PROJECT_DIR + 'figs/L_nu_to_phi_to_phase/mc2=%d a=%0.2f/' % (
+                        mc2_arr[mc2_index], a_portion_arr[a_index])
+                    save_file_name = 'i=%d betta_mu=%d L_nu_to_phi_to_phase.png' % (
+                        i_angle_arr[i_angle_index], betta_mu_arr[betta_mu_index])
+
+                    x_axis_label = r'$\Phi$'
+                    y_axis_label = r'$\phi_0$'
+
+                    ax.set_xlabel(x_axis_label, fontsize=26)
+                    ax.set_ylabel(y_axis_label, fontsize=26)
+                    # fig.suptitle(figure_title, fontsize=22)
+
+                    main_service.save_figure(fig, save_folder, save_file_name)
+
+
+def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
+    save_folder = config.PROJECT_DIR + 'figs/L_to_fi_0/' + f'i={i_angle} betta_mu={betta_mu}/' + f'mc2={mc2}/' f'a={a_portion}/'
+
+    file_name = 'total_luminosity_of_surfaces.txt'
+
+    make_new_phi(a_portion, fi_0_arr)
+    L_data = [0] * 18
+    for fi_0_index in range(len(fi_0_arr)):
+        full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion, fi_0_arr[fi_0_index])
+
+        L_array = main_service.load_arr_from_txt(full_file_folder, file_name)[4]
+
+        L_array += \
+            main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/', 'scattered_energy_top.txt')
+        L_array += \
+            main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/', 'scattered_energy_bot.txt')
+
+        L_data[fi_0_index] = L_array
+
+    for i in range(8):
+        L_data[9 + i + 1] = L_data[9 - i - 1][::-1]
+
+    for i in range(18):
+        L_data[i] = main_service.extend_arr_for_phase(L_data[i])
+
+    fi_0_arr_for_plot = [20 * i for i in range(18)]
+
+    phase = np.linspace(0, 2, 2 * config.t_max)
+
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(111)
+    im = ax.contourf(phase, fi_0_arr_for_plot, L_data, levels=30)
+    clb = plt.colorbar(im)
+    clb.set_label(r'$L_{iso}$' + ' [erg/s]', fontsize=26)
+
+
+    save_file_name  = 'map_contour_L_iso' + '.png'
+
+    x_axis_label = r'$\Phi$'
+    y_axis_label = r'$\phi_0$'
+
+    ax.set_xlabel(x_axis_label, fontsize=26)
+    ax.set_ylabel(y_axis_label, fontsize=26)
+    # fig.suptitle(figure_title, fontsize=22)
+
+    main_service.save_figure(fig, save_folder, save_file_name)
 
 energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
 energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
@@ -853,50 +986,79 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
 
 # ---------------------------------------------------------
-a_portion_arr = [0.11, 0.25, 0.33, 0.44, 0.55, 0.65, 0.77]
-i_angle_arr = [20, 40, 60]
-betta_mu_arr = [40, 60]
-for i_angle in i_angle_arr:
-    for betta_mu in betta_mu_arr:
-        for a_portion in a_portion_arr:
-            if a_portion == 0.11:
-                mc2_arr = np.linspace(10, 60, 6)
-                mc2_arr = list(map(int, mc2_arr))
-            elif a_portion == 0.25:
-                mc2_arr = np.linspace(10, 120, 12)
-                mc2_arr = list(map(int, mc2_arr))
-            else:
-                mc2_arr = np.linspace(10, 130, 13)
-                mc2_arr = list(map(int, mc2_arr))
-            fi_0 = (config.fi_0_dict[a_portion] + 90) % 360
-            # fi_0 = config.fi_0_dict[a_portion]
-            plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
+# a_portion_arr = [0.22, 0.44, 0.66]
+# i_angle_arr = [20, 40]
+# betta_mu_arr = [40, 60]
+# for i_angle in i_angle_arr:
+#     for betta_mu in betta_mu_arr:
+#         for a_portion in a_portion_arr:
+#             if a_portion == 0.11:
+#                 mc2_arr = np.linspace(10, 60, 6)
+#                 mc2_arr = list(map(int, mc2_arr))
+#             elif a_portion == 0.22:
+#                 mc2_arr = np.linspace(10, 110, 11)
+#                 mc2_arr = list(map(int, mc2_arr))
+#             else:
+#                 mc2_arr = np.linspace(10, 130, 13)
+#                 mc2_arr = list(map(int, mc2_arr))
+#             fi_0 = (config.fi_0_dict[a_portion]) % 360
+#             # fi_0 = config.fi_0_dict[a_portion]
+#             plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 
 # ---------------------------------------------------------------
-
-a_portion_arr = [0.11, 0.25, 0.33, 0.44, 0.55, 0.65, 0.77]
-i_angle_arr = [20, 40, 60]
-betta_mu_arr = [40, 60]
-mc2_arr = [60]
-fi_0 = 'new'
-
-for i_angle in i_angle_arr:
-    for betta_mu in betta_mu_arr:
-        for mc2 in mc2_arr:
-            plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0)
+# a_portion_arr = [0.22, 0.33, 0.44, 0.55, 0.66, 0.77]
+# i_angle_arr = [20, 40]
+# betta_mu_arr = [40, 60]
+# mc2_arr = [100, 30]
+# fi_0 = 'new'
+#
+# for i_angle in i_angle_arr:
+#     for betta_mu in betta_mu_arr:
+#         for mc2 in mc2_arr:
+#             plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0)
 
 # ---------------------------------------------------------
-# i_angle = 20
-# betta_mu = 0
-# mc2 = 100
-# a_portion = 0.25
+# i_angle_arr = [20, 40, 60]
+# betta_mu_arr = [40, 60]
+# mc2_arr = [30, 100]
+# a_portion_arr = [0.25, 0.65]
 # fi_0 = 0
 #
+# for i_angle in i_angle_arr:
+#     for betta_mu in betta_mu_arr:
+#         for mc2 in mc2_arr:
+#             for a_portion in a_portion_arr:
+#                 plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0)
+
 # plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0)
 
 # -------------------------------------------------------
+# i_angle = 60
+# betta_mu = 40
+# mc2_arr = [30, 100]
+# a_portion_arr = [0.22, 0.66]
+#
+# fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
+# ---------------------------------------------------------
+# i_angle_arr = [60]
+# betta_mu_arr = [40]
+# mc2_arr = [30, 100]
+# a_portion_arr = [0.22, 0.66]
+#
+# fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
+# plot_L_nu_iso_for_new_phi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
+# -------------------------------------------------------
+i_angle = 60
+betta_mu = 40
+mc2 = 30
+a_portion = 0.22
+
+fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
+plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr)
+
+# plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
 # plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
