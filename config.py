@@ -48,11 +48,15 @@ def update_folder():
 
 def update_project_dir():
     global PROJECT_DIR
+    global PROJECT_DIR_ORIGIN
 
     if new_magnet_lines_flag:
         PROJECT_DIR += 'new_magnet_lines/'
     else:
         PROJECT_DIR += 'old_magnet_lines/'
+
+    PROJECT_DIR += 'new_condition/'
+    PROJECT_DIR_ORIGIN = PROJECT_DIR
 
     buf = mu
     count = 1
