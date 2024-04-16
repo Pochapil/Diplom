@@ -448,7 +448,7 @@ def plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column):
     # mlab.mesh(x, y, z, colormap='cool', figure=fig)
 
 
-def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
+def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_not_draw):
     class Visualization(HasTraits):
         slider_fi_0 = Range(0, 360, config.phi_accretion_begin_deg)
         slider_i_angle = Range(0, 90, i_angle)
@@ -538,28 +538,32 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             # x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, config.phi_accretion_begin_deg)
             x, y, z, mask = get_data_for_magnet_lines_with_mask(theta_range_column, phi_range_column,
                                                                 config.phi_accretion_begin_deg)
-
             opacity_for_magnet_line = 0.1
-            self.magnet_lines_top = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
-                                                         representation='wireframe', mask=mask)
 
-            # self.magnet_lines_top = self.scene.mlab.surf(x, y, z, color=(1, 0, 0), warp_scale=0.3,
-            #                                              representation='wireframe', line_width=0.5)
-            self.magnet_lines_bot = self.scene.mlab.mesh(-x, -y, -z, color=self.color_magnet_lines_bot,
-                                                         opacity=opacity_for_magnet_line,
-                                                         representation='wireframe', mask=mask)
+            if not flag_do_not_draw:
+
+                self.magnet_lines_top = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
+                                                             representation='wireframe', mask=mask)
+
+                # self.magnet_lines_top = self.scene.mlab.surf(x, y, z, color=(1, 0, 0), warp_scale=0.3,
+                #                                              representation='wireframe', line_width=0.5)
+                self.magnet_lines_bot = self.scene.mlab.mesh(-x, -y, -z, color=self.color_magnet_lines_bot,
+                                                             opacity=opacity_for_magnet_line,
+                                                             representation='wireframe', mask=mask)
 
             x, y, z, mask = get_data_for_magnet_lines_outer_with_mask(theta_range_column, phi_range_column,
                                                                       config.phi_accretion_begin_deg)
-            self.magnet_lines_top_outer = self.scene.mlab.mesh(x, y, z,
-                                                               color=self.color_magnet_lines_top_outer,
-                                                               opacity=opacity_for_magnet_line,
-                                                               representation='wireframe', mask=mask)
 
-            self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x, -y, -z,
-                                                               color=self.color_magnet_lines_bot_outer,
-                                                               opacity=opacity_for_magnet_line,
-                                                               representation='wireframe', mask=mask)
+            if not flag_do_not_draw:
+                self.magnet_lines_top_outer = self.scene.mlab.mesh(x, y, z,
+                                                                   color=self.color_magnet_lines_top_outer,
+                                                                   opacity=opacity_for_magnet_line,
+                                                                   representation='wireframe', mask=mask)
+
+                self.magnet_lines_bot_outer = self.scene.mlab.mesh(-x, -y, -z,
+                                                                   color=self.color_magnet_lines_bot_outer,
+                                                                   opacity=opacity_for_magnet_line,
+                                                                   representation='wireframe', mask=mask)
 
             # mu_vector
             # mlab.plot3d([0, 0], [0, 0], [0, 1.0], color=self.mu_vector_color, tube_radius=self.mu_vector_tube_radius,
@@ -568,9 +572,9 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
             self.mu_vector = mlab.quiver3d(0, 0, 1, mode='2ddash', scale_factor=1, color=self.mu_vector_color)
             self.mu_vector_1 = mlab.quiver3d(0, 0, -1, mode='2ddash', scale_factor=1, color=self.mu_vector_color)
 
-            omega_vector = [-np.sin(betta_mu * config.grad_to_rad) * np.cos(0),
-                            np.sin(betta_mu * config.grad_to_rad) * np.sin(0),
-                            np.cos(betta_mu * config.grad_to_rad)]
+            omega_vector = [np.sin(-betta_mu * config.grad_to_rad) * np.cos(0),
+                            np.sin(-betta_mu * config.grad_to_rad) * np.sin(0),
+                            np.cos(-betta_mu * config.grad_to_rad)]
 
             # omega_vector
             # self.omega_vector = mlab.plot3d([0, omega_vector[0]], [0, omega_vector[1]], [0, omega_vector[2]],
@@ -638,7 +642,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
                                                          representation='wireframe', mask=mask)
 
             x, y, z, mask = get_data_for_magnet_lines_outer_with_mask(theta_range_column, phi_range_column,
-                                                                      config.phi_accretion_begin_deg)
+                                                                      self.slider_fi_0)
 
             self.magnet_lines_top_outer.mlab_source.trait_set(x=[0], y=[0], z=[0])
             self.magnet_lines_bot_outer.mlab_source.trait_set(x=[0], y=[0], z=[0])
@@ -789,8 +793,17 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column):
         @on_trait_change('slider_fi_0')
         def func_change_slider_fi_0(self):
             x, y, z = get_data_for_accretion_columns(theta_range_column, phi_range_column, self.slider_fi_0)
+
             self.accretion_column_top.mlab_source.trait_set(x=x, y=y, z=z, color=self.color_accretion_column_top)
             self.accretion_column_bot.mlab_source.trait_set(x=-x, y=-y, z=-z, color=self.color_accretion_column_bot)
+
+            x, y, z = get_data_for_accretion_columns_outer(theta_range_column, phi_range_column,
+                                                           self.slider_fi_0)
+            # верх
+            self.accretion_column_top_outer.mlab_source.trait_set(x=x, y=y, z=z, color=self.color_accretion_column_top_outer)
+            # низ
+            self.accretion_column_bot_outer.mlab_source.trait_set(x=-x, y=-y, z=-z,
+                                                                  color=self.color_accretion_column_bot_outer)
 
             if self.flag_draw_magnet_lines:
                 # x, y, z = get_data_for_magnet_lines(theta_range_column, phi_range_column, self.slider_fi_0,
@@ -900,8 +913,9 @@ if __name__ == "__main__":
     betta_mu = 40
 
     mc2 = 100
-    a_portion = 0.25
-    fi_0 = 0
+    a_portion = 0.22
+    fi_0 = 320
+    flag_do_not_draw = False
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
@@ -925,6 +939,6 @@ if __name__ == "__main__":
     # theta_range_column = np.loadtxt(file_name)
 
     # plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column)
-    plot_main(i_angle, betta_mu, phi_range_column, theta_range_column)
+    plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_not_draw)
 
     # plot_in_mayavi(i_angle, betta_mu, phi_range_column, theta_range_column)
