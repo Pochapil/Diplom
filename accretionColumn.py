@@ -681,7 +681,8 @@ class AccretionColumn:
                         direction_y = e_obs_mu[0, 1]
                         direction_z = e_obs_mu[0, 2]
 
-                        if accretionColumnService.intersection_with_sphere(origin_x, origin_y, origin_z, direction_x,
+
+                        if config.NS_shadow_flag and accretionColumnService.intersection_with_sphere(origin_x, origin_y, origin_z, direction_x,
                                                                            direction_y, direction_z):
                             cos_psi_range[i, j] = 0
                         else:
