@@ -217,7 +217,8 @@ def try_sky_map(obs_i_angle_arr):
     # ax.axhline(config.betta_mu_deg, c='r', linestyle="--")
 
     ax.scatter([0, 1, 2], [config.betta_mu_deg, config.betta_mu_deg, config.betta_mu_deg], c='red', marker='*')
-    ax.scatter([0, 1, 2], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='red', marker='*')
+    ax.scatter([0.5, 1.5], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='red',
+               marker='*')
 
     working_folder = file_folder + config.file_folder_accretion_args
     file_name = 'try_map_contour' + '.png'
@@ -254,7 +255,7 @@ if __name__ == '__main__':
     mc2 = [30, 100]
     a_portion = [0.66]
     # fi_0 = [config.fi_0_dict[a_portion[0]]]
-    fi_0 =  [(config.fi_0_dict[a_portion[0]] + 90) % 360]
+    fi_0 = [(config.fi_0_dict[a_portion[0]] + 90) % 360]
     betta_mu = [20, 40, 60]
     for betta_mu_index in range(len(betta_mu)):
         for mc_index in range(len(mc2)):
