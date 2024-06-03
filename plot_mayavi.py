@@ -508,6 +508,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
             # Do not forget to call the parent's __init__
             HasTraits.__init__(self)
             self.scene.background = (1, 1, 1)
+            # mlab.figure(bgcolor=(1, 1, 1), fgcolor=(0., 0., 0.))
             # NS
             x, y, z = get_data_for_NS()
             self.NS = self.scene.mlab.mesh(x, y, z, color=(0, 0, 0))
@@ -541,7 +542,6 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
             opacity_for_magnet_line = 0.1
 
             if not flag_do_not_draw:
-
                 self.magnet_lines_top = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
                                                              representation='wireframe', mask=mask)
 
@@ -754,8 +754,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
                             np.sin(config.betta_mu_deg * config.grad_to_rad) * np.sin(0),
                             np.cos(config.betta_mu_deg * config.grad_to_rad)]
 
-            self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
-                                                    z=[0, omega_vector[2]])
+            # self.omega_vector.mlab_source.trait_set(x=[0, omega_vector[0]], y=[0, omega_vector[1]],
+            #                                         z=[0, omega_vector[2]])
 
             self.update_accretion_disc_rotate_angle()
 
@@ -800,7 +800,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
             x, y, z = get_data_for_accretion_columns_outer(theta_range_column, phi_range_column,
                                                            self.slider_fi_0)
             # верх
-            self.accretion_column_top_outer.mlab_source.trait_set(x=x, y=y, z=z, color=self.color_accretion_column_top_outer)
+            self.accretion_column_top_outer.mlab_source.trait_set(x=x, y=y, z=z,
+                                                                  color=self.color_accretion_column_top_outer)
             # низ
             self.accretion_column_bot_outer.mlab_source.trait_set(x=-x, y=-y, z=-z,
                                                                   color=self.color_accretion_column_bot_outer)
@@ -909,12 +910,12 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 60
-    betta_mu = 40
+    i_angle = 20
+    betta_mu = 30
 
-    mc2 = 100
-    a_portion = 0.22
-    fi_0 = 320
+    mc2 = 30
+    a_portion = 0.66
+    fi_0 = 240
     flag_do_not_draw = False
 
     config.set_e_obs(i_angle, 0)
