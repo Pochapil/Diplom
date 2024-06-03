@@ -35,7 +35,13 @@ L_array += \
 
 y_data = L_array
 y_max = np.max(y_data)
-y_data /= y_max
+
+mean = np.mean(y_data)
+std = np.std(y_data)
+
+# y_data /= y_max
+y_data = (y_data - mean)/std
+
 x_data = np.linspace(0, 2 * np.pi, 45)
 
 
@@ -83,8 +89,10 @@ ax.plot(x_data, y_data)
 ax.plot(x_data, fit_y_1 + fit_y_2 + fit_y_3)
 plt.show()
 
+
 def fit_func4(x, c):
     return np.sin(0 * x) + c
+
 
 popt, pcov = curve_fit(fit_func4, x_data, y_data)
 fit_y_4 = fit_func4(x_data, *popt)
@@ -102,14 +110,69 @@ print(fit_params_3)
 print(fit_params_4)
 
 
+def fit_func_all(x, a_1, b_1, a_2, b_2, a_3, b_3, c):
+    return a_1 * np.sin(x + b_1) + a_2 * np.sin(2 * x + b_2) + a_3 * np.sin(3 * x + b_3) + c
+
+
+popt, pcov = curve_fit(fit_func_all, x_data, y_data)
+fit_all = fit_func_all(x_data, *popt)
+fit_params = popt
+
+dict_vals = {'a1': fit_params[0], 'b1': fit_params[1],
+             'a2': fit_params[2], 'b2': fit_params[3],
+             'a3': fit_params[4], 'b3': fit_params[5],
+             'c': fit_params[6]}
+
+
+fig = plt.figure(figsize=(12, 6))
+ax = fig.add_subplot(111)
+ax.plot(x_data, y_data, label='true')
+ax.plot(x_data, fit_all, label='fitted')
+plt.legend()
+plt.show()
+
+print(dict_vals)
+
+
+def fit_func_all(x, a_1, b_1, a_2, b_2, a_3, b_3, a_4, b_4, a_5, b_5,c):
+    return a_1 * np.sin(x + b_1) + a_2 * np.sin(2 * x + b_2) + a_3 * np.sin(3 * x + b_3) + a_4 * np.sin(4 * x + b_4) + a_5 * np.sin(5 * x + b_5) + c
+
+
+popt, pcov = curve_fit(fit_func_all, x_data, y_data)
+fit_all = fit_func_all(x_data, *popt)
+fit_params = popt
+
+dict_vals = {'a1': fit_params[0], 'b1': fit_params[1],
+             'a2': fit_params[2], 'b2': fit_params[3],
+             'a3': fit_params[4], 'b3': fit_params[5],
+             'a4': fit_params[6], 'b4': fit_params[7],
+             'a5': fit_params[8], 'b5': fit_params[9],
+             'c': fit_params[10]}
+
+
+fig = plt.figure(figsize=(12, 6))
+ax = fig.add_subplot(111)
+ax.plot(x_data, y_data, label='true')
+ax.plot(x_data, fit_all, label='fitted')
+plt.legend()
+plt.show()
+
+print(dict_vals)
+
+
+
+
+
+
+
 n = len(x_data)
 dx = np.diff(x_data)[0]
 f_hat = np.fft.fft(y_data, n)
 # print(f_hat)
 
-PSD = f_hat * np.conj(f_hat)/n
-freq = (1/(dx * n)) * np.arange(n)
-L = np.arange(1, np.floor(n/2), dtype='int')
+PSD = f_hat * np.conj(f_hat) / n
+freq = (1 / (dx * n)) * np.arange(n)
+L = np.arange(1, np.floor(n / 2), dtype='int')
 
 ind = np.argpartition(np.abs(f_hat.real), -4)[-4:]
 
@@ -140,4 +203,3 @@ print(PSD[indecies])
 
 print(f_hat[ind])
 print(ind)
-
