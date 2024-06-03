@@ -272,6 +272,7 @@ class AccretionColumn:
                 self.T_eff[i + 1] = y_new[i]
 
         def create_ds_for_integral(self):
+            # это dl phi * dl theta но без d theta d phi !!! S с волной ~S в моем дипломе
             # для интеграла по simpson
             dS_simps = np.zeros(config.N_theta_accretion)
             # dS_simps = []  # единичная площадка при интегрировании
@@ -681,9 +682,11 @@ class AccretionColumn:
                         direction_y = e_obs_mu[0, 1]
                         direction_z = e_obs_mu[0, 2]
 
-
-                        if config.NS_shadow_flag and accretionColumnService.intersection_with_sphere(origin_x, origin_y, origin_z, direction_x,
-                                                                           direction_y, direction_z):
+                        if config.NS_shadow_flag and accretionColumnService.intersection_with_sphere(origin_x, origin_y,
+                                                                                                     origin_z,
+                                                                                                     direction_x,
+                                                                                                     direction_y,
+                                                                                                     direction_z):
                             cos_psi_range[i, j] = 0
                         else:
                             cos_psi_range[i, j] *= accretionColumnService.get_vals(self.phi_range[i],
