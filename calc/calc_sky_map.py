@@ -153,7 +153,14 @@ def try_sky_map(obs_i_angle_arr):
     # для сдвига на полфазы -- можно расчитать только до 90 а потом для других переставить и получить для до 180
     for i in range(len(obs_i_angle_arr)):
         config.set_e_obs(obs_i_angle_arr[i], 0)
+        file_name = 'total_luminosity_of_surfaces.txt'
         data_array[i] = main_service.load_arr_from_txt(config.full_file_folder, file_name)[4]
+        file_name = 'scattered_energy_bot.txt'
+        data_array[i] += main_service.load_arr_from_txt(config.full_file_folder + 'scattered_on_magnet_lines/',
+                                                        file_name)
+        file_name = 'scattered_energy_top.txt'
+        data_array[i] += main_service.load_arr_from_txt(config.full_file_folder + 'scattered_on_magnet_lines/',
+                                                        file_name)
         if i != 8:
             data_array[-i - 1] = np.roll(data_array[i], len(data_array[i]) // 2)
 
@@ -217,8 +224,7 @@ def try_sky_map(obs_i_angle_arr):
     # ax.axhline(config.betta_mu_deg, c='r', linestyle="--")
 
     ax.scatter([0, 1, 2], [config.betta_mu_deg, config.betta_mu_deg, config.betta_mu_deg], c='red', marker='*')
-    ax.scatter([0.5, 1.5], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='red',
-               marker='*')
+    ax.scatter([0.5, 1.5], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='red', marker='*')
 
     working_folder = file_folder + config.file_folder_accretion_args
     file_name = 'try_map_contour' + '.png'
@@ -253,10 +259,10 @@ if __name__ == '__main__':
 
     obs_i_angle_arr = np.linspace(10, 90, 9)
     mc2 = [30, 100]
-    a_portion = [0.66]
+    a_portion = [0.44]
     # fi_0 = [config.fi_0_dict[a_portion[0]]]
     fi_0 = [(config.fi_0_dict[a_portion[0]] + 90) % 360]
-    betta_mu = [20, 40, 60]
+    betta_mu = [40]
     for betta_mu_index in range(len(betta_mu)):
         for mc_index in range(len(mc2)):
             for j in range(len(a_portion)):
