@@ -55,7 +55,7 @@ def update_project_dir():
     else:
         PROJECT_DIR += 'old_magnet_lines/'
 
-    PROJECT_DIR += 'new_condition/'
+    PROJECT_DIR += 'new_condition/'  # new fi_0
     PROJECT_DIR_ORIGIN = PROJECT_DIR
 
     buf = mu
