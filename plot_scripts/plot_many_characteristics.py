@@ -23,9 +23,14 @@ plt.style.use(['science', 'notebook', 'grid'])  # для красивых гра
 
 
 def make_new_phi(a_portion, fi_0_arr):
-    # new_phi_0
+    # new_phi_0 - перевод из старых в новые (чтобы 0 соответствовал старым)
     for k in range(len(fi_0_arr)):
         fi_0_arr[k] = (config.fi_0_dict[a_portion] + 20 * (k)) % 360
+        # fi_0_arr[k] = (config.fi_0_dict[a_portion] + fi_0_arr[k]) % 360
+
+
+def make_new_phi_0(a_portion, fi_0):
+    return (config.fi_0_dict[a_portion] + fi_0) % 360
 
 
 marker_dict = {0: '.', 1: '*', 2: '+', 3: '^'}
@@ -377,8 +382,9 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
     folder = 'L_nu/'
     file_name = 'PF.txt'
-
+    bounds = fi_0_arr.copy()
     for a_index in range(len(a_portion_arr)):
+        # новые fi_0
         make_new_phi(a_portion_arr[a_index], fi_0_arr)
         # new_phi_0
         for mc2_index in range(len(mc2_arr)):
@@ -401,6 +407,198 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
     fig2 = plt.figure(figsize=(12, 6))
     ax2 = fig2.add_subplot(111)
+
+    fig3 = plt.figure(figsize=(12, 6))
+    ax3 = fig3.add_subplot(111)
+    for a_index in range(len(a_portion_arr)):
+        fig = plt.figure(figsize=(12, 6))
+        ax = fig.add_subplot(111)
+
+        fig1 = plt.figure(figsize=(12, 6))
+        ax1 = fig1.add_subplot(111)
+
+        line_color_index = 0
+        for mc2_index in range(len(mc2_arr)):
+            L_nu_data_dict = {}
+            color_dict = {}
+            # new_phi_0
+            make_new_phi(a_portion_arr[a_index], fi_0_arr)
+
+            for fi_0_index in range(len(fi_0_arr)):
+                full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
+                                                               a_portion_arr[a_index],
+                                                               fi_0_arr[fi_0_index])
+
+                L_nu_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+
+                buf = main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/nu_L_nu/',
+                                                     'bot_column_scatter_nu_L_nu.txt')[energy_index]
+                if not np.isnan(buf).any():
+                    L_nu_array += buf
+
+                buf = main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/nu_L_nu/',
+                                                     'top_column_scatter_nu_L_nu.txt')[energy_index]
+                if not np.isnan(buf).any():
+                    L_nu_array += buf
+
+                L_nu_data_dict[np.mean(L_nu_array)] = final_final_array[a_index][mc2_index][fi_0_index]
+
+                color_dict[np.mean(L_nu_array)] = fi_0_arr[fi_0_index]
+
+                # L_nu_data_dict[L_nu_array[L_nu_array_index]] = final_final_array[i_angle_index][betta_mu_index][
+                #     i]
+
+            lists = sorted(L_nu_data_dict.items())  # sorted by key, return a list of tuples
+            x, y = zip(*lists)  # unpack a list of pairs into two tuples
+
+            lists = sorted(color_dict.items())
+            buffer, colors = zip(*lists)  # L_nu, fi_0 =
+            colors_deg = colors
+            colors = (np.array(colors) % 180) / 180
+            # colors = (np.array(colors) % 360) / 360
+            # fig = main_service.create_figure(x, y, x_axis_label=r'$L_{\nu}$', y_axis_label='PF',
+            #                                  figure_title=title, is_y_2d=False)
+
+            label = 'm=%d' % (mc2_arr[mc2_index])
+
+            # ax.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors), label=label)
+            # ax1.scatter(x, y, marker=marker_dict[marker_index % 4], label=label)
+
+            fillstyle = 'full'
+            if marker_index == 0:
+                fillstyle = 'none'
+
+            ax.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors), label=label)
+            ax1.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index % 6])
+
+            if marker_index == 0:
+                ax2.scatter(x, y, s=30, facecolors='none', edgecolors=line_color_dict[line_color_index % 6])
+                ax3.scatter(x, y, s=30, facecolors='none', edgecolors=cm.jet(colors))
+            else:
+                ax2.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index % 6])
+                ax3.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors))
+            line_color_index += 1
+
+        marker_index = 3
+
+        x_axis_label = r'$\nu L_{\nu}$' + ' [erg/s]'
+        y_axis_label = r'$PF_{' + '%.2f' % energy_arr[energy_index] + r'}$'
+        # figure_title = 'i=%d betta_mu=%d a=%0.2f' % (i_angle, betta_mu, a_arr[a_index])
+        ax.set_xlabel(x_axis_label, fontsize=24)
+        ax.set_ylabel(y_axis_label, fontsize=24)
+
+        ax.set_xscale('log')
+        ax.legend()
+
+        # fig.suptitle(figure_title, fontsize=14)
+
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/colors/' + 'a=%0.2f/' % a_portion_arr[a_index]
+        save_file_name = 'i=%d betta_mu=%d PF_to_L_nu_color.png' % (i_angle, betta_mu)
+
+        # cmap = mpl.cm.jet
+        # norm = mpl.colors.Normalize(vmin=min(colors_deg), vmax=max(colors_deg))
+        # fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax)
+        # fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax, orientation='horizontal', label='Some Units')
+
+        cmap = mpl.cm.jet
+        norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+
+        fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+                     ax=ax, orientation='vertical', label=r'$\phi_0$')
+
+        # fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'),
+        #              ax=ax, orientation='vertical', label=r'$\phi_0$')
+
+        main_service.save_figure(fig, save_folder, save_file_name)
+
+        ax1.set_xlabel(x_axis_label, fontsize=24)
+        ax1.set_ylabel(y_axis_label, fontsize=24)
+        # fig1.suptitle(figure_title, fontsize=14)
+
+        ax1.set_xscale('log')
+        ax1.legend()
+
+        save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/noncolors/' + 'a=%0.2f/' % a_portion_arr[a_index]
+        save_file_name = 'i=%d betta_mu=%d PF_to_L_nu.png' % (i_angle, betta_mu)
+
+        # fig1.colorbar(
+        #     mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'),
+        #     ax=ax, orientation='vertical', label=r'$\phi_0$')
+
+        main_service.save_figure(fig1, save_folder, save_file_name)
+
+    ax2.set_xlabel(x_axis_label, fontsize=24)
+    ax2.set_ylabel(y_axis_label, fontsize=24)
+    # fig1.suptitle(figure_title, fontsize=14)
+
+    ax2.set_xscale('log')
+
+    save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/noncolors/'
+    save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (i_angle, betta_mu)
+    main_service.save_figure(fig2, save_folder, save_file_name)
+
+    ax3.set_xlabel(x_axis_label, fontsize=24)
+    ax3.set_ylabel(y_axis_label, fontsize=24)
+    ax3.set_xscale('log')
+
+    # fig3.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'), ax=ax3,
+    #               orientation='vertical', label=r'$\phi_0$')
+
+    cmap = mpl.cm.jet
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+    fig3.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+                  ax=ax3, orientation='vertical', label=r'$\phi_0$')
+
+    save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/colors/'
+    save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (i_angle, betta_mu)
+    main_service.save_figure(fig3, save_folder, save_file_name)
+
+
+def plot_masses_PF_L_nu_single_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0, energy_index=8):
+    # PF(L_nu) много точек, берутся линии по mc, a
+    ''' рисует графики PF от nu_L_nu (nu_L_nu усреднили по фазе)
+
+    сначала в цикле читаю PF, заношу в 2D массив
+    потом в цикле по fi_0 в мапу - ключ среднее по фазе nu_Lnu значение - значение PF массив
+    одновременно для L_nu запоминаю fi_0, чтобы окрасить в цвет (1 график)
+
+    рисую 3 графика ox - nu_L_nu, oy - PF:
+    1 - множество точек для разных mc2, a - папки по a - точки окрашены по fi_0
+    2 - множество точек для разных mc2, a - папки по a - точки окрашены для комбинаций mc2, a
+    3 - множество точек для разных mc2, a - все точки - точки окрашены для комбинаций mc2, a'''
+
+    final_final_array = np.zeros((len(a_portion_arr), len(mc2_arr), fi_0))
+
+    folder = 'L_nu/'
+    file_name = 'PF.txt'
+
+    for a_index in range(len(a_portion_arr)):
+        # новые fi_0
+        fi_0_new = make_new_phi_0(a_portion_arr[a_index], fi_0)
+        # new_phi_0
+        for mc2_index in range(len(mc2_arr)):
+            final_array = []
+
+            full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2_arr[mc2_index],
+                                                           a_portion_arr[a_index],
+                                                           fi_0_new)
+
+            PF_array = main_service.load_arr_from_txt(full_file_folder + folder, file_name)
+            final_array.append(PF_array[energy_index])
+
+            final_final_array[a_index][mc2_index] = final_array
+
+    line_color_dict = {0: 'blue', 1: 'green', 2: 'orange', 3: 'red', 4: 'purple', 5: 'black', 6: 'yellow'}
+    marker_index = 0
+
+    folder = 'nu_L_nu/txt/'
+    file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % energy_arr[energy_index]
+
+    fig2 = plt.figure(figsize=(12, 6))
+    ax2 = fig2.add_subplot(111)
+
+    fig3 = plt.figure(figsize=(12, 6))
+    ax3 = fig3.add_subplot(111)
     for a_index in range(len(a_portion_arr)):
         fig = plt.figure(figsize=(12, 6))
         ax = fig.add_subplot(111)
@@ -438,9 +636,10 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
             x, y = zip(*lists)  # unpack a list of pairs into two tuples
 
             lists = sorted(color_dict.items())
-            buffer, colors = zip(*lists)
-            colors = np.array(colors) / 340
-
+            buffer, colors = zip(*lists)  # L_nu, fi_0 =
+            colors_deg = colors
+            colors = (np.array(colors) % 180) / 180
+            # colors = (np.array(colors) % 360) / 360
             # fig = main_service.create_figure(x, y, x_axis_label=r'$L_{\nu}$', y_axis_label='PF',
             #                                  figure_title=title, is_y_2d=False)
 
@@ -458,9 +657,10 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
             if marker_index == 0:
                 ax2.scatter(x, y, s=30, facecolors='none', edgecolors=line_color_dict[line_color_index % 6])
+                ax3.scatter(x, y, s=30, facecolors='none', edgecolors=cm.jet(colors))
             else:
                 ax2.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index % 6])
-
+                ax3.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors))
             line_color_index += 1
 
         marker_index = 3
@@ -478,6 +678,21 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
         save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/colors/' + 'a=%0.2f/' % a_portion_arr[a_index]
         save_file_name = 'i=%d betta_mu=%d PF_to_L_nu_color.png' % (i_angle, betta_mu)
+
+        # cmap = mpl.cm.jet
+        # norm = mpl.colors.Normalize(vmin=min(colors_deg), vmax=max(colors_deg))
+        # fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax)
+        # fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap), cax=ax, orientation='horizontal', label='Some Units')
+
+        cmap = mpl.cm.jet
+        norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+
+        fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+                     ax=ax, orientation='vertical', label=r'$\phi_0$')
+
+        # fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'),
+        #              ax=ax, orientation='vertical', label=r'$\phi_0$')
+
         main_service.save_figure(fig, save_folder, save_file_name)
 
         ax1.set_xlabel(x_axis_label, fontsize=24)
@@ -489,17 +704,38 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
         save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/noncolors/' + 'a=%0.2f/' % a_portion_arr[a_index]
         save_file_name = 'i=%d betta_mu=%d PF_to_L_nu.png' % (i_angle, betta_mu)
+
+        # fig1.colorbar(
+        #     mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'),
+        #     ax=ax, orientation='vertical', label=r'$\phi_0$')
+
         main_service.save_figure(fig1, save_folder, save_file_name)
 
-        ax2.set_xlabel(x_axis_label, fontsize=24)
-        ax2.set_ylabel(y_axis_label, fontsize=24)
-        # fig1.suptitle(figure_title, fontsize=14)
+    ax2.set_xlabel(x_axis_label, fontsize=24)
+    ax2.set_ylabel(y_axis_label, fontsize=24)
+    # fig1.suptitle(figure_title, fontsize=14)
 
     ax2.set_xscale('log')
 
     save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/noncolors/'
     save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (i_angle, betta_mu)
     main_service.save_figure(fig2, save_folder, save_file_name)
+
+    ax3.set_xlabel(x_axis_label, fontsize=24)
+    ax3.set_ylabel(y_axis_label, fontsize=24)
+    ax3.set_xscale('log')
+
+    # fig3.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'), ax=ax3,
+    #               orientation='vertical', label=r'$\phi_0$')
+
+    cmap = mpl.cm.jet
+    norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
+    fig3.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+                  ax=ax3, orientation='vertical', label=r'$\phi_0$')
+
+    save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/colors/'
+    save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (i_angle, betta_mu)
+    main_service.save_figure(fig3, save_folder, save_file_name)
 
 
 def plot_L_nu_flag_particular_fi_0(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8):
@@ -643,11 +879,13 @@ def plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0):
 
         file_name = "scattered_energy_bot.txt"
         buf = main_service.load_arr_from_txt(file_path, file_name)
-        data_array[i] += buf
+        if not np.isnan(buf).any():
+            data_array[i] += buf
 
         file_name = "scattered_energy_top.txt"
         buf = main_service.load_arr_from_txt(file_path, file_name)
-        data_array[i] += buf
+        if not np.isnan(buf).any():
+            data_array[i] += buf
 
     phase = np.linspace(0, 2, 2 * config.t_max)
 
@@ -662,7 +900,7 @@ def plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0):
         data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
 
     im = ax.pcolormesh(phase, np.linspace(0, 1, len(a_portion_arr)), data_to_plot)
-    ax.set_yticks(np.linspace(0, 1, len(a_portion_arr)), a_portion_arr)
+    ax.set_yticks(np.linspace(0, 1, len(a_portion_arr)), np.round(a_portion_arr, 2))
 
     x_axis_label = r'$\Phi$'
     y_axis_label = r'$a$'
@@ -700,11 +938,13 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
 
         file_name = "scattered_energy_bot.txt"
         buf = main_service.load_arr_from_txt(file_path, file_name)
-        data_array[i] += buf
+        if not np.isnan(buf).any():
+            data_array[i] += buf
 
         file_name = "scattered_energy_top.txt"
         buf = main_service.load_arr_from_txt(file_path, file_name)
-        data_array[i] += buf
+        if not np.isnan(buf).any():
+            data_array[i] += buf
 
     phase = np.linspace(0, 2, 2 * config.t_max)
 
@@ -902,23 +1142,28 @@ def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
     save_folder = config.PROJECT_DIR + 'figs/L_to_fi_0/' + f'i={i_angle} betta_mu={betta_mu}/' + f'mc2={mc2}/' f'a={a_portion}/'
 
     file_name = 'total_luminosity_of_surfaces.txt'
-
+    # изменить данные - чтобы читать
     make_new_phi(a_portion, fi_0_arr)
+
     L_data = [0] * 18
     for fi_0_index in range(len(fi_0_arr)):
         full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion, fi_0_arr[fi_0_index])
 
         L_array = main_service.load_arr_from_txt(full_file_folder, file_name)[4]
-
-        L_array += \
-            main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/', 'scattered_energy_top.txt')
-        L_array += \
-            main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/', 'scattered_energy_bot.txt')
+        buf = main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/',
+                                             'scattered_energy_top.txt')
+        if not np.isnan(buf).any():
+            L_array += buf
+        buf = main_service.load_arr_from_txt(full_file_folder + 'scattered_on_magnet_lines/',
+                                             'scattered_energy_bot.txt')
+        if not np.isnan(buf).any():
+            L_array += buf
 
         L_data[fi_0_index] = L_array
 
     for i in range(8):
         L_data[9 + i + 1] = L_data[9 - i - 1][::-1]
+        # симметрично для 180 - fi_0
 
     for i in range(18):
         L_data[i] = main_service.extend_arr_for_phase(L_data[i])
@@ -933,8 +1178,7 @@ def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
     clb = plt.colorbar(im)
     clb.set_label(r'$L_{iso}$' + ' [erg/s]', fontsize=26)
 
-
-    save_file_name  = 'map_contour_L_iso' + '.png'
+    save_file_name = 'map_contour_L_iso' + '.png'
 
     x_axis_label = r'$\Phi$'
     y_axis_label = r'$\phi_0$'
@@ -944,6 +1188,61 @@ def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
     # fig.suptitle(figure_title, fontsize=22)
 
     main_service.save_figure(fig, save_folder, save_file_name)
+
+
+def plot_PF_contour(mc2, a_portion, fi_0):
+    # PF(L_nu) много точек, берутся линии по mc, a
+
+    i_angle_arr = np.linspace(10, 90, 9)
+    betta_mu_arr = np.linspace(10, 90, 9)
+
+    final_final_array = np.zeros((len(i_angle_arr), len(betta_mu_arr)))
+
+    folder = 'scattered_on_magnet_lines/L_nu/'
+    file_name = 'PF.txt'
+
+    save_file_name = f'a={a_portion}' + f'fi_0={fi_0}.png'
+    # new_phi_0
+    fi_0 = make_new_phi_0(a_portion, fi_0)
+
+    folder = 'scattered_on_magnet_lines/'
+    file_name = 'total_luminosity_of_surfaces.txt'
+
+    for i in range(len(i_angle_arr)):
+        for j in range(len(betta_mu_arr)):
+            full_file_folder = config.get_folder_with_args(i_angle_arr[i], betta_mu_arr[j], mc2, a_portion, fi_0)
+            L = main_service.load_arr_from_txt(full_file_folder, file_name)[4]
+
+            buf = main_service.load_arr_from_txt(full_file_folder + folder, 'scattered_energy_bot.txt')
+            if not np.isnan(buf).any():
+                L += buf
+
+            buf = main_service.load_arr_from_txt(full_file_folder + folder, 'scattered_energy_top.txt')
+            if not np.isnan(buf).any():
+                L += buf
+
+            PF = (max(L) - min(L)) / (max(L) + min(L))
+            final_final_array[i][j] = PF
+
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(111)
+
+    x, y = np.meshgrid(i_angle_arr, betta_mu_arr)
+    z = np.transpose(final_final_array)
+
+    cs = ax.contourf(x, y, z)
+
+    ax.set_xlabel(r'$\theta_{obs}$')
+    ax.set_ylabel(r'$\chi$')
+
+    cbar = fig.colorbar(cs)
+    cbar.ax.set_ylabel('PF')
+
+    # plt.show()
+
+    save_folder = config.PROJECT_DIR + 'figs/PF_contour/' + f'mc2={mc2}/'
+    main_service.save_figure(fig, save_folder, save_file_name)
+
 
 energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
 energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
@@ -988,10 +1287,15 @@ fi_0_arr = [20 * i for i in range(18)]
 # ---------------------------------------------------------
 # a_portion_arr = [0.22, 0.44, 0.66]
 # i_angle_arr = [20, 40]
-# betta_mu_arr = [40, 60]
+# betta_mu_arr = [60]
+# # mc2_arr = np.linspace(10, 130, 13)
+# # mc2_arr = list(map(int, mc2_arr))
 # for i_angle in i_angle_arr:
 #     for betta_mu in betta_mu_arr:
 #         for a_portion in a_portion_arr:
+#             # fi_0 = (config.fi_0_dict[a_portion]) % 360
+#             # # fi_0 = config.fi_0_dict[a_portion]
+#             # plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 #             if a_portion == 0.11:
 #                 mc2_arr = np.linspace(10, 60, 6)
 #                 mc2_arr = list(map(int, mc2_arr))
@@ -1005,11 +1309,17 @@ fi_0_arr = [20 * i for i in range(18)]
 #             # fi_0 = config.fi_0_dict[a_portion]
 #             plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 
+
 # ---------------------------------------------------------------
-# a_portion_arr = [0.22, 0.33, 0.44, 0.55, 0.66, 0.77]
-# i_angle_arr = [20, 40]
-# betta_mu_arr = [40, 60]
-# mc2_arr = [100, 30]
+# # a_portion_arr = [0.22, 0.33, 0.44, 0.55, 0.66, 0.77]
+# a_portion_arr = [0.165, 0.22, 0.275, 0.33, 0.385, 0.44, 0.5, 0.55, 0.605, 0.66, 0.715, 0.77, 0.825]
+# i_angle_arr = [20, 40, 60]
+# betta_mu_arr = [20, 40, 60]
+# mc2_arr = [30, 100]
+# #
+# # mc2_arr = np.linspace(10, 130, 13)
+# # mc2_arr = list(map(int, mc2_arr))
+#
 # fi_0 = 'new'
 #
 # for i_angle in i_angle_arr:
@@ -1033,12 +1343,16 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0)
 
 # -------------------------------------------------------
-# i_angle = 60
-# betta_mu = 40
+# i_angle = 40
+# betta_mu = 60
+#
 # mc2_arr = [30, 100]
+# mc2_arr = np.linspace(10, 130, 13)
+#
 # a_portion_arr = [0.22, 0.66]
 #
 # fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
+# fi_0_arr = [0]
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
 # ---------------------------------------------------------
@@ -1051,13 +1365,32 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_L_nu_iso_for_new_phi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
 # -------------------------------------------------------
-i_angle = 60
-betta_mu = 40
-mc2 = 30
-a_portion = 0.22
+# i_angle = 40
+# betta_mu = 60
+# mc2 = 100
+# a_portion = 0.66
+#
+# fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
 
-fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
-plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr)
+
+# plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr)
+
+#---------------------------------------------------------
+i_angle = 40
+betta_mu = 60
+mc2 = 100
+a_portion = 0.66
+fi_0 = 90
+
+a_portion_arr = [0.22, 0.44, 0.66]
+mc2_arr = [30, 100]
+
+for mc2 in mc2_arr:
+    for a_portion in a_portion_arr:
+        plot_PF_contour(mc2, a_portion, fi_0)
+
+
+
 
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
