@@ -15,6 +15,9 @@ import vectors
 import geometricTask.matrix as matrix
 
 
+def make_new_phi_0(a_portion, fi_0):
+    return (config.fi_0_dict[a_portion] + fi_0) % 360
+
 def get_projection_on_vector(input_vector, project_vector):
     # cos * project_vector
     return np.dot(input_vector, project_vector) * project_vector / (np.linalg.norm(project_vector)) ** 2
@@ -910,13 +913,16 @@ if __name__ == "__main__":
     if plot_magnet_lines_flag:
         lim_coeff_for_axis = 0.14
 
-    i_angle = 20
-    betta_mu = 30
+    i_angle = 40
+    betta_mu = 60
 
-    mc2 = 30
-    a_portion = 0.66
-    fi_0 = 240
-    flag_do_not_draw = False
+    mc2 = 100
+    a_portion = 0.11
+
+    new_fi_0 = 0
+    fi_0 = (config.fi_0_dict[a_portion] + new_fi_0) % 360
+
+    flag_do_not_draw = True
 
     config.set_e_obs(i_angle, 0)
     config.set_betta_mu(betta_mu)
