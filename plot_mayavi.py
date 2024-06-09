@@ -874,12 +874,16 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
         @on_trait_change('button_hide_accr_disc')
         def func_change_button_hide_accr_disc(self):
             if self.flag_accretion_disc_hide:
-                self.draw_accretion_disc()
+                # self.draw_accretion_disc()
+                self.flag_accretion_disc_hide = not self.flag_accretion_disc_hide
+                self.accretion_disc_top.visible = True
+                self.accretion_disc_bot.visible = True
+                self.accretion_disc_side_surface.visible = True
             else:
                 self.flag_accretion_disc_hide = not self.flag_accretion_disc_hide
-                self.accretion_disc_top.mlab_source.trait_set(x=[0], y=[0], z=[0])
-                self.accretion_disc_bot.mlab_source.trait_set(x=[0], y=[0], z=[0])
-                self.accretion_disc_side_surface.mlab_source.trait_set(x=[0], y=[0], z=[0])
+                self.accretion_disc_top.visible = False
+                self.accretion_disc_bot.visible = False
+                self.accretion_disc_side_surface.visible = False
 
         @on_trait_change('button_check_data')
         def func_change_button_check_data(self):
@@ -892,8 +896,8 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
             N = 100
             for i in range(N):
                 self.slider_distance = 3.89764
-                self.slider_phase = 2 * i / (N - 1)
-                # self.scene.save_png('mayavi_figs/' + f'anim{i}.png')
+                self.slider_phase = 1 * i / (N - 1)
+                self.scene.save_png('mayavi_figs/' + 'anim%02d.png' % i)
 
         # @mlab.animate
         # def anim(self):
