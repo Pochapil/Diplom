@@ -2,6 +2,7 @@ import numpy as np
 import math
 import matplotlib.pyplot as plt
 from mayavi import mlab
+import time
 
 from traits.api import HasTraits, Range, Button, Instance, on_trait_change
 from traitsui.api import View, Item, HGroup, VGroup
@@ -17,6 +18,7 @@ import geometricTask.matrix as matrix
 
 def make_new_phi_0(a_portion, fi_0):
     return (config.fi_0_dict[a_portion] + fi_0) % 360
+
 
 def get_projection_on_vector(input_vector, project_vector):
     # cos * project_vector
@@ -464,6 +466,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
         button_cut_magnet_lines = Button('cut_magnet_lines')
         button_hide_accr_disc = Button('hide_accr_disc')
         button_check_data = Button('check_data')
+        button_animate = Button('animate')
 
         scene = Instance(MlabSceneModel, ())
 
@@ -545,6 +548,7 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
             opacity_for_magnet_line = 0.1
 
             if not flag_do_not_draw:
+                # .visible = False - чтобы сделать невидимым
                 self.magnet_lines_top = self.scene.mlab.mesh(x, y, z, color=(0, 0, 1), opacity=opacity_for_magnet_line,
                                                              representation='wireframe', mask=mask)
 
@@ -861,7 +865,6 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
 
         @on_trait_change('button_accr_disc')
         def func_change_button_accr_disc(self):
-
             if self.flag_accretion_disc_omega_mu:
                 self.rotate_accretion_disc(self.accretion_disc_rotate_angle)
             else:
@@ -870,7 +873,6 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
 
         @on_trait_change('button_hide_accr_disc')
         def func_change_button_hide_accr_disc(self):
-
             if self.flag_accretion_disc_hide:
                 self.draw_accretion_disc()
             else:
@@ -883,6 +885,22 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
         def func_change_button_check_data(self):
             self.try_check_data()
 
+        @on_trait_change('button_animate')
+        def anim(self):
+            self.scene.reset_zoom()
+            # save_folder = config.PROJECT_DIR_ORIGIN + 'mayavi_figs/'
+            N = 100
+            for i in range(N):
+                self.slider_distance = 3.89764
+                self.slider_phase = 2 * i / (N - 1)
+                # self.scene.save_png('mayavi_figs/' + f'anim{i}.png')
+
+        # @mlab.animate
+        # def anim(self):
+        #     for i in range(10):
+        #         self.slider_phase = 2 * i / 10
+        #         yield
+
         # the layout of the dialog created
         view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
                          height=250, width=300, show_label=False),
@@ -894,12 +912,13 @@ def plot_main(i_angle, betta_mu, phi_range_column, theta_range_column, flag_do_n
                             '_', 'slider_fi_0', 'slider_phase'
                         ),
                         HGroup('button_magnet_line', 'button_accr_disc', 'button_cut_magnet_lines',
-                               'button_hide_accr_disc', 'slider_distance')
+                               'button_hide_accr_disc', 'slider_distance', 'button_animate')
                     )
                     )
 
     visualization = Visualization()
     visualization.configure_traits()
+    # visualization.anim()
 
 
 if __name__ == "__main__":
