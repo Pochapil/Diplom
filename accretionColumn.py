@@ -209,7 +209,7 @@ class AccretionColumn:
             self.R_e = R_e
             self.surface_type = surface_type  # True - внешняя поверхность, False - внутренняя
 
-            self.T_eff, self.ksi_shock, self.L_x, self.beta = get_T_eff.get_Teff_distribution(R_e,
+            self.T_eff, self.ksi_shock, self.L_x, self.beta = get_T_eff.get_Teff_distribution(
                                                                                               accretionColumnService.get_delta_distance(
                                                                                                   theta_accretion_begin,
                                                                                                   self.R_e),
