@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib as mpl
 import scienceplots
+from matplotlib import ticker
 
 import geometricTask.matrix as matrix
 import config
@@ -16,6 +17,10 @@ import vectors
 import main_service
 
 plt.style.use(['science', 'notebook', 'grid'])  # для красивых графиков
+
+mpl.rcParams['mathtext.fontset'] = 'stix'
+mpl.rcParams['font.family'] = 'STIXGeneral'
+mpl.pyplot.title(r'ABC123 vs $\mathrm{ABC123}^{123}$')
 
 
 # jet =  mpl.colormaps['jet']
@@ -123,7 +128,7 @@ def plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_a
             axes[i].set_ylabel(y_axis_label, fontsize=24)
             axes[i].set_title(title_dict[i], fontsize=24)
 
-            plt.colorbar(col_bar, ax=axes[i])
+            plt.colorbar(col_bar, ax=axes[i], pad=0.01)
 
         fig.tight_layout()
         # plt.show()
@@ -292,7 +297,7 @@ def plot_L_nu_iso(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, e
                         L_nu_data.append(L_nu_array)
 
                     im = ax.contourf(phase, fi_0_arr, L_nu_data, levels=30)
-                    clb = plt.colorbar(im)
+                    clb = plt.colorbar(im, pad=0.01)
                     clb.set_label(r'$\nu L_{\nu}$' + ' [erg/s]', fontsize=26)
 
                     figure_title = r'$L_{\nu}$ ' + 'i=%d betta_mu=%d a=%0.2f m=%d' % (
@@ -402,12 +407,15 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
     line_color_dict = {0: 'blue', 1: 'green', 2: 'orange', 3: 'red', 4: 'purple', 5: 'black', 6: 'yellow'}
     marker_index = 0
 
+    line_style = ['-', '--']
+
     folder = 'nu_L_nu/txt/'
     file_name = 'nu_L_nu_of_energy_%0.2f_KeV_of_surfaces.txt' % energy_arr[energy_index]
 
     fig2 = plt.figure(figsize=(12, 6))
     ax2 = fig2.add_subplot(111)
 
+    # layout='compressed'
     fig3 = plt.figure(figsize=(12, 6))
     ax3 = fig3.add_subplot(111)
     for a_index in range(len(a_portion_arr)):
@@ -421,6 +429,9 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
         for mc2_index in range(len(mc2_arr)):
             L_nu_data_dict = {}
             color_dict = {}
+
+            full_dict = {}
+
             # new_phi_0
             make_new_phi(a_portion_arr[a_index], fi_0_arr)
 
@@ -445,8 +456,17 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
                 color_dict[np.mean(L_nu_array)] = fi_0_arr[fi_0_index]
 
+                full_dict[np.mean(L_nu_array)] = (final_final_array[a_index][mc2_index][fi_0_index], bounds[fi_0_index])
+
                 # L_nu_data_dict[L_nu_array[L_nu_array_index]] = final_final_array[i_angle_index][betta_mu_index][
                 #     i]
+            lists = sorted(full_dict.items(), key=lambda item: item[1])
+            x_sort, y_sort = zip(*lists)
+            y_sort, colors_sort = zip(*y_sort)
+
+            lists = sorted(full_dict.items(), key=lambda item: item[1][1])
+            x_sort_fi_0, y_sort_fi_0 = zip(*lists)
+            y_sort_fi_0, _ = zip(*y_sort_fi_0)
 
             lists = sorted(L_nu_data_dict.items())  # sorted by key, return a list of tuples
             x, y = zip(*lists)  # unpack a list of pairs into two tuples
@@ -454,11 +474,14 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
             lists = sorted(color_dict.items())
             buffer, colors = zip(*lists)  # L_nu, fi_0 =
             colors_deg = colors
-            colors = (np.array(colors) % 180) / 180
+            x = x_sort
+            y = y_sort
+            # colors = (np.array(colors) % 180) / 180
+            colors = (np.array(colors_sort)) / 180
+
             # colors = (np.array(colors) % 360) / 360
             # fig = main_service.create_figure(x, y, x_axis_label=r'$L_{\nu}$', y_axis_label='PF',
             #                                  figure_title=title, is_y_2d=False)
-
             label = 'm=%d' % (mc2_arr[mc2_index])
 
             # ax.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors), label=label)
@@ -473,9 +496,11 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
 
             if marker_index == 0:
                 ax2.scatter(x, y, s=30, facecolors='none', edgecolors=line_color_dict[line_color_index % 6])
+                ax3.plot(x_sort_fi_0, y_sort_fi_0, color='black', alpha=0.2, linestyle=line_style[mc2_index])
                 ax3.scatter(x, y, s=30, facecolors='none', edgecolors=cm.jet(colors))
             else:
                 ax2.scatter(x, y, marker=marker_dict[marker_index % 4], color=line_color_dict[line_color_index % 6])
+                ax3.plot(x_sort_fi_0, y_sort_fi_0, color='black', alpha=0.2, linestyle=line_style[mc2_index])
                 ax3.scatter(x, y, marker=marker_dict[marker_index % 4], color=cm.jet(colors))
             line_color_index += 1
 
@@ -504,7 +529,7 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
         norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
 
         fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
-                     ax=ax, orientation='vertical', label=r'$\phi_0$')
+                     ax=ax, orientation='vertical', label=r'$\phi_0$', pad=0.01)
 
         # fig.colorbar(mpl.cm.ScalarMappable(norm=mpl.colors.Normalize(vmin=0, vmax=180), cmap='jet'),
         #              ax=ax, orientation='vertical', label=r'$\phi_0$')
@@ -547,7 +572,7 @@ def plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, ene
     cmap = mpl.cm.jet
     norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
     fig3.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
-                  ax=ax3, orientation='vertical', label=r'$\phi_0$')
+                  ax=ax3, orientation='vertical', label=r'$\phi_0$', pad=0.01)
 
     save_folder = config.PROJECT_DIR + 'figs/PF_to_L_nu/mc_a_many/colors/'
     save_file_name = 'i=%d betta_mu=%d All_PF_to_L_nu.png' % (i_angle, betta_mu)
@@ -908,7 +933,7 @@ def plot_L_to_a_portion(i_angle, betta_mu, mc2, a_portion_arr, fi_0):
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
 
-    clb = plt.colorbar(im)
+    clb = plt.colorbar(im, pad=0.01)
     clb.set_label(r'$L_{iso} \cdot max(L_{iso})^{-1}$', fontsize=24)
 
     file_name = 'map_contour' + '.png'
@@ -957,11 +982,34 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
         data_to_plot[i] = (arr / max(arr))
         data_to_plot[i] = main_service.extend_arr_for_phase(data_to_plot[i])
 
-    fig = plt.figure(figsize=(8, 6))
+    fig = plt.figure(figsize=(9, 6))
     ax = fig.add_subplot(111)
 
-    im = ax.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
-    ax.set_yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
+    # data2 = [main_service.extend_arr_for_phase(item) for item in data_array]
+    # im = ax.pcolormesh(phase, [np.mean(item) for item in data_array], data2, alpha=0)
+    dummy = np.zeros(90)
+    dummy1 = [np.mean(item) for item in data_array]
+    for i,item in enumerate(dummy1):
+        dummy[i] = item
+
+    ax.plot(phase, dummy, alpha=0)
+
+    # im = ax.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
+
+    def fmt_two_digits(x, pos):
+        return f'{x:.2e}'
+
+    ax.set_yscale('log')
+    # ax.set_yticks(np.linspace(0, 1, len(mc2_arr)), labels=[fmt_two_digits(np.mean(item), 0) for item in data_array])
+
+    secax1 = ax.twinx()
+    im = secax1.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
+    secax1.set_yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
+
+    # secax = ax.secondary_yaxis('right')
+    # im = secax.pcolormesh(phase, np.linspace(0, 1, len(mc2_arr)), data_to_plot)
+    # secax.set_yticks(np.linspace(0, 1, len(mc2_arr)), mc2_arr)
+
     # ax.plot_surface(phase, mc2_arr, data_to_plot)
     # triang = tri.Triangulation(phase, mc2_arr)
     # im = ax.tricontour(triang, data_to_plot, levels=14, linewidths=0.5, colors='k')
@@ -980,9 +1028,23 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
 
     x_axis_label = r'$\Phi$'
     y_axis_label = r'$\dot{m}$'
+    y_axis_label = r'$mean L_{iso} [erg/s]$'
 
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
+
+    y_axis_label = r'$\dot{m}$'
+    secax1.set_ylabel(y_axis_label, fontsize=24)
+    # secax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%.2f'))
+
+    # secax.yaxis.set_major_formatter(ticker.FuncFormatter(fmt_two_digits))
+    # secax.yaxis.set_major_formatter(ticker.StrMethodFormatter("{x:.2f}"))
+
+    # secax.ticklabel_format()
+    # secax.set_ylabel('radians')
+
+    # ax2 = ax.twinx()
+    # ax2.set_yticks(np.linspace(0, 1, len(mc2_arr)), labels=[np.mean(item) for item in data_to_plot])
 
     # fig_title = 'L_iso/L_x'
     # fig.suptitle(fig_title, fontsize=14)
@@ -990,8 +1052,9 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
     # fig_title = r'$L_{iso}/L_{x}$ ' + title
     # fig.suptitle(fig_title, fontsize=14)
 
-    clb = plt.colorbar(im)
+    clb = plt.colorbar(im, pad=0.15, format="{x:.2}")
     clb.set_label(r'$L_{iso} \cdot max(L_{iso})^{-1}$', fontsize=24)
+
     # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
 
     file_name = 'map_contour' + '.png'
@@ -1014,7 +1077,7 @@ def plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0):
     ax.set_xlabel(x_axis_label, fontsize=24)
     ax.set_ylabel(y_axis_label, fontsize=24)
 
-    clb = plt.colorbar(im)
+    clb = plt.colorbar(im, pad=0.02, format="{x:.2}")
     clb.set_label(r'$L_{iso} \cdot L_x^{-1}$', fontsize=24)
     # clb.ax.set_title(r'$L_{iso} \cdot L_{x}^{-1}$', fontsize=24)
 
@@ -1116,7 +1179,7 @@ def plot_L_nu_iso_for_new_phi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr,
 
                     phase = np.linspace(0, 2, 2 * config.t_max)
                     im = ax.contourf(phase, fi_0_arr_for_plot, L_nu_data, levels=30)
-                    clb = plt.colorbar(im)
+                    clb = plt.colorbar(im, pad=0.01)
                     clb.set_label(r'$\nu L_{\nu}$' + ' [erg/s]', fontsize=26)
 
                     figure_title = r'$L_{\nu}$ ' + 'i=%d betta_mu=%d a=%0.2f m=%d' % (
@@ -1175,7 +1238,7 @@ def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
     fig = plt.figure(figsize=(12, 6))
     ax = fig.add_subplot(111)
     im = ax.contourf(phase, fi_0_arr_for_plot, L_data, levels=30)
-    clb = plt.colorbar(im)
+    clb = plt.colorbar(im, pad=0.01)
     clb.set_label(r'$L_{iso}$' + ' [erg/s]', fontsize=26)
 
     save_file_name = 'map_contour_L_iso' + '.png'
@@ -1201,7 +1264,7 @@ def plot_PF_contour(mc2, a_portion, fi_0):
     folder = 'scattered_on_magnet_lines/L_nu/'
     file_name = 'PF.txt'
 
-    save_file_name = f'a={a_portion}' + f'fi_0={fi_0}.png'
+    save_file_name = f'a={a_portion}' + ' ' + f'fi_0={fi_0}.png'
     # new_phi_0
     fi_0 = make_new_phi_0(a_portion, fi_0)
 
@@ -1224,18 +1287,22 @@ def plot_PF_contour(mc2, a_portion, fi_0):
             PF = (max(L) - min(L)) / (max(L) + min(L))
             final_final_array[i][j] = PF
 
-    fig = plt.figure(figsize=(12, 6))
+    fig = plt.figure(figsize=(9, 6))
     ax = fig.add_subplot(111)
 
-    x, y = np.meshgrid(i_angle_arr, betta_mu_arr)
-    z = np.transpose(final_final_array)
+    x, y = np.meshgrid(betta_mu_arr, i_angle_arr)
+    z = final_final_array
+    # z = np.transpose(final_final_array)
+
+    # x, y = np.meshgrid(betta_mu_arr, i_angle_arr)
+    # z = final_final_array
 
     cs = ax.contourf(x, y, z)
 
-    ax.set_xlabel(r'$\theta_{obs}$')
-    ax.set_ylabel(r'$\chi$')
+    ax.set_xlabel(r'$\chi$')
+    ax.set_ylabel(r'$\theta_{obs}$')
 
-    cbar = fig.colorbar(cs)
+    cbar = fig.colorbar(cs, pad=0.01)
     cbar.ax.set_ylabel('PF')
 
     # plt.show()
@@ -1285,30 +1352,29 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
 
 # ---------------------------------------------------------
-# a_portion_arr = [0.22, 0.44, 0.66]
-# i_angle_arr = [20, 40]
-# betta_mu_arr = [60]
-# # mc2_arr = np.linspace(10, 130, 13)
-# # mc2_arr = list(map(int, mc2_arr))
-# for i_angle in i_angle_arr:
-#     for betta_mu in betta_mu_arr:
-#         for a_portion in a_portion_arr:
-#             # fi_0 = (config.fi_0_dict[a_portion]) % 360
-#             # # fi_0 = config.fi_0_dict[a_portion]
-#             # plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
-#             if a_portion == 0.11:
-#                 mc2_arr = np.linspace(10, 60, 6)
-#                 mc2_arr = list(map(int, mc2_arr))
-#             elif a_portion == 0.22:
-#                 mc2_arr = np.linspace(10, 110, 11)
-#                 mc2_arr = list(map(int, mc2_arr))
-#             else:
-#                 mc2_arr = np.linspace(10, 130, 13)
-#                 mc2_arr = list(map(int, mc2_arr))
-#             fi_0 = (config.fi_0_dict[a_portion]) % 360
-#             # fi_0 = config.fi_0_dict[a_portion]
-#             plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
-
+a_portion_arr = [0.22]
+i_angle_arr = [20]
+betta_mu_arr = [60]
+# mc2_arr = np.linspace(10, 130, 13)
+# mc2_arr = list(map(int, mc2_arr))
+for i_angle in i_angle_arr:
+    for betta_mu in betta_mu_arr:
+        for a_portion in a_portion_arr:
+            # fi_0 = (config.fi_0_dict[a_portion]) % 360
+            # # fi_0 = config.fi_0_dict[a_portion]
+            # plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
+            if a_portion == 0.11:
+                mc2_arr = np.linspace(10, 60, 6)
+                mc2_arr = list(map(int, mc2_arr))
+            elif a_portion == 0.22:
+                mc2_arr = np.linspace(10, 110, 11)
+                mc2_arr = list(map(int, mc2_arr))
+            else:
+                mc2_arr = np.linspace(10, 130, 13)
+                mc2_arr = list(map(int, mc2_arr))
+            fi_0 = (config.fi_0_dict[a_portion]) % 360
+            # fi_0 = config.fi_0_dict[a_portion]
+            plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 
 # ---------------------------------------------------------------
 # # a_portion_arr = [0.22, 0.33, 0.44, 0.55, 0.66, 0.77]
@@ -1343,16 +1409,18 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_geometric_contribution(i_angle, betta_mu, mc2, a_portion, fi_0)
 
 # -------------------------------------------------------
-# i_angle = 40
-# betta_mu = 60
+
+# i_angle = 60
+# betta_mu = 40
 #
 # mc2_arr = [30, 100]
-# mc2_arr = np.linspace(10, 130, 13)
+# # mc2_arr = np.linspace(10, 130, 13)
 #
 # a_portion_arr = [0.22, 0.66]
 #
 # fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
-# fi_0_arr = [0]
+# # fi_0_arr = [0]
+#
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
 # ---------------------------------------------------------
@@ -1375,22 +1443,20 @@ fi_0_arr = [20 * i for i in range(18)]
 
 # plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr)
 
-#---------------------------------------------------------
-i_angle = 40
-betta_mu = 60
-mc2 = 100
-a_portion = 0.66
-fi_0 = 90
+# ---------------------------------------------------------
 
-a_portion_arr = [0.22, 0.44, 0.66]
-mc2_arr = [30, 100]
-
-for mc2 in mc2_arr:
-    for a_portion in a_portion_arr:
-        plot_PF_contour(mc2, a_portion, fi_0)
-
-
-
+# i_angle = 40
+# betta_mu = 60
+# mc2 = 100
+# a_portion = 0.66
+# fi_0 = 0
+#
+# a_portion_arr = [0.22, 0.44, 0.66]
+# mc2_arr = [30, 100]
+#
+# for mc2 in mc2_arr:
+#     for a_portion in a_portion_arr:
+#         plot_PF_contour(mc2, a_portion, fi_0)
 
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr)
