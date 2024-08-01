@@ -7,7 +7,12 @@ import main_service
 
 
 def plot_figs():
+    import matplotlib as mpl
+    mpl.rcParams['mathtext.fontset'] = 'cm'
+    mpl.rcParams['font.family'] = 'STIXGeneral'
+
     plt.style.use(['science', 'notebook', 'grid'])
+
     working_folder = config.full_file_folder
 
     phi_for_plot = list(config.omega_ns * config.grad_to_rad * i / (2 * np.pi) for i in range(config.t_max_for_plot))

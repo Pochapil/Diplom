@@ -2,8 +2,14 @@ import config
 import numpy as np
 import matplotlib.pyplot as plt
 import scienceplots
+import matplotlib as mpl
 
 import main_service
+
+plt.style.use(['science', 'notebook', 'grid'])  # для красивых графиков
+
+mpl.rcParams['mathtext.fontset'] = 'cm'
+mpl.rcParams['font.family'] = 'STIXGeneral'
 
 
 def plot_save_sky_map(obs_i_angle_arr):
@@ -155,12 +161,17 @@ def try_sky_map(obs_i_angle_arr):
         config.set_e_obs(obs_i_angle_arr[i], 0)
         file_name = 'total_luminosity_of_surfaces.txt'
         data_array[i] = main_service.load_arr_from_txt(config.full_file_folder, file_name)[4]
+
         file_name = 'scattered_energy_bot.txt'
-        data_array[i] += main_service.load_arr_from_txt(config.full_file_folder + 'scattered_on_magnet_lines/',
-                                                        file_name)
+        buf = main_service.load_arr_from_txt(config.full_file_folder + 'scattered_on_magnet_lines/', file_name)
+        if not np.isnan(buf).any():
+            data_array[i] += buf
+
         file_name = 'scattered_energy_top.txt'
-        data_array[i] += main_service.load_arr_from_txt(config.full_file_folder + 'scattered_on_magnet_lines/',
-                                                        file_name)
+        buf = main_service.load_arr_from_txt(config.full_file_folder + 'scattered_on_magnet_lines/', file_name)
+        if not np.isnan(buf).any():
+            data_array[i] += buf
+
         if i != 8:
             data_array[-i - 1] = np.roll(data_array[i], len(data_array[i]) // 2)
 
@@ -259,10 +270,10 @@ if __name__ == '__main__':
 
     obs_i_angle_arr = np.linspace(10, 90, 9)
     mc2 = [30, 100]
-    a_portion = [0.44]
+    a_portion = [1]
     # fi_0 = [config.fi_0_dict[a_portion[0]]]
-    fi_0 = [(config.fi_0_dict[a_portion[0]] + 90) % 360]
-    betta_mu = [40]
+    fi_0 = [(config.fi_0_dict[a_portion[0]] + 0) % 360]
+    betta_mu = [20]
     for betta_mu_index in range(len(betta_mu)):
         for mc_index in range(len(mc2)):
             for j in range(len(a_portion)):

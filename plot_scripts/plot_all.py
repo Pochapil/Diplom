@@ -1,9 +1,14 @@
 import time
 import matplotlib.pyplot as plt
-
+import matplotlib as mpl
 import config
 
 from plot_scripts import plot_from_main, plot_luminosity_in_range, plot_nu_L_nu, plot_L_nu, plot_scattered
+plt.style.use(['science', 'notebook', 'grid'])  # для красивых графиков
+
+mpl.rcParams['mathtext.fontset'] = 'cm'
+mpl.rcParams['font.family'] = 'STIXGeneral'
+
 
 if __name__ == '__main__':
     def plot_all():
@@ -16,7 +21,7 @@ if __name__ == '__main__':
 
 
     fi_0 = [0]
-    i_angle = [10 * i for i in range(1, 10)]
+    i_angle = [10 * i for i in range(2, 10)]
     betta_mu = [10 * i for i in range(1, 10)]
     #  mc2 = [10, 30, 50, 100, 150]
     mc2 = [30, 100]
@@ -26,15 +31,15 @@ if __name__ == '__main__':
 
     i_angle = [60]
     betta_mu = [40]
-    # mc2 = [100]
-    # a_portion = [0.25]
+    mc2 = [160]
+    a_portion = [0.22, 0.44, 0.66]
     # fi_0 = [0]
 
     # i_angle = [10 * i for i in range(10, 19)]
-    fi_0 = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
-    a_portion = [0.22]
+    #fi_0 = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
+    # a_portion = [0.22, 0.44, 0.66]
     N_big = len(i_angle) * len(betta_mu) * len(mc2) * len(a_portion) * len(fi_0)
-    print('to calculate %d loops need about %f hours' % (N_big, 35 * N_big / 3600))
+    print('to calculate %d loops need about %f hours' % (N_big, 40 * N_big / 3600))
 
     for i_angle_index in range(len(i_angle)):
         for betta_mu_index in range(len(betta_mu)):
@@ -43,9 +48,9 @@ if __name__ == '__main__':
                     for k in range(len(fi_0)):
                         # fi_0[k] = 360 - 180 * a_portion[j]
 
-                        # fi_0[k] = (config.fi_0_dict[a_portion[j]] + 90) % 360
+                        fi_0[k] = (config.fi_0_dict[a_portion[j]] + 0) % 360
                         # fi_0[k] = config.fi_0_dict[a_portion[j]]
-                        fi_0[k] = (config.fi_0_dict[a_portion[j]] + 20 * k) % 360
+                        # fi_0[k] = (config.fi_0_dict[a_portion[j]] + 20 * k) % 360
 
                         config.set_e_obs(i_angle[i_angle_index], 0)
                         config.set_betta_mu(betta_mu[betta_mu_index])

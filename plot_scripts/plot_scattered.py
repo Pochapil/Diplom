@@ -10,6 +10,10 @@ import accretionColumnService
 def plot_figs():
     check_flag = False
 
+    import matplotlib as mpl
+    mpl.rcParams['mathtext.fontset'] = 'cm'
+    mpl.rcParams['font.family'] = 'STIXGeneral'
+
     plt.style.use(['science', 'notebook', 'grid'])
     working_folder = config.full_file_folder
 

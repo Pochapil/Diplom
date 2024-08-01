@@ -8,6 +8,10 @@ import main_service
 
 
 def plot_figs():
+    import matplotlib as mpl
+    mpl.rcParams['mathtext.fontset'] = 'cm'
+    mpl.rcParams['font.family'] = 'STIXGeneral'
+
     plt.style.use(['science', 'notebook', 'grid'])
 
     folder = 'luminosity_in_range/'
