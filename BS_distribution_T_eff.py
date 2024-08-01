@@ -24,7 +24,7 @@ def find_ksi_shock(eta, gamma):
         return x - f(x) / df(x)
 
     delta = 0.001  # точность для метода ньютона
-    ksi_prev = 84.3  # начальное предположение
+    ksi_prev = 31  # начальное предположение
     ksi_next = nuton(ksi_prev)
     while np.abs((ksi_prev - ksi_next)) > delta:
         ksi_prev = ksi_next
@@ -123,7 +123,7 @@ def get_Teff_distribution(delta_ns, A_normal):
     A_normal - уповерхности НЗ --- a cross-section
     A_perp =  2, delta, 2 uppi a R sin theta --- 2!!! это площадка для 2 колонок!!
     '''
-    plot_flag = False
+
     # над 10 формулой:
     # The case n = 2 corresponds to the spherically diverging accretion column;
     # the case n = 3 is a good approximation to the flow pattern near the magnetic poles
@@ -148,9 +148,14 @@ def get_Teff_distribution(delta_ns, A_normal):
 
     ksi_shock = find_ksi_shock(eta, gamma)
     # print(ksiShock)
-    u_numerical_solution, v_numerical_solution = solve_numerical(gamma, s, ksi_shock)
 
     ksi_arr = np.linspace(1., ksi_shock, config.N_theta_accretion)
+
+    numerical_flag = False
+    if numerical_flag:
+        u_numerical_solution, v_numerical_solution = solve_numerical(gamma, s, ksi_shock)
+        T = (u_numerical_solution / config.a_rad_const) ** (1 / 4)
+        Teff = (get_f_theta(u_numerical_solution, v_numerical_solution, ksi_arr, e) / config.sigm_Stf_Bolc) ** (1 / 4)
 
     # 35 формула
     # доля излучения в стороны от всей Lt полной светимости, темп аккреции
@@ -160,16 +165,15 @@ def get_Teff_distribution(delta_ns, A_normal):
     v = get_v_analytic(u0, s, gamma, beta, ksi_arr)
     u = get_u_analytic(u0, gamma, beta, ksi_arr)
 
-    T = (u_numerical_solution / config.a_rad_const) ** (1 / 4)
     Tbs = (get_u_analytic(u0, gamma, beta, ksi_arr) / config.a_rad_const) ** (1 / 4)  # настоящее аналитическое решение
 
     # получаем эффективную температуру из закона Стефана-Больцмана
-    Teff = (get_f_theta(u_numerical_solution, v_numerical_solution, ksi_arr, e) / config.sigm_Stf_Bolc) ** (1 / 4)
     Teffbs = (get_f_theta_bs(ksi_arr, e, u0, s, gamma, beta) / config.sigm_Stf_Bolc) ** (1 / 4)
 
     # формула 37, 1 - полная светимость
     L_x = (1 - beta) * config.M_accretion_rate * config.G * config.M_ns / config.R_ns
 
+    plot_flag = False
     if plot_flag:
         fig = plt.figure(figsize=(12, 6))
         ax = fig.add_subplot(111)
@@ -199,7 +203,7 @@ def get_Teff_distribution(delta_ns, A_normal):
         ax.legend()
         plt.show()
 
-    return Teff, ksi_shock, L_x, beta
+    return Teffbs, ksi_shock, L_x, beta
 
 
 if __name__ == '__main__':
