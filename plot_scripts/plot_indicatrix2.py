@@ -102,6 +102,7 @@ def plot_main(i_angle, betta_mu, fi_0):
         button_cut_magnet_lines = Button('cut_magnet_lines')
         button_hide_accr_disc = Button('hide_accr_disc')
         button_check_data = Button('check_data')
+        button_animate = Button('animate')
 
         scene = Instance(MlabSceneModel, ())
 
@@ -228,9 +229,9 @@ def plot_main(i_angle, betta_mu, fi_0):
                          np.cos(betta_mu * config.grad_to_rad)]
 
             self.mu_vector = mlab.quiver3d(mu_vector[0], mu_vector[1], mu_vector[2], mode='2ddash',
-                                              scale_factor=scale_factor, color=self.mu_vector_color)
+                                           scale_factor=scale_factor, color=self.mu_vector_color)
             self.mu_vector_1 = mlab.quiver3d(-mu_vector[0], -mu_vector[1], -mu_vector[2], mode='2ddash',
-                                                scale_factor=scale_factor, color=self.mu_vector_color)
+                                             scale_factor=scale_factor, color=self.mu_vector_color)
 
             obs_vector = [
                 np.sin(-betta_mu * config.grad_to_rad + config.obs_i_angle_deg * config.grad_to_rad) * np.cos(0),
@@ -294,6 +295,16 @@ def plot_main(i_angle, betta_mu, fi_0):
 
             self.view_phase(phase)
 
+        @on_trait_change('button_animate')
+        def anim(self):
+            self.scene.reset_zoom()
+            # save_folder = config.PROJECT_DIR_ORIGIN + 'mayavi_figs/'
+            N = 100
+            for i in range(N):
+                self.slider_distance = 5.89764
+                self.slider_phase = 1 * i / (N - 1)
+                self.scene.save_png('mayavi_figs_indicatrix/' + 'anim%02d.png' % i)
+
         view = View(Item('scene', editor=SceneEditor(scene_class=MayaviScene),
                          height=250, width=300, show_label=False),
                     VGroup(
@@ -304,7 +315,7 @@ def plot_main(i_angle, betta_mu, fi_0):
                             '_', 'slider_fi_0', 'slider_phase'
                         ),
                         HGroup('button_magnet_line', 'button_accr_disc', 'button_cut_magnet_lines',
-                               'button_hide_accr_disc', 'slider_distance')
+                               'button_hide_accr_disc', 'slider_distance', 'button_animate')
                     )
                     )
 
@@ -316,8 +327,11 @@ betta_mu = 40
 i_angle = 40
 
 mc2 = 100
-a_portion = 0.22
-fi_0 = 50
+a_portion = 0.66
+
+new_fi_0 = 0
+fi_0 = (config.fi_0_dict[a_portion] + new_fi_0) % 360
+print(fi_0)
 
 config.set_e_obs(i_angle, 0)
 config.set_betta_mu(betta_mu)
