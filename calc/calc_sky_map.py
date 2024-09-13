@@ -234,8 +234,11 @@ def try_sky_map(obs_i_angle_arr):
 
     # ax.axhline(config.betta_mu_deg, c='r', linestyle="--")
 
-    ax.scatter([0, 1, 2], [config.betta_mu_deg, config.betta_mu_deg, config.betta_mu_deg], c='red', marker='*')
-    ax.scatter([0.5, 1.5], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='red', marker='*')
+    ax.scatter([0, 1, 2], [config.betta_mu_deg, config.betta_mu_deg, config.betta_mu_deg], c='white', marker='*', s=300)
+    ax.scatter([0.5, 1.5], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='white', marker='*', s=300)
+
+    ax.scatter([0, 1, 2], [config.betta_mu_deg, config.betta_mu_deg, config.betta_mu_deg], c='black', marker='*', s=100)
+    ax.scatter([0.5, 1.5], [180 - config.betta_mu_deg, 180 - config.betta_mu_deg], c='black', marker='*', s=100)
 
     working_folder = file_folder + config.file_folder_accretion_args
     file_name = 'try_map_contour' + '.png'
@@ -269,10 +272,10 @@ if __name__ == '__main__':
     #                 plot_save_sky_map_contour(obs_i_angle_arr)
 
     obs_i_angle_arr = np.linspace(10, 90, 9)
-    mc2 = [30, 100]
-    a_portion = [1]
+    mc2 = [30]
+    a_portion = [0.66]
     # fi_0 = [config.fi_0_dict[a_portion[0]]]
-    fi_0 = [(config.fi_0_dict[a_portion[0]] + 0) % 360]
+    fi_0 = [((config.fi_0_dict[a_portion[i]] + 0) % 360) for i in range(len(a_portion))]
     betta_mu = [20]
     for betta_mu_index in range(len(betta_mu)):
         for mc_index in range(len(mc2)):
