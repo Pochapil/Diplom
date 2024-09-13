@@ -1326,12 +1326,14 @@ def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
 
     fig = plt.figure(figsize=(12, 6))
     ax = fig.add_subplot(111)
-    # im = ax.contourf(phase, fi_0_arr_for_plot, L_data, levels=400)
+    # im = ax.contourf(phase, fi_0_arr_for_plot, L_data, levels=90)
+
     im = ax.pcolormesh(phase, fi_0_arr_for_plot, L_data)
+    # ax.contour(phase, fi_0_arr_for_plot, L_data, linewidths=0.5, colors='k')
     clb = plt.colorbar(im, pad=0.01)
     clb.set_label(r'$L_{iso}$' + ' [erg/s]', fontsize=26)
 
-    save_file_name = 'map_contour_L_iso' + '.png'
+
 
     x_axis_label = r'$\Phi$'
     y_axis_label = r'$\phi_0$'
@@ -1340,8 +1342,20 @@ def plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr):
     ax.set_ylabel(y_axis_label, fontsize=26)
     # fig.suptitle(figure_title, fontsize=22)
 
+    save_file_name = 'map_contour_L_iso' + '.png'
     main_service.save_figure(fig, save_folder, save_file_name)
 
+    fig = plt.figure(figsize=(12, 6))
+    ax = fig.add_subplot(111)
+    im = ax.contourf(phase, fi_0_arr_for_plot, L_data, linewidths=0.5)
+    clb = plt.colorbar(im, pad=0.01)
+    clb.set_label(r'$L_{iso}$' + ' [erg/s]', fontsize=26)
+
+    ax.set_xlabel(x_axis_label, fontsize=26)
+    ax.set_ylabel(y_axis_label, fontsize=26)
+
+    save_file_name = 'map_contour_L_iso_c' + '.png'
+    main_service.save_figure(fig, save_folder, save_file_name)
 
 def plot_PF_contour(mc2, a_portion, fi_0):
     # PF(L_nu) много точек, берутся линии по mc, a
@@ -1354,7 +1368,7 @@ def plot_PF_contour(mc2, a_portion, fi_0):
     folder = 'scattered_on_magnet_lines/L_nu/'
     file_name = 'PF.txt'
 
-    save_file_name = f'a={a_portion}' + ' ' + f'fi_0={fi_0}.png'
+    new_phi_0 = fi_0
     # new_phi_0
     fi_0 = make_new_phi_0(a_portion, fi_0)
 
@@ -1387,7 +1401,7 @@ def plot_PF_contour(mc2, a_portion, fi_0):
     # x, y = np.meshgrid(betta_mu_arr, i_angle_arr)
     # z = final_final_array
 
-    cs = ax.contourf(x, y, z)
+    cs = ax.contourf(x, y, z, 90)
 
     ax.set_xlabel(r'$\chi$')
     ax.set_ylabel(r'$\theta_{obs}$')
@@ -1396,7 +1410,23 @@ def plot_PF_contour(mc2, a_portion, fi_0):
     cbar.ax.set_ylabel('PF')
 
     # plt.show()
+    save_file_name = f'a={a_portion}' + ' ' + f'fi_0={new_phi_0}.png'
+    save_folder = config.PROJECT_DIR + 'figs/PF_contour/' + f'mc2={mc2}/'
+    main_service.save_figure(fig, save_folder, save_file_name)
 
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.add_subplot(111)
+
+    cs = ax.pcolormesh(x, y, z)
+
+    ax.set_xlabel(r'$\chi$')
+    ax.set_ylabel(r'$\theta_{obs}$')
+
+    cbar = fig.colorbar(cs, pad=0.01)
+    cbar.ax.set_ylabel('PF')
+
+    # plt.show()
+    save_file_name = f'a={a_portion}' + ' ' + f'fi_0={new_phi_0} colormesh.png'
     save_folder = config.PROJECT_DIR + 'figs/PF_contour/' + f'mc2={mc2}/'
     main_service.save_figure(fig, save_folder, save_file_name)
 
@@ -1427,7 +1457,10 @@ def plot_L_max_phase_to_m_to_a(i_angle, betta_mu):
     '''
     # 0, 90
     mc2_arr = [10, 30, 60, 80, 100, 130, 160]
-    a_portion_arr = [0.11, 0.22, 0.33, 0.44, 0.55, 0.66, 0.77]
+    if i_angle < 40:
+        a_portion_arr = [0.11, 0.22, 0.33, 0.44, 0.55, 0.66]
+    else:
+        a_portion_arr = [0.11, 0.22, 0.44, 0.66]
 
     phase = np.linspace(0, 1, config.t_max)
 
@@ -1444,10 +1477,7 @@ def plot_L_max_phase_to_m_to_a(i_angle, betta_mu):
     # L_data_for_levels = L_data_for_levels/np.max(L_data_for_levels)
     # clev = np.arange(np.min(L_data_for_levels), np.max(L_data_for_levels), .001)
 
-
     # interpolate_data = scipy.interpolate.interp2d(mc2_arr, a_portion_arr, max_phase_idx_data, xq, yq, 'cubic')
-
-
 
     fig = plt.figure(figsize=(10, 6))
     ax = fig.add_subplot(111)
@@ -1469,7 +1499,25 @@ def plot_L_max_phase_to_m_to_a(i_angle, betta_mu):
     save_folder = config.PROJECT_DIR + 'figs/L_max_phase/' + f'i={i_angle} betta_mu={betta_mu}/'
     main_service.save_figure(fig, save_folder, save_file_name)
 
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
 
+    im = ax.pcolormesh(mc2_arr, a_portion_arr, max_phase_idx_data)
+    # ax.contour(mc2_arr, a_portion_arr, max_phase_idx_data, colors='k')
+    clb = plt.colorbar(im, pad=0.01)
+    clb.set_label(r'$\Phi_{max}$', fontsize=26)
+
+    save_file_name = 'colormesh_max' + '.png'
+
+    x_axis_label = r'$\dot{m}$'
+    y_axis_label = r'$a$'
+
+    ax.set_xlabel(x_axis_label, fontsize=26)
+    ax.set_ylabel(y_axis_label, fontsize=26)
+    # fig.suptitle(figure_title, fontsize=22)
+
+    save_folder = config.PROJECT_DIR + 'figs/L_max_phase/' + f'i={i_angle} betta_mu={betta_mu}/'
+    main_service.save_figure(fig, save_folder, save_file_name)
 
     newpoints = 20
     xq, yq = np.linspace(min(mc2_arr), max(mc2_arr), newpoints), np.linspace(min(a_portion_arr), max(a_portion_arr),
@@ -1495,6 +1543,160 @@ def plot_L_max_phase_to_m_to_a(i_angle, betta_mu):
 
     save_folder = config.PROJECT_DIR + 'figs/L_max_phase/' + f'i={i_angle} betta_mu={betta_mu}/'
     main_service.save_figure(fig, save_folder, save_file_name)
+
+
+def plot_L_iso_to_m(i_angle, betta_mu, a_portion, mc2_arr, fi_0):
+    L_iso_arr = []
+
+    for mc2 in mc2_arr:
+        L = get_data(i_angle, betta_mu, mc2, a_portion, fi_0)
+        L_iso_arr.append(np.mean(L))
+
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111)
+
+    ax.scatter(mc2_arr, L_iso_arr, s=30, facecolors='none', edgecolors='black')
+    ax.plot(mc2_arr, L_iso_arr, color='black', alpha=0.2, linestyle='-')
+
+    # ax.plot(mc2_arr, L_iso_arr, color='black')
+
+    x_axis_label = r'$\dot{m}$'
+    y_axis_label = r'$L_{\rm iso}$'
+
+    ax.set_xlabel(x_axis_label, fontsize=26)
+    ax.set_ylabel(y_axis_label, fontsize=26)
+
+    save_folder = config.PROJECT_DIR + 'figs/L_iso_to_m/' + f'i={i_angle} betta_mu={betta_mu}/'
+    save_file_name = f'a={a_portion} fi_0={fi_0}' + '.png'
+    main_service.save_figure(fig, save_folder, save_file_name)
+
+
+def plot_pf_to_chi_theta(a_portion, mc2, fi_0):
+    i_angle_arr = np.linspace(10, 90, 9)
+    betta_mu_arr = np.linspace(10, 90, 9)
+
+    final_final_array = np.zeros((len(i_angle_arr), len(betta_mu_arr)))
+
+    dict_chi_plus_theta = {}
+    dict_chi_minus_theta = {}
+
+    dict_chi = {}
+
+    new_phi_0 = fi_0
+    # new_phi_0
+    fi_0 = make_new_phi_0(a_portion, fi_0)
+
+    for i in range(len(i_angle_arr)):
+        for j in range(len(betta_mu_arr)):
+            L = get_data(i_angle_arr[i], betta_mu_arr[j], mc2, a_portion, fi_0)
+            PF = (max(L) - min(L)) / (max(L) + min(L))
+            final_final_array[i][j] = PF
+
+            plus = i_angle_arr[i] + betta_mu_arr[j]
+            arr = dict_chi_plus_theta.get(plus, [])
+            arr.append(PF)
+            dict_chi_plus_theta[plus] = arr
+
+            minus = betta_mu_arr[j] - i_angle_arr[i]
+            arr = dict_chi_minus_theta.get(minus, [])
+            arr.append(PF)
+            dict_chi_minus_theta[minus] = arr
+
+            # betta_mu = betta_mu_arr[j]
+            # arr = dict_chi.get(betta_mu, [])
+            # arr.append(PF)
+            # dict_chi[betta_mu] = arr
+
+
+    # fig = plt.figure(figsize=(9, 6))
+    # ax = fig.add_subplot(111)
+    # for betta_mu in betta_mu_arr:
+    #     arr = [betta_mu] * len(dict_chi[betta_mu])
+    #     ax.scatter(arr, dict_chi[betta_mu], color='black')
+    # plt.show()
+
+
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.add_subplot(111)
+
+    for plus in dict_chi_plus_theta:
+        arr = [plus] * len(dict_chi_plus_theta[plus])
+        ax.scatter(arr, dict_chi_plus_theta[plus], color='black')
+
+    ax.set_xlabel(r'$\chi + \theta_{obs}$')
+    ax.set_ylabel(r'$PF$')
+
+    save_file_name = f'a={a_portion}' + ' ' + f'mc2={mc2}' + ' ' + f'fi_0={new_phi_0}.png'
+    save_folder = config.PROJECT_DIR + 'figs/PF_to_plus/'
+    main_service.save_figure(fig, save_folder, save_file_name)
+
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.add_subplot(111)
+
+    for minus in dict_chi_minus_theta:
+        arr = [minus] * len(dict_chi_minus_theta[minus])
+        ax.scatter(arr, dict_chi_minus_theta[minus], color='black')
+
+    ax.set_xlabel(r'$\chi - \theta_{obs}$')
+    ax.set_ylabel(r'$PF$')
+
+    save_file_name = f'a={a_portion}' + ' ' + f'mc2={mc2}' + ' ' + f'fi_0={new_phi_0}.png'
+    save_folder = config.PROJECT_DIR + 'figs/PF_to_minus/'
+    main_service.save_figure(fig, save_folder, save_file_name)
+
+
+def plot_table(a_portion, mc2_arr):
+    i_angle, betta_mu = 20, 20
+    fi_0 = make_new_phi_0(a_portion, 0)
+
+    file_name = 'save_values.txt'
+    folder = 'scattered_on_magnet_lines/'
+
+    R_e_arr = []
+    ksi_shock_arr = []
+    L_x_arr = []
+
+    for mc2 in mc2_arr:
+        full_file_folder = config.get_folder_with_args(i_angle, betta_mu, mc2, a_portion, fi_0)
+
+        with open(full_file_folder + 'save_values.txt') as f:
+            lines = f.readlines()
+
+            R_e = float(lines[0][6:-1])
+            ksi_shock = float(lines[1][12:-1])
+            L_x = float(lines[3][12:20]) * 10 ** (int(lines[3][27:-1]) - 38)
+
+        R_e_arr.append(R_e)
+        ksi_shock_arr.append(ksi_shock)
+        L_x_arr.append(L_x)
+
+    # print(R_e_arr)
+    # print(ksi_shock_arr)
+    # print(L_x_arr)
+
+    fig = plt.figure(figsize=(9, 6))
+    ax = fig.add_subplot(111)
+
+    ax.scatter(mc2_arr, R_e_arr, s=30, facecolors='none', edgecolors='red', label=r'$\frac{R_e}{R_*}$')
+    ax.plot(mc2_arr, R_e_arr, color='black', alpha=0.2, linestyle='-')
+
+    ax.scatter(mc2_arr, ksi_shock_arr, s=30, facecolors='none', edgecolors='blue', label=r'$\frac{\xi_{s}}{R_*}$')
+    ax.plot(mc2_arr, ksi_shock_arr, color='black', alpha=0.2, linestyle='-')
+
+    ax.scatter(mc2_arr, L_x_arr, s=30, facecolors='none', edgecolors='green', label=r'$\frac{L_x}{10^{38}}$')
+    ax.plot(mc2_arr, L_x_arr, color='black', alpha=0.2, linestyle='-')
+
+    x_axis_label = r'$\dot{m}$'
+    y_axis_label = r'$units$'
+
+    ax.set_xlabel(x_axis_label, fontsize=26)
+    ax.set_ylabel(y_axis_label, fontsize=26)
+    ax.legend()
+
+    save_file_name = f'a={a_portion}' + '.png'
+    save_folder = config.PROJECT_DIR + 'figs/table/'
+    main_service.save_figure(fig, save_folder, save_file_name)
+
 
 energy_step = (config.energy_max / config.energy_min) ** (1 / (config.N_energy - 1))
 energy_arr = list(config.energy_min * energy_step ** i for i in range(config.N_energy - 1))
@@ -1537,9 +1739,9 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_disp_max_mean(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr)
 
 # ---------------------------------------------------------
-# a_portion_arr = [0.44,0.66]
-# i_angle_arr = [20,40,60]
-# betta_mu_arr = [60]
+# a_portion_arr = [0.22, 0.44, 0.66]
+# i_angle_arr = [60]
+# betta_mu_arr = [40, 60]
 # # mc2_arr = np.linspace(10, 130, 13)
 # # mc2_arr = list(map(int, mc2_arr))
 # for i_angle in i_angle_arr:
@@ -1554,13 +1756,15 @@ fi_0_arr = [20 * i for i in range(18)]
 #             elif a_portion == 0.22:
 #                 mc2_arr = np.linspace(10, 130, 13)
 #                 mc2_arr = list(map(int, mc2_arr))
-#                 #buf = [0.05, 0.1, 0.5, 1]
-#                 #buf.extend(mc2_arr)
-#                 #mc2_arr = buf.copy()
+#                 mc2_arr = [10, 30, 60, 80, 100, 130, 160]
+#                 # buf = [0.05, 0.1, 0.5, 1]
+#                 # buf.extend(mc2_arr)
+#                 # mc2_arr = buf.copy()
 #             else:
 #                 mc2_arr = np.linspace(10, 130, 13)
 #                 mc2_arr = list(map(int, mc2_arr))
-#             fi_0 = (config.fi_0_dict[a_portion]) % 360
+#                 mc2_arr = [10, 30, 60, 80, 100, 130, 160]
+#             fi_0 = (config.fi_0_dict[a_portion] + 90) % 360
 #             # fi_0 = config.fi_0_dict[a_portion]
 #             plot_L_to_accr_rate(i_angle, betta_mu, mc2_arr, a_portion, fi_0)
 
@@ -1621,23 +1825,23 @@ fi_0_arr = [20 * i for i in range(18)]
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
 # ---------------------------------------------------------
+'''OLD ?????????????????'''
 # i_angle_arr = [60]
 # betta_mu_arr = [40]
 # mc2_arr = [30, 100]
 # a_portion_arr = [0.22, 0.66]
-#
 # fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
 # plot_L_nu_iso_for_new_phi(i_angle_arr, betta_mu_arr, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
 
 # -------------------------------------------------------
-# i_angle = 60
-# betta_mu = 40
-# mc2 = 30
-# a_portion = 0.22
-#
-# fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
-#
-# plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr)
+i_angle = 40
+betta_mu = 60
+mc2 = 30
+a_portion = 0.66
+
+fi_0_arr = [0, 20, 40, 60, 80, 100, 120, 140, 160, 180]
+
+plot_L_to_new_fi_0(i_angle, betta_mu, mc2, a_portion, fi_0_arr)
 
 # ---------------------------------------------------------
 
@@ -1648,18 +1852,55 @@ fi_0_arr = [20 * i for i in range(18)]
 # a_portion = 0.22
 # fi_0 = 0
 #
-# a_portion_arr = [0.22, 0.44, 0.66]
-# mc2_arr = [80, 130]
+# a_portion_arr = [0.11, 0.22, 0.44, 0.66]
+# mc2_arr = [10, 30, 60, 80, 100, 130, 160]
+#
+# a_portion_arr = [1]
+# mc2_arr = [30, 100]
 #
 # for mc2 in mc2_arr:
 #     for a_portion in a_portion_arr:
 #         plot_PF_contour(mc2, a_portion, fi_0)
 
 # -------------------------------------------------------------
-i_angle = 60
-betta_mu = 40
-plot_L_max_phase_to_m_to_a(i_angle, betta_mu)
-# ------------------------------
+
+# i_angle = 60
+# betta_mu = 40
+
+# i_angle_arr = [20, 40, 60]
+# betta_mu_arr = [20, 40, 60]
+#
+# for i_angle in i_angle_arr:
+#     for betta_mu in betta_mu_arr:
+#         plot_L_max_phase_to_m_to_a(i_angle, betta_mu)
+
+# -------------------------------------------------------------
+
+
+# i_angle = 20
+# betta_mu = 60
+#
+# # mc2_arr = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 300, 600, 1000]
+#
+# mc2_arr = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 300]
+# a_portion = 0.66
+# fi_0 = config.fi_0_dict[a_portion]
+#
+# plot_L_iso_to_m(i_angle, betta_mu, a_portion, mc2_arr, fi_0)
+
+# -------------------------------------------------------------
+
+a_portion = 1
+mc2 = 100
+fi_0 = 0
+plot_pf_to_chi_theta(a_portion, mc2, fi_0)
+
+# -------------------------------------------------------------
+
+# a_portion = 1
+# mc2_arr = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130]
+# plot_table(a_portion, mc2_arr)
+# -------------------------------------------------------------
 
 
 # plot_masses_PF_L_nu(i_angle, betta_mu, mc2_arr, a_portion_arr, fi_0_arr, energy_index=8)
