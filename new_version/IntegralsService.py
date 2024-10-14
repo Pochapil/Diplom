@@ -4,7 +4,14 @@ import accretingNS
 import config
 from geometricTask import matrix
 
-curr_configuration = accretingNS.AccretingPulsarConfiguration()
+beta_mu = 40
+mc2 = 100
+a_portion = 0.44
+phi_0 = 0
+
+# переделать phi_0 !!!!
+
+curr_configuration = accretingNS.AccretingPulsarConfiguration(config.mu, beta_mu, mc2, a_portion, phi_0)
 theta_obs = 60
 
 e_obs = np.array([np.sin(theta_obs) * np.cos(0),
@@ -18,7 +25,7 @@ obs_matrix = np.zeros((config.t_max, 3))
 for t_index in range(config.t_max):
     phi_mu = config.phi_mu_0 + config.omega_ns * config.grad_to_rad * t_index
 
-    A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu, betta_mu)
+    A_matrix_analytic = matrix.newMatrixAnalytic(config.phi_rotate, config.betta_rotate, phi_mu, beta_mu)
     e_obs_mu = np.dot(A_matrix_analytic, e_obs)
 
     obs_matrix[t_index] = e_obs_mu
